@@ -1,15 +1,16 @@
 [
   {
     "slug": "ra-teatro-barok",
-    "name": "Rá en Teatro Barok",
+    "name": "Rá en Teatro Bar",
     "date": "2021-09-03",
-    "venue": "Teatro Barok",
+    "venue": "Teatro Bar",
     "bands": [
-      "Rá"
+      "Rá",
+      "Alejandro Cares y Los Magos"
     ],
     "confidence": "confirmed",
-    "note": "Fecha confirmada por el caption ('el pasado Viernes 3 de Septiembre'), coincide con el dia de la semana real. La imagen es una foto del show (recap), no un flyer disenado; no se encontro un flyer de anuncio separado.",
-    "flyer_file": "ra-teatro-barok.jpg"
+    "note": "",
+    "flyer_file": "ra-teatro-bar.jpg"
   },
   {
     "slug": "ra-magenta-teatro-mandril",
@@ -81,14 +82,14 @@
   {
     "slug": "quintacolumna-traer-del-manana-lalala",
     "name": "Quintacolumna presenta Traer del Mañana en La Lala",
-    "date": "2024-12-03 (aproximada)",
+    "date": "2024-11-29",
     "venue": "La Lala (Ortuzar)",
     "bands": [
       "Quintacolumna",
       "Francisamanteb"
     ],
-    "confidence": "uncertain",
-    "note": "Fecha exacta no especificada en el caption (solo un reel de recap sin fecha); se uso la fecha del posteo como aproximacion. Francisamanteb abrio la noche. Imagen es un fotograma en vivo, no un flyer disenado.",
+    "confidence": "confirmed",
+    "note": "",
     "flyer_file": "quintacolumna-traer-del-manana-lalala.jpg"
   },
   {
@@ -98,11 +99,11 @@
     "venue": "Velazco Disquería Bar",
     "bands": [
       "Jaimes",
-      "Pato Díaz",
-      "Almanaques"
+      "Patricio Díaz",
+      "Champxx"
     ],
     "confidence": "confirmed",
-    "note": "Almanaques abrio la noche en formato duo. Fecha confirmada por una story del mismo dia ('Llego el dia, nos vemos en @velazcodisqueriabar', 21/02/2025). Imagen es una foto del lugar (fotograma de video), no un flyer disenado.",
+    "note": "",
     "flyer_file": "jaimes-velazco-disqueria.jpg"
   },
   {
@@ -172,29 +173,16 @@
     "flyer_file": "lautaro-ra-tinachown-panchita-la-quince.jpg"
   },
   {
-    "slug": "brea-ocio-laboral-quetren",
-    "name": "Brea presenta Ocio Laboral",
-    "date": "2025-11-08",
-    "venue": "Quetren Club Cultural",
+    "slug": "radio-mercurio-sintonia-solar",
+    "name": "Radio Mercurio — Presentación Oficial",
+    "date": "2025-11-27",
+    "venue": "JJ Circuito Cultural",
     "bands": [
-      "Brea",
-      "El Billy",
-      "Panchita la Pistolera"
+      "Radio Mercurio",
+      "Renzo Montalbano"
     ],
     "confidence": "confirmed",
-    "note": "Panchita la Pistolera (artista del sello) participo como banda invitada en la presentacion del disco debut 'Ocio Laboral' de Brea. Flyer tomado de un fotograma de una story de Instagram.",
-    "flyer_file": "brea-ocio-laboral-quetren.jpg"
-  },
-  {
-    "slug": "radio-mercurio-sintonia-solar",
-    "name": "Radio Mercurio presenta Sintonía Solar",
-    "date": "2025-11-27",
-    "venue": "JJ",
-    "bands": [
-      "Radio Mercurio"
-    ],
-    "confidence": "uncertain",
-    "note": "El venue aparece solo como la abreviatura 'JJ' en el caption, sin poder confirmar el nombre completo del lugar. Fecha (jueves 27) confirmada por coincidencia del dia de la semana con la fecha del posteo (21/11/2025, viernes) y corroborada por una story del 02/12/2025. No hay flyer disponible; se uso un fotograma de un video de entrevista (no es un flyer disenado).",
+    "note": "",
     "flyer_file": "radio-mercurio-sintonia-solar.jpg"
   },
   {
@@ -212,5 +200,45 @@
     "confidence": "uncertain",
     "note": "El caption (post de recap con fotos) no menciona el nombre del venue ni la fecha exacta del show; se uso la fecha del posteo como aproximacion. 'Explotados por Jaimes' es el proyecto de Luciano Jaimes.",
     "flyer_file": "dso-aniversario-mareco.jpg"
+  },
+  {
+    "slug": "lhdm-vuelve-marzo",
+    "name": "La Hora del Mosquito vuelve a La Quince",
+    "date": "2026-03-07",
+    "venue": "La Quince",
+    "bands": [
+      "La Hora del Mosquito"
+    ],
+    "confidence": "confirmed",
+    "note": "",
+    "flyer_file": "lhdm-vuelve-marzo.jpg"
+  },
+  {
+    "slug": "radiomercurio-fiebrelunar-laquince",
+    "name": "Fiebre Lunar con Radio Mercurio",
+    "date": "2026-04-25",
+    "venue": "La Quince Cooperativa Cultural",
+    "bands": [
+      "Radio Mercurio",
+      "alioch.a",
+      "__nottom__",
+      "aguscisterferri"
+    ],
+    "confidence": "confirmed",
+    "note": "Fiesta/DJ set, no un show en formato banda tradicional.",
+    "flyer_file": "radiomercurio-fiebrelunar-laquince.jpg"
+  },
+  {
+    "slug": "lhdm-quetren-julio",
+    "name": "La Hora del Mosquito y Fuego Fatuo en Quetrén",
+    "date": "2026-07-04",
+    "venue": "Quetrén Club Cultural",
+    "bands": [
+      "La Hora del Mosquito",
+      "Fuego Fatuo"
+    ],
+    "confidence": "confirmed",
+    "note": "",
+    "flyer_file": "lhdm-quetren-julio.jpg"
   }
 ]
