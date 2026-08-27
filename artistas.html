@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artistas — Segunda Fundación</title>
+<meta name="description" content="Los artistas del catálogo de Segunda Fundación, sello y productora independiente de Buenos Aires.">
+<link rel="stylesheet" href="assets/style.css?v=24">
+<script src="assets/nav.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="segunda-fundacion.html" class="wordmark">
+      <span class="icon"><svg viewBox="0 0 258 147" xmlns="http://www.w3.org/2000/svg"><path d="M189.4 78.5637C179.438 78.6153 172.376 68.9386 175.538 59.5685L178.414 51.0445C179.468 47.9204 177.113 44.6944 173.792 44.7127L149.573 44.8466L169.231 102.348L177.35 126.13L182.201 140.139C183.279 143.253 180.953 146.496 177.634 146.507L166.851 146.542C164.769 146.549 162.915 145.235 162.246 143.28L148.268 102.416L140.529 79.8683L128.609 44.9152L115.826 7.49481L115.665 7.02448C114.605 3.9175 116.925 0.693425 120.232 0.677566L186.14 0.361504C196.09 0.313787 203.147 9.97219 200.003 19.3361L197.107 27.9644C196.058 31.087 198.413 34.3075 201.731 34.2892L243.11 34.0613C253.071 34.0065 260.136 43.6788 256.979 53.0495L249.588 74.9924C248.93 76.9447 247.092 78.2649 245.017 78.2757L189.4 78.5637Z" fill="currentColor"/><path d="M72.1539 68.3396C82.1203 68.288 89.1851 77.9647 86.022 87.3348L83.1444 95.8589C82.0898 98.9829 84.446 102.209 87.7689 102.191L111.999 102.057L92.3316 44.5554L84.2089 20.7736L79.3558 6.76407C78.2772 3.65027 80.6042 0.407379 83.9251 0.396561L94.713 0.36142C96.796 0.35463 98.6506 1.66783 99.3199 3.62349L113.304 44.4869L121.047 67.0351L132.972 101.988L145.761 139.409L145.921 139.879C146.982 142.986 144.661 146.21 141.352 146.226L75.4153 146.542C65.4605 146.59 58.4007 136.931 61.5459 127.567L64.444 118.939C65.4928 115.816 63.1371 112.596 59.8173 112.614L4.87886 112.917C1.5571 112.935 -0.798874 109.711 0.253769 106.587L9.73895 78.4414C11.7127 72.5846 17.2291 68.6239 23.4575 68.5917L72.1539 68.3396Z" fill="currentColor"/></svg></span>
+      <span class="wordmark-text">segunda fundación</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links" id="navLinks">
+      <a href="segunda-fundacion.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+      <a href="videoclips.html">Videoclips</a>
+      <a href="eventos.html">Eventos</a>
+      <a href="nosotros.html">Nosotros</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="page-header">
+    <h1 class="page-title">Artistas</h1>
+    <p>Las bandas y solistas detrás del catálogo del sello.</p>
+  </section>
+
+  <section class="artists-section">
+    <div class="catalog-toolbar">
+      <input type="text" id="artistSearch" class="catalog-search" placeholder="Buscar artista…" autocomplete="off">
+    </div>
+    <p class="catalog-empty" id="artistEmpty">No se encontraron artistas.</p>
+
+    <div class="artist-grid" id="artistGrid"></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>© 2026 Segunda Fundación. Todos los derechos reservados.</span>
+    <span>Buenos Aires, Argentina</span>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="artistModal">
+  <div class="modal-card" id="artistModalCard">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeArtistModal()">&times;</button>
+    <div class="artist-modal-photo" id="artistModalPhotoWrap"><img id="artistModalPhoto" src="" alt=""></div>
+    <h2 class="artist-modal-name" id="artistModalName"></h2>
+    <div class="modal-body" style="padding-top:0;">
+      <div class="modal-section" style="margin-top:0;">
+        <div class="modal-label">Biografía</div>
+        <p class="modal-pending">Biografía próximamente.</p>
+      </div>
+      <div class="modal-section" id="artistPrincipalSection">
+        <div class="modal-label">Catálogo principal</div>
+        <div class="artist-release-list" id="artistPrincipalList"></div>
+      </div>
+      <div class="modal-section" id="artistAppearsSection">
+        <div class="modal-label">También aparece en</div>
+        <div class="artist-release-list" id="artistAppearsList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/artists-data.js"></script>
+<script>
+  function normalizeText(s){
+    return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  const artistGrid = document.getElementById('artistGrid');
+  const artistEmpty = document.getElementById('artistEmpty');
+  const ARTISTS_BY_SLUG = {};
+
+  ARTISTS.forEach(function(a){
+    ARTISTS_BY_SLUG[a.slug] = a;
+
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'artist-item';
+    item.dataset.slug = a.slug;
+
+    const photoWrap = document.createElement('div');
+    if(a.hasPhoto){
+      photoWrap.className = 'artist-photo';
+      const img = document.createElement('img');
+      img.src = 'assets/artists/' + a.slug + '.jpg';
+      img.alt = a.name;
+      img.loading = 'lazy';
+      photoWrap.appendChild(img);
+    } else {
+      photoWrap.className = 'artist-photo placeholder';
+      photoWrap.textContent = a.name.trim().charAt(0).toUpperCase();
+    }
+
+    const name = document.createElement('div');
+    name.className = 'artist-name';
+    name.textContent = a.name;
+
+    item.appendChild(photoWrap);
+    item.appendChild(name);
+    item.addEventListener('click', function(){ openArtistModal(a.slug); });
+    artistGrid.appendChild(item);
+  });
+
+  const artistItems = Array.from(artistGrid.querySelectorAll('.artist-item'));
+  const artistSearchIndex = {};
+  ARTISTS.forEach(function(a){
+    artistSearchIndex[a.slug] = normalizeText(a.name);
+  });
+
+  document.getElementById('artistSearch').addEventListener('input', function(e){
+    const q = normalizeText(e.target.value.trim());
+    let visibleCount = 0;
+    artistItems.forEach(function(item){
+      const match = !q || (artistSearchIndex[item.dataset.slug] || '').includes(q);
+      item.style.display = match ? '' : 'none';
+      if(match) visibleCount++;
+    });
+    artistEmpty.classList.toggle('show', visibleCount === 0);
+  });
+
+  const artistModal = document.getElementById('artistModal');
+
+  function releaseUrl(r){
+    const q = encodeURIComponent(r.artistField.replace(/\s*,\s*/g, ' ') + ' ' + r.title);
+    return 'https://open.spotify.com/search/' + q;
+  }
+
+  function renderReleaseList(container, list, showWith){
+    container.innerHTML = '';
+    list.forEach(function(r){
+      const a = document.createElement('a');
+      a.className = 'artist-release-row';
+      a.href = releaseUrl(r);
+      a.target = '_blank';
+      a.rel = 'noopener';
+
+      const cover = document.createElement('div');
+      cover.className = 'artist-release-cover';
+      const img = document.createElement('img');
+      img.src = 'assets/covers/' + r.slug + '.jpg';
+      img.alt = '';
+      img.loading = 'lazy';
+      cover.appendChild(img);
+
+      const meta = document.createElement('div');
+      meta.className = 'artist-release-meta';
+      const title = document.createElement('div');
+      title.className = 'artist-release-title';
+      title.textContent = r.title;
+      const sub = document.createElement('div');
+      sub.className = 'artist-release-sub';
+      let subText = r.type + ' · ' + r.year;
+      if(showWith && r.with && r.with.length){
+        subText += ' · junto a ' + r.with.join(', ');
+      }
+      sub.textContent = subText;
+
+      meta.appendChild(title);
+      meta.appendChild(sub);
+      a.appendChild(cover);
+      a.appendChild(meta);
+      container.appendChild(a);
+    });
+  }
+
+  function openArtistModal(slug){
+    const a = ARTISTS_BY_SLUG[slug];
+    if(!a) return;
+
+    const photoWrap = document.getElementById('artistModalPhotoWrap');
+    if(a.hasPhoto){
+      photoWrap.className = 'artist-modal-photo';
+      photoWrap.innerHTML = '<img id="artistModalPhoto" src="assets/artists/' + a.slug + '.jpg" alt="' + a.name.replace(/"/g,'&quot;') + '">';
+    } else {
+      photoWrap.className = 'artist-modal-photo placeholder';
+      photoWrap.textContent = a.name.trim().charAt(0).toUpperCase();
+    }
+
+    document.getElementById('artistModalName').textContent = a.name;
+
+    renderReleaseList(document.getElementById('artistPrincipalList'), a.principal, false);
+    document.getElementById('artistPrincipalSection').style.display = a.principal.length ? '' : 'none';
+
+    renderReleaseList(document.getElementById('artistAppearsList'), a.appearsIn, true);
+    document.getElementById('artistAppearsSection').style.display = a.appearsIn.length ? '' : 'none';
+
+    artistModal.classList.add('open');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeArtistModal(){
+    artistModal.classList.remove('open');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+
+  artistModal.addEventListener('click', function(e){
+    if(e.target === artistModal) closeArtistModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeArtistModal();
+  });
+</script>
+
+</body>
+</html>
