@@ -1,0 +1,216 @@
+[
+  {
+    "slug": "ra-teatro-barok",
+    "name": "Rá en Teatro Barok",
+    "date": "2021-09-03",
+    "venue": "Teatro Barok",
+    "bands": [
+      "Rá"
+    ],
+    "confidence": "confirmed",
+    "note": "Fecha confirmada por el caption ('el pasado Viernes 3 de Septiembre'), coincide con el dia de la semana real. La imagen es una foto del show (recap), no un flyer disenado; no se encontro un flyer de anuncio separado.",
+    "flyer_file": "ra-teatro-barok.jpg"
+  },
+  {
+    "slug": "ra-magenta-teatro-mandril",
+    "name": "Rá cierra el año en el Mandril",
+    "date": "2021-12-17",
+    "venue": "Teatro Mandril",
+    "bands": [
+      "Rá",
+      "Magenta"
+    ],
+    "confidence": "confirmed",
+    "note": "",
+    "flyer_file": "ra-magenta-teatro-mandril.jpg"
+  },
+  {
+    "slug": "quintacolumna-roseti-espacio",
+    "name": "Quintacolumna presenta su disco homónimo",
+    "date": "2022-09-16",
+    "venue": "Roseti Espacio",
+    "bands": [
+      "Quintacolumna",
+      "Catalin Munteanu",
+      "Paco Barcena"
+    ],
+    "confidence": "confirmed",
+    "note": "",
+    "flyer_file": "quintacolumna-roseti-espacio.jpg"
+  },
+  {
+    "slug": "lautaro-ra-vuela-el-pez",
+    "name": "Lautaro Rá (banda completa) en Vuela el Pez",
+    "date": "2022-09-30",
+    "venue": "Vuela el Pez",
+    "bands": [
+      "Lautaro Rá",
+      "Emily and",
+      "Biloba"
+    ],
+    "confidence": "confirmed",
+    "note": "Tambien hubo una feria a cargo de Espacio Paradojas (no es una banda).",
+    "flyer_file": "lautaro-ra-vuela-el-pez.jpg"
+  },
+  {
+    "slug": "lautaro-ra-presenta-soles",
+    "name": "Lautaro Rá presenta Soles",
+    "date": "2022-11-19",
+    "venue": "Roseti Espacio",
+    "bands": [
+      "Lautaro Rá",
+      "El Fin del Cuento"
+    ],
+    "confidence": "confirmed",
+    "note": "",
+    "flyer_file": "lautaro-ra-presenta-soles.jpg"
+  },
+  {
+    "slug": "panchita-trequartista-10-anos",
+    "name": "Panchita la Pistolera celebra 10 años de Trequartista",
+    "date": "2024-08-31",
+    "venue": "La Quince",
+    "bands": [
+      "Panchita la Pistolera",
+      "Campo Traviesa"
+    ],
+    "confidence": "confirmed",
+    "note": "Invitados especiales en el show (no forman parte de la banda base): Dante Sultani, Franco Giambartolomei, Juani Varela, Augusto Nasso y Facundo Gemelli.",
+    "flyer_file": "panchita-trequartista-10-anos.jpg"
+  },
+  {
+    "slug": "quintacolumna-traer-del-manana-lalala",
+    "name": "Quintacolumna presenta Traer del Mañana en La Lala",
+    "date": "2024-12-03 (aproximada)",
+    "venue": "La Lala (Ortuzar)",
+    "bands": [
+      "Quintacolumna",
+      "Francisamanteb"
+    ],
+    "confidence": "uncertain",
+    "note": "Fecha exacta no especificada en el caption (solo un reel de recap sin fecha); se uso la fecha del posteo como aproximacion. Francisamanteb abrio la noche. Imagen es un fotograma en vivo, no un flyer disenado.",
+    "flyer_file": "quintacolumna-traer-del-manana-lalala.jpg"
+  },
+  {
+    "slug": "jaimes-velazco-disqueria",
+    "name": "Jaimes (junto a Pato Díaz) en Velazco Disquería Bar",
+    "date": "2025-02-21",
+    "venue": "Velazco Disquería Bar",
+    "bands": [
+      "Jaimes",
+      "Pato Díaz",
+      "Almanaques"
+    ],
+    "confidence": "confirmed",
+    "note": "Almanaques abrio la noche en formato duo. Fecha confirmada por una story del mismo dia ('Llego el dia, nos vemos en @velazcodisqueriabar', 21/02/2025). Imagen es una foto del lugar (fotograma de video), no un flyer disenado.",
+    "flyer_file": "jaimes-velazco-disqueria.jpg"
+  },
+  {
+    "slug": "flama-panchita-la-quince",
+    "name": "Flama junto a Panchita la Pistolera en La Quince",
+    "date": "2025-05-05 (aproximada)",
+    "venue": "La Quince",
+    "bands": [
+      "Flama",
+      "Panchita la Pistolera"
+    ],
+    "confidence": "uncertain",
+    "note": "No se encontro la fecha exacta del show ni un post de anuncio; se uso la fecha del posteo de recap (05/05/2025) como aproximacion. La imagen es un fotograma del video de recap (foto del lugar), no un flyer disenado.",
+    "flyer_file": "flama-panchita-la-quince.jpg"
+  },
+  {
+    "slug": "lhdm-tinachown-cc-matienzo",
+    "name": "La Hora del Mosquito y Tinachown en CC Matienzo",
+    "date": "2025-05-08",
+    "venue": "CC Matienzo",
+    "bands": [
+      "La Hora del Mosquito",
+      "Tinachown"
+    ],
+    "confidence": "confirmed",
+    "note": "El post solo tenia un video (reel); fecha y venue se tomaron de un flyer visible dentro del propio video, no habia imagen estatica adjunta.",
+    "flyer_file": "lhdm-tinachown-cc-matienzo.jpg"
+  },
+  {
+    "slug": "tinachown-valle-de-pantanos-bastet",
+    "name": "Estreno de la Live Session de Tinachown en Bastet Club",
+    "date": "2025-07-11",
+    "venue": "Bastet Club",
+    "bands": [
+      "Tinachown",
+      "Valle de Pantanos"
+    ],
+    "confidence": "confirmed",
+    "note": "Evento de proyeccion/estreno de una live session, con apertura en vivo de Valle de Pantanos.",
+    "flyer_file": "tinachown-valle-de-pantanos-bastet.jpg"
+  },
+  {
+    "slug": "lhdm-piter-mazda-la-tangente",
+    "name": "La Hora del Mosquito junto a Piter Mazda y Las FFFF",
+    "date": "2025-08-14",
+    "venue": "La Tangente",
+    "bands": [
+      "La Hora del Mosquito",
+      "Piter Mazda y Las FFFF"
+    ],
+    "confidence": "confirmed",
+    "note": "El post de anuncio era un reel (video); fecha y venue confirmados por el flyer disenado visible dentro del video.",
+    "flyer_file": "lhdm-piter-mazda-la-tangente.jpg"
+  },
+  {
+    "slug": "lautaro-ra-tinachown-panchita-la-quince",
+    "name": "Lautaro Rá, Tinachown y Panchita la Pistolera en La Quince",
+    "date": "2025-09-04",
+    "venue": "La Quince",
+    "bands": [
+      "Lautaro Rá",
+      "Tinachown",
+      "Panchita la Pistolera"
+    ],
+    "confidence": "confirmed",
+    "note": "",
+    "flyer_file": "lautaro-ra-tinachown-panchita-la-quince.jpg"
+  },
+  {
+    "slug": "brea-ocio-laboral-quetren",
+    "name": "Brea presenta Ocio Laboral",
+    "date": "2025-11-08",
+    "venue": "Quetren Club Cultural",
+    "bands": [
+      "Brea",
+      "El Billy",
+      "Panchita la Pistolera"
+    ],
+    "confidence": "confirmed",
+    "note": "Panchita la Pistolera (artista del sello) participo como banda invitada en la presentacion del disco debut 'Ocio Laboral' de Brea. Flyer tomado de un fotograma de una story de Instagram.",
+    "flyer_file": "brea-ocio-laboral-quetren.jpg"
+  },
+  {
+    "slug": "radio-mercurio-sintonia-solar",
+    "name": "Radio Mercurio presenta Sintonía Solar",
+    "date": "2025-11-27",
+    "venue": "JJ",
+    "bands": [
+      "Radio Mercurio"
+    ],
+    "confidence": "uncertain",
+    "note": "El venue aparece solo como la abreviatura 'JJ' en el caption, sin poder confirmar el nombre completo del lugar. Fecha (jueves 27) confirmada por coincidencia del dia de la semana con la fecha del posteo (21/11/2025, viernes) y corroborada por una story del 02/12/2025. No hay flyer disponible; se uso un fotograma de un video de entrevista (no es un flyer disenado).",
+    "flyer_file": "radio-mercurio-sintonia-solar.jpg"
+  },
+  {
+    "slug": "dso-aniversario-mareco",
+    "name": "Desperté Siendo Otro en la velada por el 40° aniversario de Mareco",
+    "date": "2026-01-05 (aproximada)",
+    "venue": null,
+    "bands": [
+      "Desperté Siendo Otro",
+      "Los Subtítulos",
+      "Son los Días",
+      "Césped Césped",
+      "Explotados por Jaimes"
+    ],
+    "confidence": "uncertain",
+    "note": "El caption (post de recap con fotos) no menciona el nombre del venue ni la fecha exacta del show; se uso la fecha del posteo como aproximacion. 'Explotados por Jaimes' es el proyecto de Luciano Jaimes.",
+    "flyer_file": "dso-aniversario-mareco.jpg"
+  }
+]
