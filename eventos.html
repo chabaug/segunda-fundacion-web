@@ -42,6 +42,7 @@
 
   <section class="events-section">
     <div class="section-title">Próximos shows</div>
+    <p class="events-empty" id="upcomingEmpty">Sin shows confirmados por el momento.</p>
     <div class="upcoming-grid" id="upcomingGrid"></div>
   </section>
 
@@ -67,6 +68,8 @@
 <script>
   (function renderUpcomingEvents(){
     const grid = document.getElementById('upcomingGrid');
+    const empty = document.getElementById('upcomingEmpty');
+    empty.style.display = UPCOMING_EVENTS.length ? 'none' : '';
     UPCOMING_EVENTS.forEach(function(ev){
       const card = document.createElement('div');
       card.className = 'event-card';
