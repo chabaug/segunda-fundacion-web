@@ -63,10 +63,16 @@
     <button class="modal-close" aria-label="Cerrar" onclick="closeArtistModal()">&times;</button>
     <div class="artist-modal-photo" id="artistModalPhotoWrap"><img id="artistModalPhoto" src="" alt=""></div>
     <h2 class="artist-modal-name" id="artistModalName"></h2>
-    <div class="modal-body" style="padding-top:0;">
-      <div class="modal-links" id="artistModalLinks" style="display:none; justify-content:center; margin-top:-14px;">
-        <a class="modal-link modal-link-video" id="artistModalInstagram" href="#" target="_blank" rel="noopener">Instagram</a>
-      </div>
+    <p class="artist-modal-members" id="artistModalMembers" style="display:none;"></p>
+    <div class="artist-icon-links">
+      <a class="artist-icon-btn" id="artistModalInstagram" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none;">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2c-2.7 0-3.06.01-4.12.06-1.06.05-1.79.22-2.43.47-.66.26-1.22.6-1.77 1.16-.56.55-.9 1.11-1.16 1.77-.25.64-.42 1.37-.47 2.43C2 8.94 2 9.3 2 12s.01 3.06.06 4.12c.05 1.06.22 1.79.47 2.43.26.66.6 1.22 1.16 1.77.55.56 1.11.9 1.77 1.16.64.25 1.37.42 2.43.47C8.94 22 9.3 22 12 22s3.06-.01 4.12-.06c1.06-.05 1.79-.22 2.43-.47.66-.26 1.22-.6 1.77-1.16.56-.55.9-1.11 1.16-1.77.25-.64.42-1.37.47-2.43C22 15.06 22 14.7 22 12s-.01-3.06-.06-4.12c-.05-1.06-.22-1.79-.47-2.43-.26-.66-.6-1.22-1.16-1.77-.55-.56-1.11-.9-1.77-1.16-.64-.25-1.37-.42-2.43-.47C15.06 2 14.7 2 12 2Zm0 1.8c2.67 0 2.99.01 4.04.06.98.04 1.5.21 1.86.34.47.18.8.4 1.15.75.35.35.57.68.75 1.15.13.36.29.88.34 1.86.05 1.05.06 1.37.06 4.04s-.01 2.99-.06 4.04c-.04.98-.21 1.5-.34 1.86-.18.47-.4.8-.75 1.15-.35.35-.68.57-1.15.75-.36.13-.88.29-1.86.34-1.05.05-1.37.06-4.04.06s-2.99-.01-4.04-.06c-.98-.04-1.5-.21-1.86-.34-.47-.18-.8-.4-1.15-.75-.35-.35-.57-.68-.75-1.15-.13-.36-.29-.88-.34-1.86C3.8 14.99 3.8 14.67 3.8 12s.01-2.99.06-4.04c.04-.98.21-1.5.34-1.86.18-.47.4-.8.75-1.15.35-.35.68-.57 1.15-.75.36-.13.88-.29 1.86-.34C9.01 3.8 9.33 3.8 12 3.8Zm0 3.06a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28Zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68Zm5.34-8.68a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z"/></svg>
+      </a>
+      <a class="artist-icon-btn" id="artistModalSpotify" href="#" target="_blank" rel="noopener" aria-label="Spotify">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.59 14.44a.62.62 0 0 1-.86.21c-2.36-1.44-5.33-1.77-8.83-.97a.62.62 0 1 1-.28-1.22c3.83-.88 7.12-.5 9.76 1.11.3.18.4.57.21.87Zm1.22-2.72a.78.78 0 0 1-1.07.26c-2.7-1.66-6.82-2.14-10.02-1.17a.78.78 0 1 1-.45-1.49c3.65-1.11 8.19-.57 11.28 1.33.37.23.49.72.26 1.07Zm.1-2.83c-3.24-1.92-8.6-2.1-11.7-1.16a.93.93 0 1 1-.54-1.78c3.56-1.08 9.47-.87 13.2 1.34a.93.93 0 1 1-.96 1.6Z"/></svg>
+      </a>
+    </div>
+    <div class="modal-body" style="padding-top:14px;">
       <div class="modal-section" id="artistPrincipalSection" style="margin-top:0;">
         <div class="modal-label">Catálogo principal</div>
         <div class="artist-release-list" id="artistPrincipalList"></div>
@@ -235,13 +241,24 @@
 
     document.getElementById('artistModalName').textContent = a.name;
 
-    const igLinks = document.getElementById('artistModalLinks');
-    if(a.instagram){
-      document.getElementById('artistModalInstagram').href = 'https://instagram.com/' + a.instagram;
-      igLinks.style.display = 'flex';
+    const membersEl = document.getElementById('artistModalMembers');
+    if(a.members && a.members.length){
+      membersEl.textContent = a.members.join(', ');
+      membersEl.style.display = '';
     } else {
-      igLinks.style.display = 'none';
+      membersEl.style.display = 'none';
     }
+
+    const igBtn = document.getElementById('artistModalInstagram');
+    if(a.instagram){
+      igBtn.href = 'https://instagram.com/' + a.instagram;
+      igBtn.style.display = '';
+    } else {
+      igBtn.style.display = 'none';
+    }
+
+    const spotifyBtn = document.getElementById('artistModalSpotify');
+    spotifyBtn.href = a.spotify || ('https://open.spotify.com/search/' + encodeURIComponent(a.name));
 
     renderReleaseList(document.getElementById('artistPrincipalList'), a.principal, false);
     document.getElementById('artistPrincipalSection').style.display = a.principal.length ? '' : 'none';

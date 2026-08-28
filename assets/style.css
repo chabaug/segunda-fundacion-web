@@ -1006,9 +1006,34 @@
     font-weight:900;
     font-size:clamp(22px, 4.5vw, 30px);
     color:var(--fg);
-    margin:18px 0 26px;
+    margin:18px 0 6px;
     padding:0 28px;
   }
+  .artist-modal-members{
+    text-align:center;
+    font-size:13px;
+    color:var(--heading);
+    padding:0 28px;
+    margin:0;
+  }
+  .artist-icon-links{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:18px 0 4px;
+  }
+  .artist-icon-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:var(--fg);
+    color:var(--bg);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .artist-icon-btn:hover{ opacity:0.82; transform:scale(1.05); }
   .artist-release-list{
     display:flex;
     flex-direction:column;
