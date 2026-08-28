@@ -10,6 +10,7 @@
 <meta name="description" content="Los artistas del catálogo de Segunda Fundación, sello y productora independiente de Buenos Aires.">
 <link rel="stylesheet" href="assets/style.css?v=24">
 <script src="assets/nav.js"></script>
+<script src="assets/releases-data.js"></script>
 </head>
 <body>
 
@@ -63,6 +64,9 @@
     <div class="artist-modal-photo" id="artistModalPhotoWrap"><img id="artistModalPhoto" src="" alt=""></div>
     <h2 class="artist-modal-name" id="artistModalName"></h2>
     <div class="modal-body" style="padding-top:0;">
+      <div class="modal-links" id="artistModalLinks" style="display:none; justify-content:center; margin-top:-14px;">
+        <a class="modal-link modal-link-video" id="artistModalInstagram" href="#" target="_blank" rel="noopener">Instagram</a>
+      </div>
       <div class="modal-section" id="artistPrincipalSection" style="margin-top:0;">
         <div class="modal-label">Catálogo principal</div>
         <div class="artist-release-list" id="artistPrincipalList"></div>
@@ -75,7 +79,51 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="releaseModal">
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeReleaseModal()">&times;</button>
+    <div class="modal-cover" id="modalCoverWrap"><img id="modalCover" src="" alt=""></div>
+    <div class="modal-body">
+      <div class="modal-artist" id="modalArtist"></div>
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="modal-type" id="modalType"></div>
+      <div class="modal-date" id="modalDate"></div>
+      <div class="modal-links" id="modalLinks">
+        <div class="modal-video-links" id="modalVideoLinks"></div>
+        <button class="modal-link" id="modalListenBtn" type="button" onclick="openListenModal()">Escuchar</button>
+      </div>
+      <div class="modal-section" id="modalTracksSection">
+        <div class="modal-label">Canciones</div>
+        <ol class="modal-tracklist" id="modalTracklist"></ol>
+      </div>
+      <div class="modal-section" id="modalCreditsSection">
+        <div class="modal-label">Créditos</div>
+        <p class="modal-credits" id="modalCredits"></p>
+      </div>
+      <div class="modal-section" id="modalPendingSection">
+        <p class="modal-pending">Ficha completa próximamente.</p>
+      </div>
+      <div class="modal-scroll-hint-wrap">
+        <button class="modal-scroll-hint" id="modalScrollHint" type="button" aria-label="Scroll">↓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="listen-overlay" id="listenModal">
+  <div class="listen-card">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeListenModal()">&times;</button>
+    <div class="listen-title">Escuchar en...</div>
+    <div class="listen-options" id="listenOptions"></div>
+  </div>
+</div>
+
+<div class="lightbox-overlay" id="coverLightbox" onclick="closeCoverLightbox()">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
 <script src="assets/artists-data.js"></script>
+<script src="assets/release-modal.js"></script>
 <script>
   function normalizeText(s){
     return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -135,19 +183,12 @@
 
   const artistModal = document.getElementById('artistModal');
 
-  function releaseUrl(r){
-    const q = encodeURIComponent(r.artistField.replace(/\s*,\s*/g, ' ') + ' ' + r.title);
-    return 'https://open.spotify.com/search/' + q;
-  }
-
   function renderReleaseList(container, list, showWith){
     container.innerHTML = '';
     list.forEach(function(r){
-      const a = document.createElement('a');
-      a.className = 'artist-release-row';
-      a.href = releaseUrl(r);
-      a.target = '_blank';
-      a.rel = 'noopener';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'artist-release-row';
 
       const cover = document.createElement('div');
       cover.className = 'artist-release-cover';
@@ -172,9 +213,10 @@
 
       meta.appendChild(title);
       meta.appendChild(sub);
-      a.appendChild(cover);
-      a.appendChild(meta);
-      container.appendChild(a);
+      btn.appendChild(cover);
+      btn.appendChild(meta);
+      btn.addEventListener('click', function(){ openReleaseModal(r.slug); });
+      container.appendChild(btn);
     });
   }
 
@@ -193,6 +235,14 @@
 
     document.getElementById('artistModalName').textContent = a.name;
 
+    const igLinks = document.getElementById('artistModalLinks');
+    if(a.instagram){
+      document.getElementById('artistModalInstagram').href = 'https://instagram.com/' + a.instagram;
+      igLinks.style.display = 'flex';
+    } else {
+      igLinks.style.display = 'none';
+    }
+
     renderReleaseList(document.getElementById('artistPrincipalList'), a.principal, false);
     document.getElementById('artistPrincipalSection').style.display = a.principal.length ? '' : 'none';
 
@@ -200,22 +250,27 @@
     document.getElementById('artistAppearsSection').style.display = a.appearsIn.length ? '' : 'none';
 
     artistModal.classList.add('open');
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    lockScroll();
   }
 
   function closeArtistModal(){
     artistModal.classList.remove('open');
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
+    unlockScroll();
   }
 
   artistModal.addEventListener('click', function(e){
     if(e.target === artistModal) closeArtistModal();
   });
+  // Capture phase so this runs before release-modal.js's own (bubble-phase)
+  // Escape handler has a chance to remove releaseModal's "open" class —
+  // otherwise this check would always see it as already closed and dismiss
+  // both modals on a single press instead of just the top one.
   document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape') closeArtistModal();
-  });
+    // Dismiss the top layer first: if a release modal is open on top of the
+    // artist modal, let release-modal.js's own Escape handler close that one
+    // first, and only close the artist modal on a second press.
+    if(e.key === 'Escape' && !releaseModal.classList.contains('open')) closeArtistModal();
+  }, true);
 </script>
 
 </body>

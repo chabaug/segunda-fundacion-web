@@ -1019,6 +1019,14 @@
     gap:12px;
     align-items:center;
     text-decoration:none;
+    width:100%;
+    background:none;
+    border:none;
+    padding:0;
+    text-align:left;
+    cursor:pointer;
+    font:inherit;
+    color:inherit;
   }
   .artist-release-cover{
     width:48px; height:48px;
