@@ -413,7 +413,6 @@
     padding:56px 0 28px;
   }
   .events-intro{
-    font-family:'Newsreader', Georgia, serif;
     color:var(--heading);
     font-size:18px;
     max-width:560px;
@@ -716,6 +715,9 @@
     transform:translate(-50%, -50%);
     pointer-events:none;
   }
+  @media (min-width:700px){
+    .watermark-wrap{ top:64%; }
+  }
   .about-watermark{
     position:absolute;
     inset:0;
@@ -752,10 +754,40 @@
     .wm-particle{ display:none; }
   }
   .about-section p{
-    font-family:'Newsreader', Georgia, serif;
     color:var(--heading);
     font-size:18px;
     max-width:640px;
+    margin:0 auto;
+    text-align:center;
+  }
+  .stats-section{ padding:48px 0 0; }
+  .stats-grid{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:40px;
+    margin:0;
+  }
+  .stats-grid > div{ text-align:center; }
+  .stats-grid dt{
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--heading);
+    margin-bottom:8px;
+  }
+  .stats-grid dd{
+    font-size:clamp(28px, 5vw, 40px);
+    font-weight:900;
+    color:var(--accent);
+    font-variant-numeric:tabular-nums;
+    line-height:1;
+    margin:0;
+  }
+  @media (max-width:700px){
+    .stats-section{ padding-top:32px; }
+    .stats-grid{ gap:28px 24px; }
   }
 
   /* LINKS / CTA */
