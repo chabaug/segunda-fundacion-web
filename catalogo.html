@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=38">
-<script src="assets/nav.js?v=38"></script>
-<script src="assets/releases-data.js?v=38"></script>
-<script src="assets/cover-colors.js?v=38"></script>
-<script src="assets/artists-data.js?v=38"></script>
+<link rel="stylesheet" href="assets/style.css?v=39">
+<script src="assets/nav.js?v=39"></script>
+<script src="assets/releases-data.js?v=39"></script>
+<script src="assets/cover-colors.js?v=39"></script>
+<script src="assets/artists-data.js?v=39"></script>
 </head>
 <body>
 
@@ -76,20 +76,25 @@
     </div>
     <p class="catalog-empty" id="catalogEmpty">No se encontraron lanzamientos.</p>
 
-    <div class="coverflow-wrap" id="coverflowWrap">
-      <div class="coverflow-stage" id="catalogCoverflow" tabindex="0" role="listbox" aria-label="Catálogo en carrusel">
-        <div class="coverflow-track" id="coverflowTrack"></div>
+    <div class="catalog-carousel-area" id="carouselArea">
+      <div class="coverflow-wrap" id="coverflowWrap">
+        <div class="coverflow-stage" id="catalogCoverflow" tabindex="0" role="listbox" aria-label="Catálogo en carrusel">
+          <div class="coverflow-track" id="coverflowTrack"></div>
+        </div>
       </div>
-    </div>
-    <div class="coverflow-label" id="coverflowLabel">
-      <div class="coverflow-number" id="coverflowNumber"></div>
-      <div class="coverflow-artist" id="coverflowArtist"></div>
-      <div class="coverflow-title" id="coverflowTitle"></div>
+      <div class="coverflow-label" id="coverflowLabel">
+        <div class="coverflow-number" id="coverflowNumber"></div>
+        <div class="coverflow-artist" id="coverflowArtist"></div>
+        <div class="coverflow-title" id="coverflowTitle"></div>
+      </div>
     </div>
 
     <div class="catalog-toggle-row">
       <button class="catalog-toggle-btn" id="tabBtnLanzamientos" type="button" data-tab="lanzamientos">Lanzamientos</button>
       <button class="catalog-toggle-btn" id="tabBtnArtistas" type="button" data-tab="artistas">Artistas</button>
+      <button class="catalog-close-btn" id="catalogCloseBtn" type="button" aria-label="Volver al carrusel">
+        <svg viewBox="0 0 24 14" width="22" height="13" fill="none"><polygon points="1,4 8,1 8,13 1,10" fill="currentColor"/><rect x="8" y="1" width="8" height="12" fill="currentColor"/><polygon points="23,4 16,1 16,13 23,10" fill="currentColor"/></svg>
+      </button>
     </div>
 
     <div class="catalog-full-panel" id="catalogFullPanel">
@@ -613,7 +618,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=38"></script>
+<script src="assets/release-modal.js?v=39"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -951,25 +956,62 @@
   /* ===== Lanzamientos / Artistas: each button both opens its tab and,
      clicked again while already the open one, collapses back to the
      carousel — replacing the old separate "Ver Catálogo Completo" button. */
-  const coverflowWrap = document.getElementById('coverflowWrap');
-  const coverflowLabel = document.getElementById('coverflowLabel');
+  const carouselArea = document.getElementById('carouselArea');
+  const toggleRow = document.querySelector('.catalog-toggle-row');
   const catalogFullPanel = document.getElementById('catalogFullPanel');
+  const catalogCloseBtn = document.getElementById('catalogCloseBtn');
   const tabButtons = [document.getElementById('tabBtnLanzamientos'), document.getElementById('tabBtnArtistas')];
   const tabPanels = { lanzamientos: document.getElementById('tabLanzamientos'), artistas: document.getElementById('tabArtistas') };
 
-  function openTab(name){
-    coverflowWrap.classList.add('hidden');
-    coverflowLabel.classList.add('hidden');
-    catalogFullPanel.classList.add('open');
+  function collapseCarousel(done){
+    const h = carouselArea.scrollHeight;
+    carouselArea.style.height = h + 'px';
+    void carouselArea.offsetHeight;
+    carouselArea.classList.add('collapsed');
+    carouselArea.style.height = '0px';
+    carouselArea.addEventListener('transitionend', function onEnd(e){
+      if(e.propertyName !== 'height') return;
+      carouselArea.removeEventListener('transitionend', onEnd);
+      carouselArea.style.display = 'none';
+      if(done) done();
+    });
+  }
+
+  function expandCarousel(){
+    carouselArea.style.display = '';
+    carouselArea.classList.remove('collapsed');
+    const h = carouselArea.scrollHeight;
+    carouselArea.style.height = '0px';
+    void carouselArea.offsetHeight;
+    carouselArea.style.height = h + 'px';
+    carouselArea.addEventListener('transitionend', function onEnd(e){
+      if(e.propertyName !== 'height') return;
+      carouselArea.removeEventListener('transitionend', onEnd);
+      carouselArea.style.height = 'auto';
+    });
+  }
+
+  function openTab(name, opts){
+    const animate = !opts || opts.animate !== false;
+    const wasOpen = catalogFullPanel.classList.contains('open');
     tabButtons.forEach(function(btn){ btn.classList.toggle('active', btn.dataset.tab === name); });
     Object.keys(tabPanels).forEach(function(key){ tabPanels[key].classList.toggle('active', key === name); });
+    if(wasOpen) return;
+    toggleRow.classList.add('panel-open');
+    if(!animate){
+      carouselArea.style.display = 'none';
+      carouselArea.classList.add('collapsed');
+      catalogFullPanel.classList.add('open');
+      return;
+    }
+    collapseCarousel(function(){ catalogFullPanel.classList.add('open'); });
   }
 
   function closeTabs(){
-    coverflowWrap.classList.remove('hidden');
-    coverflowLabel.classList.remove('hidden');
+    toggleRow.classList.remove('panel-open');
     catalogFullPanel.classList.remove('open');
     tabButtons.forEach(function(btn){ btn.classList.remove('active'); });
+    expandCarousel();
   }
 
   tabButtons.forEach(function(btn){
@@ -979,6 +1021,7 @@
       else openTab(btn.dataset.tab);
     });
   });
+  catalogCloseBtn.addEventListener('click', closeTabs);
 
   /* ===== Artistas tab (ported from the former artistas.html) ===== */
   const artistGrid = document.getElementById('artistGrid');
@@ -1113,7 +1156,7 @@
   /* A link to catalogo.html#artistas (kept alive by the old artistas.html
      redirect stub) opens straight into the full panel on the Artistas tab. */
   if(window.location.hash === '#artistas'){
-    openTab('artistas');
+    openTab('artistas', { animate: false });
   }
 </script>
 

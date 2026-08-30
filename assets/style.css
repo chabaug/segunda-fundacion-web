@@ -522,6 +522,36 @@
   }
   .catalog-toggle-btn:hover{ color:var(--accent); opacity:1; }
   .catalog-toggle-btn.active{ color:var(--accent); opacity:1; }
+  .catalog-close-btn{
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:54px;
+    height:27px;
+    border:none;
+    border-radius:0 0 27px 27px;
+    background:var(--accent);
+    color:var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 0 3px;
+    cursor:pointer;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease, background .2s ease;
+  }
+  .catalog-close-btn:hover{ background:var(--heading-hover); }
+  .catalog-toggle-row.panel-open .catalog-close-btn{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .catalog-carousel-area{
+    overflow:hidden;
+    transition:height .45s cubic-bezier(0.65,0,0.35,1), opacity .3s ease;
+  }
+  .catalog-carousel-area.collapsed{ opacity:0; }
   @media (min-width:701px) and (max-width:1024px){
     .catalog-toggle-row{ display:none; }
   }
