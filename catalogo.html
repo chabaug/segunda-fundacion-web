@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=55">
+<link rel="stylesheet" href="assets/style.css?v=56">
 <script src="assets/nav.js?v=55"></script>
 <script src="assets/releases-data.js?v=58"></script>
 <script src="assets/cover-colors.js?v=55"></script>
@@ -620,7 +620,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=55"></script>
+<script src="assets/release-modal.js?v=56"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -749,7 +749,7 @@
 
   let cfItems = [];
   let cfPosition = 0, cfVelocity = 0, cfTarget = 0, cfMode = 'idle';
-  let cfDragged = false, cfPointerId = -1, cfStartX = 0, cfStartPosition = 0;
+  let cfDragged = false, cfPointerId = -1, cfStartX = 0, cfStartPosition = 0, cfDownIndex = -1;
   let cfSamples = [];
   let cfWheelTimer = null;
   let cfFrame = null, cfLastTime = 0, cfLastIndex = -1;
@@ -841,6 +841,7 @@
     e.preventDefault();
     const itemEl = e.target.closest('.coverflow-item');
     cfDownSlug = itemEl ? itemEl.dataset.slug : null;
+    cfDownIndex = itemEl ? cfItems.indexOf(itemEl) : -1;
     cfPointerId = e.pointerId; cfStartX = e.clientX; cfStartPosition = cfPosition;
     cfSamples = [{ x: e.clientX, t: performance.now() }];
     cfVelocity = 0; cfMode = 'drag'; cfDragged = false;
@@ -868,9 +869,10 @@
     // Pointer capture retargets the click event that would normally follow
     // this to the stage element, so each cover's own click listener never
     // fires — a tap is detected here instead, from the item under the
-    // pointer at pointerdown, and opens its ficha directly (any cover,
-    // centred or not — clicking a cover always opens it, never just cues it).
-    if(wasTap && cfDownSlug){
+    // pointer at pointerdown. Only the centred cover opens its ficha; a tap
+    // on a side cover does nothing beyond the drag/settle animation already
+    // handled above (it doesn't even recentre on the tapped item).
+    if(wasTap && cfDownSlug && cfDownIndex === Math.round(cfPosition)){
       // On touch, a compatibility "ghost" click can follow this tap and land
       // on the modal's own cover once it opens at the same coordinates —
       // see the matching guard in release-modal.js's modalCoverWrap handler.

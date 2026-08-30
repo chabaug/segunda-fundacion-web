@@ -998,6 +998,8 @@
     color:var(--heading);
     font-weight:700;
   }
+  .modal-artist-link{ cursor:pointer; width:fit-content; }
+  .modal-artist-link:hover{ color:var(--heading-hover); }
   .modal-title{
     font-weight:900;
     font-size:clamp(24px, 5vw, 34px);
@@ -1089,13 +1091,13 @@
     background:var(--fg);
     border-bottom:none;
     padding:10px 18px;
-    border-radius:999px;
+    border-radius:var(--radius);
   }
   .modal-link-video:hover{ color:var(--bg); opacity:0.85; }
   button.modal-link:not(.modal-link-video){
     padding:10px 18px;
     border:1px solid var(--fg);
-    border-radius:999px;
+    border-radius:var(--radius);
     color:var(--fg);
   }
   button.modal-link:not(.modal-link-video):hover{ background:var(--fg); color:var(--bg); }

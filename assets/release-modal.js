@@ -8,6 +8,23 @@ const releaseModal = document.getElementById('releaseModal');
 const modalCard = document.getElementById('modalCard');
 let currentRelease = null;
 
+// Maps a release slug to the slug of the artist that owns it (i.e. the
+// artist whose ARTISTS[].principal list includes it) so the ficha's artist
+// name can link to that artist's ficha. Only available on pages that load
+// artists-data.js and define openArtistModal (catalogo.html); on pages that
+// don't (e.g. segunda-fundacion.html), the artist name stays plain text.
+let releaseArtistSlugs = null;
+function getArtistSlugForRelease(slug){
+  if(typeof ARTISTS === 'undefined') return null;
+  if(!releaseArtistSlugs){
+    releaseArtistSlugs = {};
+    ARTISTS.forEach(function(a){
+      (a.principal || []).forEach(function(p){ releaseArtistSlugs[p.slug] = a.slug; });
+    });
+  }
+  return releaseArtistSlugs[slug] || null;
+}
+
 // Reference-counted scroll lock so a modal opened on top of another (e.g. a
 // release modal opened from inside the artist modal) doesn't re-enable page
 // scroll when only the top one closes.
@@ -37,7 +54,28 @@ function openReleaseModal(slug){
   const sfEl = document.getElementById('modalSfNumber');
   if(sfEl) sfEl.textContent = r.sfNumber ? 'SF-' + String(r.sfNumber).padStart(3, '0') : '';
 
-  document.getElementById('modalArtist').textContent = r.artist;
+  const artistEl = document.getElementById('modalArtist');
+  artistEl.textContent = r.artist;
+  const artistSlug = getArtistSlugForRelease(slug);
+  if(artistSlug && typeof openArtistModal === 'function'){
+    artistEl.classList.add('modal-artist-link');
+    artistEl.setAttribute('role', 'button');
+    artistEl.setAttribute('tabindex', '0');
+    artistEl.onclick = function(){
+      closeReleaseModal();
+      openArtistModal(artistSlug);
+    };
+    artistEl.onkeydown = function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); artistEl.onclick(); }
+    };
+  } else {
+    artistEl.classList.remove('modal-artist-link');
+    artistEl.removeAttribute('role');
+    artistEl.removeAttribute('tabindex');
+    artistEl.onclick = null;
+    artistEl.onkeydown = null;
+  }
+
   document.getElementById('modalTitle').textContent = r.title;
   document.getElementById('modalType').textContent = r.suffix === 'single' ? 'Single' : r.suffix === 'ep' ? 'EP' : 'Álbum';
 
