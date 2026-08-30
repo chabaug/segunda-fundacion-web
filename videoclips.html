@@ -8,8 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Videoclips — Segunda Fundación</title>
 <meta name="description" content="Catálogo de videoclips oficiales de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=46">
-<script src="assets/nav.js?v=46"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=47">
+<script src="assets/nav.js?v=47"></script>
 </head>
 <body>
 
@@ -60,12 +63,22 @@
 
 <main class="wrap">
 
-  <section class="page-header">
-    <h1 class="page-title"><span class="title-clip"><span class="title-inner">Videoclips</span></span></h1>
-    <p>Todos los videoclips oficiales del sello, en un mismo lugar.</p>
+  <section class="catalog-section">
+    <div class="catalog-masthead">
+      <h1 class="catalog-masthead-title"><span class="title-clip"><span class="title-inner">Videoclips</span></span></h1>
+      <input type="text" id="videosSearch" class="catalog-search" placeholder="Buscar por artista o título…" autocomplete="off">
+      <div class="catalog-masthead-tools">
+        <span class="catalog-count" id="videosCount"></span>
+        <button class="catalog-search-toggle" id="videosSearchToggle" type="button" aria-label="Buscar en videoclips" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm10.5 18-5.6-5.6"/></svg>
+        </button>
+      </div>
+    </div>
+    <p class="events-intro">Todos los videoclips oficiales del sello, en un mismo lugar.</p>
   </section>
 
   <section class="videos-section">
+    <p class="catalog-empty" id="videosEmpty">No se encontraron videoclips.</p>
     <div class="video-grid" id="videoGrid">
       <a class="video-card" data-yt="uMlYq-bZMdw" href="https://youtu.be/uMlYq-bZMdw" target="_blank" rel="noopener">
         <div class="video-thumb">
@@ -258,6 +271,44 @@
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
   }
+
+  /* ===== Search ===== */
+  function normalizeText(s){
+    return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+  const videoCards = Array.from(document.querySelectorAll('.video-card'));
+  const videosEmptyEl = document.getElementById('videosEmpty');
+  const videosCountEl = document.getElementById('videosCount');
+  videoCards.forEach(function(card){
+    const artist = card.querySelector('.artist');
+    const title = card.querySelector('.title');
+    card.dataset.search = normalizeText((artist ? artist.textContent : '') + ' ' + (title ? title.textContent : ''));
+  });
+
+  function updateVideosCount(n){
+    videosCountEl.textContent = n === videoCards.length ? (n + ' videos') : (n + ' de ' + videoCards.length);
+  }
+  updateVideosCount(videoCards.length);
+
+  document.getElementById('videosSearch').addEventListener('input', function(e){
+    const q = normalizeText(e.target.value.trim());
+    let visible = 0;
+    videoCards.forEach(function(card){
+      const match = !q || (card.dataset.search || '').includes(q);
+      card.style.display = match ? '' : 'none';
+      if(match) visible++;
+    });
+    videosEmptyEl.classList.toggle('show', visible === 0);
+    updateVideosCount(visible);
+  });
+
+  const videosSearchEl = document.getElementById('videosSearch');
+  const videosSearchToggle = document.getElementById('videosSearchToggle');
+  videosSearchToggle.addEventListener('click', function(){
+    const open = videosSearchEl.classList.toggle('open');
+    videosSearchToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(open) videosSearchEl.focus();
+  });
 </script>
 
 </body>
