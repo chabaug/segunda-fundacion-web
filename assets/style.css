@@ -183,7 +183,7 @@
     font-size:clamp(32px, 6vw, 56px);
     line-height:1;
     letter-spacing:-0.5px;
-    text-transform:uppercase;
+    text-transform:lowercase;
     color:var(--accent);
     margin:14px 0 12px;
   }
@@ -416,8 +416,8 @@
     font-size:clamp(32px, 6vw, 56px);
     line-height:1;
     letter-spacing:-0.5px;
-    text-transform:uppercase;
-    color:var(--heading);
+    text-transform:lowercase;
+    color:var(--accent);
   }
   .catalog-search{
     order:2;
