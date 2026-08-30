@@ -162,6 +162,20 @@ function closeListenModal(){
 
 const coverLightbox = document.getElementById('coverLightbox');
 document.getElementById('modalCoverWrap').addEventListener('click', function(){
+  // On touch devices, opening this modal from a coverflow tap can be
+  // followed a moment later by a browser-synthesized "ghost" click at the
+  // same screen coordinates (a compatibility mouse event some engines still
+  // fire after touch input despite preventDefault on the originating
+  // pointerdown). Landing on this exact element — the cover, now sitting
+  // where the tapped coverflow item just was — it would pop the lightbox
+  // open immediately on top of the modal from a single tap.
+  //
+  // window.__suppressCoverClickUntil is set only by the coverflow's own tap
+  // handler, and only when that tap's pointerType was "touch" — so this
+  // never touches a genuine click on the grid, an artist's release row, or a
+  // real desktop click on the coverflow itself, all of which open this same
+  // modal but have no such ghost-click risk to guard against.
+  if(window.__suppressCoverClickUntil && Date.now() < window.__suppressCoverClickUntil) return;
   document.getElementById('lightboxImg').src = document.getElementById('modalCover').src;
   document.getElementById('lightboxImg').alt = document.getElementById('modalCover').alt;
   coverLightbox.classList.add('open');

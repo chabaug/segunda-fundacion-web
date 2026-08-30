@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=29">
-<script src="assets/nav.js?v=29"></script>
-<script src="assets/releases-data.js?v=29"></script>
-<script src="assets/cover-colors.js?v=29"></script>
-<script src="assets/artists-data.js?v=29"></script>
+<link rel="stylesheet" href="assets/style.css?v=30">
+<script src="assets/nav.js?v=30"></script>
+<script src="assets/releases-data.js?v=30"></script>
+<script src="assets/cover-colors.js?v=30"></script>
+<script src="assets/artists-data.js?v=30"></script>
 </head>
 <body>
 
@@ -45,9 +45,12 @@
   <section class="catalog-section">
     <div class="catalog-masthead">
       <h1 class="catalog-masthead-title">Catálogo</h1>
+      <input type="text" id="catalogSearch" class="catalog-search" placeholder="Buscar por artista, canción, álbum o año…" autocomplete="off">
       <div class="catalog-masthead-tools">
-        <input type="text" id="catalogSearch" class="catalog-search" placeholder="Buscar por artista, canción, álbum o año…" autocomplete="off">
         <span class="catalog-count" id="catalogCount"></span>
+        <button class="catalog-search-toggle" id="catalogSearchToggle" type="button" aria-label="Buscar en el catálogo" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm10.5 18-5.6-5.6"/></svg>
+        </button>
       </div>
     </div>
     <p class="catalog-empty" id="catalogEmpty">No se encontraron lanzamientos.</p>
@@ -589,7 +592,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=29"></script>
+<script src="assets/release-modal.js?v=30"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -801,6 +804,13 @@
 
   coverflowStage.addEventListener('pointerdown', function(e){
     if(e.button !== 0) return;
+    // On touch, the browser follows a tap with synthetic compatibility mouse
+    // events (mousedown/mouseup/click) a beat later. Without this, that
+    // delayed click lands on whatever is now on screen at the same
+    // coordinates — usually the release modal's own cover image, which just
+    // opened there — firing its click handler too and popping the cover
+    // lightbox open right on top of the modal from a single tap.
+    e.preventDefault();
     const itemEl = e.target.closest('.coverflow-item');
     cfDownSlug = itemEl ? itemEl.dataset.slug : null;
     cfPointerId = e.pointerId; cfStartX = e.clientX; cfStartPosition = cfPosition;
@@ -832,7 +842,13 @@
     // fires — a tap is detected here instead, from the item under the
     // pointer at pointerdown, and opens its ficha directly (any cover,
     // centred or not — clicking a cover always opens it, never just cues it).
-    if(wasTap && cfDownSlug) openReleaseModal(cfDownSlug);
+    if(wasTap && cfDownSlug){
+      // On touch, a compatibility "ghost" click can follow this tap and land
+      // on the modal's own cover once it opens at the same coordinates —
+      // see the matching guard in release-modal.js's modalCoverWrap handler.
+      if(e.pointerType === 'touch') window.__suppressCoverClickUntil = Date.now() + 500;
+      openReleaseModal(cfDownSlug);
+    }
   }
   coverflowStage.addEventListener('pointerup', cfEndDrag);
   coverflowStage.addEventListener('pointercancel', cfEndDrag);
@@ -898,6 +914,17 @@
     catalogEmpty.classList.toggle('show', visibleSlugs.length === 0);
     updateCatalogCount(visibleSlugs.length);
     rebuildCoverflow(visibleSlugs);
+  });
+
+  /* ===== Mobile: the search field collapses behind a magnifying-glass
+     button next to the title, so the title sits right above the carousel
+     instead of leaving a tall empty gap below a stacked search bar. ===== */
+  const catalogSearchEl = document.getElementById('catalogSearch');
+  const catalogSearchToggle = document.getElementById('catalogSearchToggle');
+  catalogSearchToggle.addEventListener('click', function(){
+    const open = catalogSearchEl.classList.toggle('open');
+    catalogSearchToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(open) catalogSearchEl.focus();
   });
 
   /* ===== Lanzamientos / Artistas: each button both opens its tab and,
