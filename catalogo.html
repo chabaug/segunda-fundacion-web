@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=42">
-<script src="assets/nav.js?v=42"></script>
-<script src="assets/releases-data.js?v=42"></script>
-<script src="assets/cover-colors.js?v=42"></script>
-<script src="assets/artists-data.js?v=42"></script>
+<link rel="stylesheet" href="assets/style.css?v=43">
+<script src="assets/nav.js?v=43"></script>
+<script src="assets/releases-data.js?v=43"></script>
+<script src="assets/cover-colors.js?v=43"></script>
+<script src="assets/artists-data.js?v=43"></script>
 </head>
 <body>
 
@@ -620,7 +620,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=42"></script>
+<script src="assets/release-modal.js?v=43"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -964,6 +964,16 @@
   const catalogCloseBtn = document.getElementById('catalogCloseBtn');
   const tabButtons = [document.getElementById('tabBtnLanzamientos'), document.getElementById('tabBtnArtistas')];
   const tabPanels = { lanzamientos: document.getElementById('tabLanzamientos'), artistas: document.getElementById('tabArtistas') };
+
+  function positionCloseBtn(){
+    const rowRect = toggleRow.getBoundingClientRect();
+    const lRect = tabButtons[0].getBoundingClientRect();
+    const aRect = tabButtons[1].getBoundingClientRect();
+    const gapCenter = (lRect.right + aRect.left) / 2 - rowRect.left;
+    catalogCloseBtn.style.left = gapCenter + 'px';
+  }
+  positionCloseBtn();
+  window.addEventListener('resize', positionCloseBtn);
 
   function collapseCarousel(done){
     const h = carouselArea.scrollHeight;
