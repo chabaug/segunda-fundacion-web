@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=40">
-<script src="assets/nav.js?v=40"></script>
-<script src="assets/releases-data.js?v=40"></script>
-<script src="assets/cover-colors.js?v=40"></script>
-<script src="assets/artists-data.js?v=40"></script>
+<link rel="stylesheet" href="assets/style.css?v=41">
+<script src="assets/nav.js?v=41"></script>
+<script src="assets/releases-data.js?v=41"></script>
+<script src="assets/cover-colors.js?v=41"></script>
+<script src="assets/artists-data.js?v=41"></script>
 </head>
 <body>
 
@@ -561,6 +561,7 @@
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.59 14.44a.62.62 0 0 1-.86.21c-2.36-1.44-5.33-1.77-8.83-.97a.62.62 0 1 1-.28-1.22c3.83-.88 7.12-.5 9.76 1.11.3.18.4.57.21.87Zm1.22-2.72a.78.78 0 0 1-1.07.26c-2.7-1.66-6.82-2.14-10.02-1.17a.78.78 0 1 1-.45-1.49c3.65-1.11 8.19-.57 11.28 1.33.37.23.49.72.26 1.07Zm.1-2.83c-3.24-1.92-8.6-2.1-11.7-1.16a.93.93 0 1 1-.54-1.78c3.56-1.08 9.47-.87 13.2 1.34a.93.93 0 1 1-.96 1.6Z"/></svg>
         </a>
       </div>
+      <p class="artist-modal-bio" id="artistModalBio" style="display:none;"></p>
       <div class="modal-body" style="padding-top:14px;">
         <div class="modal-section" id="artistPrincipalSection" style="margin-top:0;">
           <div class="modal-label">Catálogo principal</div>
@@ -619,7 +620,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=40"></script>
+<script src="assets/release-modal.js?v=41"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -1131,6 +1132,14 @@
 
     const spotifyBtn = document.getElementById('artistModalSpotify');
     spotifyBtn.href = a.spotify || ('https://open.spotify.com/search/' + encodeURIComponent(a.name));
+
+    const bioEl = document.getElementById('artistModalBio');
+    if(a.bio){
+      bioEl.textContent = a.bio;
+      bioEl.style.display = '';
+    } else {
+      bioEl.style.display = 'none';
+    }
 
     renderReleaseList(document.getElementById('artistPrincipalList'), a.principal, false);
     document.getElementById('artistPrincipalSection').style.display = a.principal.length ? '' : 'none';

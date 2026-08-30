@@ -1431,6 +1431,14 @@
     padding:0 28px;
     margin:0;
   }
+  .artist-modal-bio{
+    font-size:14px;
+    line-height:1.55;
+    color:var(--fg);
+    text-align:center;
+    padding:14px 28px 0;
+    margin:0;
+  }
   .artist-icon-links{
     display:flex;
     justify-content:center;
@@ -1519,10 +1527,12 @@
     }
     #artistModalCard .artist-modal-right::-webkit-scrollbar{ display:none; }
     #artistModalCard .artist-modal-name,
-    #artistModalCard .artist-modal-members{
+    #artistModalCard .artist-modal-members,
+    #artistModalCard .artist-modal-bio{
       text-align:left;
       padding:0 28px 0 24px;
     }
+    #artistModalCard .artist-modal-bio{ padding-top:14px; }
     #artistModalCard .artist-modal-name{ margin-top:28px; }
     #artistModalCard .artist-icon-links{ justify-content:flex-start; padding:0 0 0 24px; }
     #artistModalCard .modal-body{ flex:1; padding-left:24px; }
