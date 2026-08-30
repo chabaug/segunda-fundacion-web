@@ -527,6 +527,7 @@
   }
   .catalog-toggle-btn:hover{ color:var(--accent); opacity:1; }
   .catalog-toggle-btn.active{ color:var(--accent); opacity:1; }
+  #tabBtnArtistas{ letter-spacing:7px; }
   .catalog-close-btn{
     position:absolute;
     top:50%;
