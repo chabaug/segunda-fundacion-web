@@ -183,7 +183,7 @@
     font-size:clamp(32px, 6vw, 56px);
     line-height:1;
     letter-spacing:-0.5px;
-    text-transform:lowercase;
+    text-transform:uppercase;
     color:var(--accent);
     margin:14px 0 12px;
   }
@@ -416,7 +416,7 @@
     font-size:clamp(32px, 6vw, 56px);
     line-height:1;
     letter-spacing:-0.5px;
-    text-transform:lowercase;
+    text-transform:uppercase;
     color:var(--accent);
   }
   .catalog-search{
@@ -695,9 +695,16 @@
     font-size:16px;
     max-width:640px;
   }
+  @media (max-width:700px){
+    .about-section{ padding-top:32px; padding-bottom:32px; }
+    .about-watermark{ width:34%; }
+  }
 
   /* LINKS / CTA */
   .links-section{ padding:64px 0 0; }
+  @media (max-width:700px){
+    .links-section{ padding-top:32px; }
+  }
   .link-grid{
     display:flex;
     flex-wrap:nowrap;
