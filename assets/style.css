@@ -382,12 +382,12 @@
     gap:10px;
   }
   .video-caption a{
-    color:var(--heading);
+    color:var(--accent);
     font-weight:700;
-    border-bottom:1px solid var(--fg);
+    border-bottom:1px solid var(--accent);
     padding-bottom:2px;
   }
-  .video-caption a:hover{ color:var(--heading-hover); }
+  .video-caption a:hover{ color:var(--heading-hover); border-color:var(--heading-hover); }
 
   /* SPOTIFY */
   .spotify-section{ padding:56px 0 0; }
@@ -706,18 +706,51 @@
   .about-section{
     padding:32px 0 0;
   }
-  .about-watermark{
+  .watermark-wrap{
     position:absolute;
     top:50%;
     left:50%;
     z-index:-1;
     width:min(320px, 60%);
+    aspect-ratio:258/147;
     transform:translate(-50%, -50%);
-    color:var(--accent);
-    opacity:0.11;
     pointer-events:none;
   }
-  .about-watermark svg{ display:block; width:100%; height:auto; }
+  .about-watermark{
+    position:absolute;
+    inset:0;
+    color:var(--accent);
+    opacity:0;
+    animation:watermarkForm 0.7s ease-out 1.5s both;
+  }
+  .about-watermark svg{ display:block; width:100%; height:100%; }
+  @keyframes watermarkForm{
+    from{ opacity:0; transform:scale(0.6); filter:blur(6px); }
+    to{ opacity:0.11; transform:scale(1); filter:blur(0); }
+  }
+  .wm-particle{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:4px;
+    height:4px;
+    margin:-2px 0 0 -2px;
+    border-radius:50%;
+    background:var(--accent);
+    opacity:0;
+    transform:rotate(var(--a)) translateX(90px);
+    animation:particleConverge 0.65s ease-in 1.05s both;
+  }
+  @keyframes particleConverge{
+    0%{ opacity:0; transform:rotate(var(--a)) translateX(90px) scale(1); }
+    35%{ opacity:0.7; }
+    100%{ opacity:0; transform:rotate(var(--a)) translateX(0) scale(0.2); }
+  }
+  .eyebrow.eyebrow-late{ animation-delay:2.2s; }
+  @media (prefers-reduced-motion: reduce){
+    .about-watermark{ animation:none; opacity:0.11; }
+    .wm-particle{ display:none; }
+  }
   .about-section p{
     font-family:'Newsreader', Georgia, serif;
     color:var(--heading);
@@ -847,9 +880,17 @@
   }
 
   @media (max-width:600px){
-    .hero{ padding:70px 0 40px; }
+    .hero{ padding:70px 0 24px; }
+    .video-section{ padding-top:24px; }
     .nav-links{ gap:14px; font-size:13px; }
-    .footer-inner{ flex-direction:column; align-items:flex-start; gap:6px; }
+    .footer-inner{
+      flex-wrap:nowrap;
+      justify-content:flex-start;
+      gap:6px;
+      font-size:9.5px;
+      overflow-x:auto;
+    }
+    .footer-inner span{ white-space:nowrap; flex:0 0 auto; }
   }
 
   /* RELEASE MODAL */
