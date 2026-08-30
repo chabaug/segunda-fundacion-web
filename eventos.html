@@ -8,9 +8,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eventos — Segunda Fundación</title>
 <meta name="description" content="Shows y eventos de Segunda Fundación, sello y productora independiente de Buenos Aires: próximas fechas y catálogo de shows anteriores.">
-<link rel="stylesheet" href="assets/style.css?v=45">
-<script src="assets/events-data.js?v=45"></script>
-<script src="assets/nav.js?v=45"></script>
+<link rel="stylesheet" href="assets/style.css?v=46">
+<script src="assets/events-data.js?v=46"></script>
+<script src="assets/nav.js?v=46"></script>
 </head>
 <body>
 
@@ -61,9 +61,18 @@
 
 <main class="wrap">
 
-  <section class="page-header">
-    <h1 class="page-title"><span class="title-clip"><span class="title-inner">Eventos</span></span></h1>
-    <p>Próximos shows y catálogo de fechas anteriores del sello.</p>
+  <section class="catalog-section">
+    <div class="catalog-masthead">
+      <h1 class="catalog-masthead-title"><span class="title-clip"><span class="title-inner">Eventos</span></span></h1>
+      <input type="text" id="eventsSearch" class="catalog-search" placeholder="Buscar por nombre, banda o lugar…" autocomplete="off">
+      <div class="catalog-masthead-tools">
+        <span class="catalog-count" id="eventsCount"></span>
+        <button class="catalog-search-toggle" id="eventsSearchToggle" type="button" aria-label="Buscar en eventos" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm10.5 18-5.6-5.6"/></svg>
+        </button>
+      </div>
+    </div>
+    <p class="events-intro">Próximos shows y catálogo de fechas anteriores del sello.</p>
   </section>
 
   <section class="events-section">
@@ -92,6 +101,10 @@
 </div>
 
 <script>
+  function normalizeText(s){
+    return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
   (function renderUpcomingEvents(){
     const grid = document.getElementById('upcomingGrid');
     const empty = document.getElementById('upcomingEmpty');
@@ -99,6 +112,7 @@
     UPCOMING_EVENTS.forEach(function(ev){
       const card = document.createElement('div');
       card.className = 'event-card';
+      card.dataset.search = normalizeText([ev.name, ev.venue, ev.lineup].join(' '));
       const ticketsHtml = ev.ticketUrl
         ? '<a class="event-tickets event-tickets-active" href="' + ev.ticketUrl + '" target="_blank" rel="noopener">Comprar entradas →</a>'
         : '<span class="event-tickets event-tickets-pending">Entradas próximamente</span>';
@@ -116,8 +130,8 @@
 
   fetch('assets/flyers/_events.json')
     .then(function(r){ return r.ok ? r.json() : []; })
-    .then(renderPastEvents)
-    .catch(function(){ renderPastEvents([]); });
+    .then(function(events){ renderPastEvents(events); updateEventsCount(); })
+    .catch(function(){ renderPastEvents([]); updateEventsCount(); });
 
   function renderPastEvents(events){
     const grid = document.getElementById('flyerGrid');
@@ -138,6 +152,7 @@
     events.slice().reverse().forEach(function(ev){
       const card = document.createElement('div');
       card.className = 'flyer-card';
+      card.dataset.search = normalizeText([ev.name, ev.venue, (ev.bands || []).join(' ')].join(' '));
       const aspect = ev.aspect || 1;
       card.style.flexGrow = String(aspect);
       card.style.flexBasis = (TARGET_HEIGHT * aspect) + 'px';
@@ -162,6 +177,52 @@
   function closeFlyerLightbox(){
     document.getElementById('flyerLightbox').classList.remove('open');
   }
+
+  /* ===== Search: filters both the upcoming-events grid and the past-events
+     flyer grid by the same query, against each card's own dataset.search. ===== */
+  const eventsCountEl = document.getElementById('eventsCount');
+  const upcomingEmptyEl = document.getElementById('upcomingEmpty');
+  const pastEventsEmptyEl = document.getElementById('pastEventsEmpty');
+
+  function getAllEventCards(){
+    return Array.from(document.querySelectorAll('#upcomingGrid .event-card, #flyerGrid .flyer-card'));
+  }
+
+  function updateEventsCount(){
+    const all = getAllEventCards();
+    if(!all.length){ eventsCountEl.textContent = ''; return; }
+    const visible = all.filter(function(c){ return c.style.display !== 'none'; });
+    eventsCountEl.textContent = visible.length === all.length ? (all.length + ' eventos') : (visible.length + ' de ' + all.length);
+  }
+  updateEventsCount();
+
+  document.getElementById('eventsSearch').addEventListener('input', function(e){
+    const q = normalizeText(e.target.value.trim());
+    const upcomingCards = Array.from(document.querySelectorAll('#upcomingGrid .event-card'));
+    const pastCards = Array.from(document.querySelectorAll('#flyerGrid .flyer-card'));
+    let upcomingVisible = 0, pastVisible = 0;
+    upcomingCards.forEach(function(c){
+      const match = !q || (c.dataset.search || '').includes(q);
+      c.style.display = match ? '' : 'none';
+      if(match) upcomingVisible++;
+    });
+    pastCards.forEach(function(c){
+      const match = !q || (c.dataset.search || '').includes(q);
+      c.style.display = match ? '' : 'none';
+      if(match) pastVisible++;
+    });
+    if(upcomingCards.length) upcomingEmptyEl.style.display = upcomingVisible ? 'none' : '';
+    if(pastCards.length) pastEventsEmptyEl.style.display = pastVisible ? 'none' : '';
+    updateEventsCount();
+  });
+
+  const eventsSearchEl = document.getElementById('eventsSearch');
+  const eventsSearchToggle = document.getElementById('eventsSearchToggle');
+  eventsSearchToggle.addEventListener('click', function(){
+    const open = eventsSearchEl.classList.toggle('open');
+    eventsSearchToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(open) eventsSearchEl.focus();
+  });
 </script>
 
 </body>
