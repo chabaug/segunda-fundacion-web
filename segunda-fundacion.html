@@ -8,10 +8,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Segunda Fundación</title>
 <meta name="description" content="Segunda Fundación — sello y productora independiente de música y contenido audiovisual, Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=25">
-<script src="assets/events-data.js?v=25"></script>
-<script src="assets/releases-data.js?v=25"></script>
-<script src="assets/nav.js?v=25"></script>
+<link rel="stylesheet" href="assets/style.css?v=26">
+<script src="assets/events-data.js?v=26"></script>
+<script src="assets/releases-data.js?v=26"></script>
+<script src="assets/nav.js?v=26"></script>
 </head>
 <body>
 
@@ -34,11 +34,9 @@
       <span></span><span></span><span></span>
     </button>
     <nav class="nav-links" id="navLinks">
-      <a href="segunda-fundacion.html" aria-current="page">Inicio</a>
       <a href="catalogo.html">Catálogo</a>
       <a href="videoclips.html">Videoclips</a>
       <a href="eventos.html">Eventos</a>
-      <a href="artistas.html">Artistas</a>
       <a href="nosotros.html">Nosotros</a>
     </nav>
     </div>
@@ -112,6 +110,7 @@
     <button class="modal-close" aria-label="Cerrar" onclick="closeReleaseModal()">&times;</button>
     <div class="modal-cover" id="modalCoverWrap"><img id="modalCover" src="" alt=""></div>
     <div class="modal-body">
+      <div class="modal-sf-number" id="modalSfNumber"></div>
       <div class="modal-artist" id="modalArtist"></div>
       <h2 class="modal-title" id="modalTitle"></h2>
       <div class="modal-type" id="modalType"></div>
@@ -150,7 +149,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=25"></script>
+<script src="assets/release-modal.js?v=26"></script>
 <script>
   (function(){
     const active = UPCOMING_EVENTS

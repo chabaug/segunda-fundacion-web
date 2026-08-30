@@ -8,10 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=25">
-<script src="assets/nav.js?v=25"></script>
-<script src="assets/releases-data.js?v=25"></script>
-<script src="assets/cover-colors.js?v=25"></script>
+<link rel="stylesheet" href="assets/style.css?v=26">
+<script src="assets/nav.js?v=26"></script>
+<script src="assets/releases-data.js?v=26"></script>
+<script src="assets/cover-colors.js?v=26"></script>
+<script src="assets/artists-data.js?v=26"></script>
 </head>
 <body>
 
@@ -31,10 +32,8 @@
     </button>
     <nav class="nav-links" id="navLinks">
       <a href="segunda-fundacion.html">Inicio</a>
-      <a href="catalogo.html" aria-current="page">Catálogo</a>
       <a href="videoclips.html">Videoclips</a>
       <a href="eventos.html">Eventos</a>
-      <a href="artistas.html">Artistas</a>
       <a href="nosotros.html">Nosotros</a>
     </nav>
     </div>
@@ -43,29 +42,39 @@
 
 <main class="wrap">
 
-  <section class="page-header">
-    <h1 class="page-title">Catálogo</h1>
-    <p>Todos los lanzamientos del sello, en un mismo lugar.</p>
-  </section>
-
   <section class="catalog-section">
-    <div class="catalog-toolbar">
-      <input type="text" id="catalogSearch" class="catalog-search" placeholder="Buscar por artista, canción, álbum o año…" autocomplete="off">
+    <div class="catalog-masthead">
+      <h1 class="catalog-masthead-title">Catálogo</h1>
+      <div class="catalog-masthead-tools">
+        <input type="text" id="catalogSearch" class="catalog-search" placeholder="Buscar por artista, canción, álbum o año…" autocomplete="off">
+        <span class="catalog-count" id="catalogCount"></span>
+      </div>
     </div>
     <p class="catalog-empty" id="catalogEmpty">No se encontraron lanzamientos.</p>
 
-    <div class="coverflow-wrap">
-      <div class="coverflow" id="catalogCoverflow">
+    <div class="coverflow-wrap" id="coverflowWrap">
+      <div class="coverflow-stage" id="catalogCoverflow" tabindex="0" role="listbox" aria-label="Catálogo en carrusel">
         <div class="coverflow-track" id="coverflowTrack"></div>
       </div>
     </div>
-    <div class="coverflow-label">
+    <div class="coverflow-label" id="coverflowLabel">
       <div class="coverflow-number" id="coverflowNumber"></div>
       <div class="coverflow-artist" id="coverflowArtist"></div>
       <div class="coverflow-title" id="coverflowTitle"></div>
     </div>
 
-    <div class="catalog-grid" id="catalogGrid">
+    <div class="catalog-toggle-row">
+      <button class="catalog-toggle-btn" id="catalogToggleBtn" type="button">Ver Catálogo Completo</button>
+    </div>
+
+    <div class="catalog-full-panel" id="catalogFullPanel">
+      <div class="catalog-tabs">
+        <button class="catalog-tab-btn active" id="tabBtnLanzamientos" type="button" data-tab="lanzamientos">Lanzamientos</button>
+        <button class="catalog-tab-btn" id="tabBtnArtistas" type="button" data-tab="artistas">Artistas</button>
+      </div>
+
+      <div class="catalog-tab-panel active" id="tabLanzamientos">
+        <div class="catalog-grid" id="catalogGrid">
       <a class="catalog-item" data-slug="la-hora-del-mosquito-el-sega" href="https://open.spotify.com/search/La%20Hora%20del%20Mosquito%20El%20Sega" target="_blank" rel="noopener">
         <div class="catalog-cover"><img src="assets/covers/la-hora-del-mosquito-el-sega.jpg" alt="El Sega — La Hora del Mosquito" loading="lazy"></div>
         <div class="catalog-meta">
@@ -493,7 +502,16 @@
           <span class="title">Trequartista</span>
         </div>
       </a>
-    </div>
+        </div>
+      </div>
+
+      <div class="catalog-tab-panel" id="tabArtistas">
+        <div class="catalog-toolbar">
+          <input type="text" id="artistSearch" class="catalog-search" placeholder="Buscar artista…" autocomplete="off">
+        </div>
+        <p class="catalog-empty" id="artistEmpty">No se encontraron artistas.</p>
+        <div class="artist-grid" id="artistGrid"></div>
+      </div>
     </div>
   </section>
 
@@ -506,11 +524,41 @@
   </div>
 </footer>
 
+<div class="modal-overlay" id="artistModal">
+  <div class="modal-card" id="artistModalCard">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeArtistModal()">&times;</button>
+    <div class="artist-modal-photo" id="artistModalPhotoWrap"><img id="artistModalPhoto" src="" alt=""></div>
+    <div class="artist-modal-right">
+      <h2 class="artist-modal-name" id="artistModalName"></h2>
+      <p class="artist-modal-members" id="artistModalMembers" style="display:none;"></p>
+      <div class="artist-icon-links">
+        <a class="artist-icon-btn" id="artistModalInstagram" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none;">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2c-2.7 0-3.06.01-4.12.06-1.06.05-1.79.22-2.43.47-.66.26-1.22.6-1.77 1.16-.56.55-.9 1.11-1.16 1.77-.25.64-.42 1.37-.47 2.43C2 8.94 2 9.3 2 12s.01 3.06.06 4.12c.05 1.06.22 1.79.47 2.43.26.66.6 1.22 1.16 1.77.55.56 1.11.9 1.77 1.16.64.25 1.37.42 2.43.47C8.94 22 9.3 22 12 22s3.06-.01 4.12-.06c1.06-.05 1.79-.22 2.43-.47.66-.26 1.22-.6 1.77-1.16.56-.55.9-1.11 1.16-1.77.25-.64.42-1.37.47-2.43C22 15.06 22 14.7 22 12s-.01-3.06-.06-4.12c-.05-1.06-.22-1.79-.47-2.43-.26-.66-.6-1.22-1.16-1.77-.55-.56-1.11-.9-1.77-1.16-.64-.25-1.37-.42-2.43-.47C15.06 2 14.7 2 12 2Zm0 1.8c2.67 0 2.99.01 4.04.06.98.04 1.5.21 1.86.34.47.18.8.4 1.15.75.35.35.57.68.75 1.15.13.36.29.88.34 1.86.05 1.05.06 1.37.06 4.04s-.01 2.99-.06 4.04c-.04.98-.21 1.5-.34 1.86-.18.47-.4.8-.75 1.15-.35.35-.68.57-1.15.75-.36.13-.88.29-1.86.34-1.05.05-1.37.06-4.04.06s-2.99-.01-4.04-.06c-.98-.04-1.5-.21-1.86-.34-.47-.18-.8-.4-1.15-.75-.35-.35-.57-.68-.75-1.15-.13-.36-.29-.88-.34-1.86C3.8 14.99 3.8 14.67 3.8 12s.01-2.99.06-4.04c.04-.98.21-1.5.34-1.86.18-.47.4-.8.75-1.15.35-.35.68-.57 1.15-.75.36-.13.88-.29 1.86-.34C9.01 3.8 9.33 3.8 12 3.8Zm0 3.06a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28Zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68Zm5.34-8.68a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z"/></svg>
+        </a>
+        <a class="artist-icon-btn" id="artistModalSpotify" href="#" target="_blank" rel="noopener" aria-label="Spotify">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.59 14.44a.62.62 0 0 1-.86.21c-2.36-1.44-5.33-1.77-8.83-.97a.62.62 0 1 1-.28-1.22c3.83-.88 7.12-.5 9.76 1.11.3.18.4.57.21.87Zm1.22-2.72a.78.78 0 0 1-1.07.26c-2.7-1.66-6.82-2.14-10.02-1.17a.78.78 0 1 1-.45-1.49c3.65-1.11 8.19-.57 11.28 1.33.37.23.49.72.26 1.07Zm.1-2.83c-3.24-1.92-8.6-2.1-11.7-1.16a.93.93 0 1 1-.54-1.78c3.56-1.08 9.47-.87 13.2 1.34a.93.93 0 1 1-.96 1.6Z"/></svg>
+        </a>
+      </div>
+      <div class="modal-body" style="padding-top:14px;">
+        <div class="modal-section" id="artistPrincipalSection" style="margin-top:0;">
+          <div class="modal-label">Catálogo principal</div>
+          <div class="artist-release-list" id="artistPrincipalList"></div>
+        </div>
+        <div class="modal-section" id="artistAppearsSection">
+          <div class="modal-label">También aparece en</div>
+          <div class="artist-release-list" id="artistAppearsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="releaseModal">
   <div class="modal-card" id="modalCard">
     <button class="modal-close" aria-label="Cerrar" onclick="closeReleaseModal()">&times;</button>
     <div class="modal-cover" id="modalCoverWrap"><img id="modalCover" src="" alt=""></div>
     <div class="modal-body">
+      <div class="modal-sf-number" id="modalSfNumber"></div>
       <div class="modal-artist" id="modalArtist"></div>
       <h2 class="modal-title" id="modalTitle"></h2>
       <div class="modal-type" id="modalType"></div>
@@ -549,7 +597,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=25"></script>
+<script src="assets/release-modal.js?v=26"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -566,29 +614,8 @@
   const catalogGrid = document.getElementById('catalogGrid');
   const catalogItems = Array.from(catalogGrid.querySelectorAll('.catalog-item'));
   const catalogEmpty = document.getElementById('catalogEmpty');
-
-  catalogItems.forEach(function(item){
-    const r = RELEASES[item.dataset.slug];
-    if(!r || !r.sfNumber) return;
-    const badge = document.createElement('span');
-    badge.className = 'catalog-number';
-    badge.textContent = 'SF-' + String(r.sfNumber).padStart(3, '0');
-    item.querySelector('.catalog-cover').appendChild(badge);
-  });
-
-  const coverflowTrack = document.getElementById('coverflowTrack');
-  const coverflowItems = catalogItems.map(function(item){
-    const slug = item.dataset.slug;
-    const r = RELEASES[slug];
-    if(!r) return null;
-    const cfItem = document.createElement('div');
-    cfItem.className = 'coverflow-item';
-    cfItem.dataset.slug = slug;
-    cfItem.innerHTML = '<div class="coverflow-cover"><img src="assets/covers/' + slug + '.jpg" alt="" loading="lazy"></div>';
-    cfItem.addEventListener('click', function(){ openReleaseModal(slug); });
-    coverflowTrack.appendChild(cfItem);
-    return cfItem;
-  }).filter(Boolean);
+  const catalogCount = document.getElementById('catalogCount');
+  const ALL_SLUGS = catalogItems.map(function(item){ return item.dataset.slug; });
 
   const searchIndex = {};
   catalogItems.forEach(function(item){
@@ -599,22 +626,6 @@
     const parts = [r.artist, r.title, year].concat(r.tracks || []);
     if(r.credits) parts.push(r.credits);
     searchIndex[slug] = normalizeText(parts.join(' '));
-  });
-
-  document.getElementById('catalogSearch').addEventListener('input', function(e){
-    const q = normalizeText(e.target.value.trim());
-    let visibleCount = 0;
-    catalogItems.forEach(function(item){
-      const match = !q || (searchIndex[item.dataset.slug] || '').includes(q);
-      item.style.display = match ? '' : 'none';
-      if(match) visibleCount++;
-    });
-    coverflowItems.forEach(function(item){
-      const match = !q || (searchIndex[item.dataset.slug] || '').includes(q);
-      item.style.display = match ? '' : 'none';
-    });
-    catalogEmpty.classList.toggle('show', visibleCount === 0);
-    updateCoverflow();
   });
 
   const maxTilt = 12;
@@ -642,91 +653,445 @@
     });
   });
 
-  const coverflowEl = document.getElementById('catalogCoverflow');
-  const coverflowNumberEl = document.getElementById('coverflowNumber');
-  const coverflowArtistEl = document.getElementById('coverflowArtist');
-  const coverflowTitleEl = document.getElementById('coverflowTitle');
-  let coverflowTicking = false;
+  /* ===== Coverflow: pointer-driven 3D carousel with fling physics =====
+     Ported from Bateristico's implementation (settle/inertia spring math +
+     iTunes-style keyframe geometry) since our previous scroll-container
+     version had no click-and-drag support for mouse users — trackpad/wheel
+     was the only way to move it, which read as "broken" on a plain mouse. */
+  const STIFFNESS = 120;
+  const FRICTION = 4.5;
+  const MAX_DT = 1 / 30;
 
-  const ITEM_STEP = 124; // item slot width (110) + track gap (14)
-  const KF0 = { rotate: 0, scale: 1, tz: 0, tx: 0 };
-  const KF1 = { rotate: 74, scale: 0.76, tz: -20, tx: 0 };
-  const KF2 = { rotate: 78, scale: 0.52, tz: -75, tx: 10 };
-
-  function lerpKF(a, b, t){
+  function settle(current, target, velocity, dt){
+    const step = Math.min(dt, MAX_DT);
+    const w = Math.sqrt(STIFFNESS);
+    const a = current - target;
+    const b = velocity + w * a;
+    const decay = Math.exp(-w * step);
     return {
-      rotate: a.rotate + (b.rotate - a.rotate) * t,
-      scale: a.scale + (b.scale - a.scale) * t,
-      tz: a.tz + (b.tz - a.tz) * t,
-      tx: a.tx + (b.tx - a.tx) * t
+      position: target + (a + b * step) * decay,
+      velocity: (b - w * (a + b * step)) * decay
+    };
+  }
+  function projectRest(position, velocity){ return position + velocity / FRICTION; }
+  function isSettled(state, target){
+    return Math.abs(state.position - target) < 0.001 && Math.abs(state.velocity) < 0.001;
+  }
+
+  const VISIBLE_RANGE = 6;
+  const COVER_SIZE = 200;
+  const SOLVE_BASIS = 260;
+  const SCALE = COVER_SIZE / SOLVE_BASIS;
+  const BASE_KEYFRAMES = [
+    { rotateY: 0, translateX: 0, translateZ: 80, scale: 1, opacity: 1 },
+    { rotateY: 68, translateX: 125, translateZ: -100, scale: 0.88, opacity: 1 },
+    { rotateY: 72, translateX: 180, translateZ: -180, scale: 0.82, opacity: 1 },
+    { rotateY: 74, translateX: 229, translateZ: -250, scale: 0.77, opacity: 0.92 },
+    { rotateY: 75, translateX: 274, translateZ: -310, scale: 0.73, opacity: 0.72 },
+    { rotateY: 76, translateX: 315, translateZ: -360, scale: 0.7, opacity: 0.42 },
+    { rotateY: 76, translateX: 354, translateZ: -400, scale: 0.68, opacity: 0 }
+  ];
+  const KEYFRAMES = BASE_KEYFRAMES.map(function(k){
+    return Object.assign({}, k, { translateX: k.translateX * SCALE, translateZ: k.translateZ * SCALE });
+  });
+  function lerp(a, b, t){ return a + (b - a) * t; }
+  function unsign(n){ return n === 0 ? 0 : n; }
+  function coverTransform(offset){
+    const side = offset < 0 ? -1 : 1;
+    const distance = Math.min(Math.abs(offset), VISIBLE_RANGE);
+    const lower = Math.min(Math.floor(distance), KEYFRAMES.length - 1);
+    const upper = Math.min(lower + 1, KEYFRAMES.length - 1);
+    const t = distance - lower;
+    const a = KEYFRAMES[lower], b = KEYFRAMES[upper];
+    return {
+      rotateY: unsign(-side * lerp(a.rotateY, b.rotateY, t)),
+      translateX: unsign(side * lerp(a.translateX, b.translateX, t)),
+      translateZ: lerp(a.translateZ, b.translateZ, t),
+      scale: lerp(a.scale, b.scale, t),
+      opacity: lerp(a.opacity, b.opacity, t),
+      zIndex: Math.round(100 - distance * 10)
     };
   }
 
-  function keyframeAt(absP){
-    if(absP <= 1) return lerpKF(KF0, KF1, absP);
-    if(absP <= 2) return lerpKF(KF1, KF2, absP - 1);
-    return KF2;
+  const PX_PER_SLOT = 70;
+  const SAMPLE_WINDOW_MS = 90;
+  const MAX_FLING_SLOTS = 8;
+  const WHEEL_IDLE_MS = 110;
+
+  const coverflowStage = document.getElementById('catalogCoverflow');
+  const coverflowTrack = document.getElementById('coverflowTrack');
+  const coverflowNumberEl = document.getElementById('coverflowNumber');
+  const coverflowArtistEl = document.getElementById('coverflowArtist');
+  const coverflowTitleEl = document.getElementById('coverflowTitle');
+
+  let cfItems = [];
+  let cfPosition = 0, cfVelocity = 0, cfTarget = 0, cfMode = 'idle';
+  let cfDragged = false, cfPointerId = -1, cfStartX = 0, cfStartPosition = 0;
+  let cfSamples = [];
+  let cfWheelTimer = null;
+  let cfFrame = null, cfLastTime = 0, cfLastIndex = -1;
+
+  function cfClamp(v){ return Math.max(0, Math.min(cfItems.length - 1, v)); }
+
+  function cfGoTo(index){
+    cfTarget = cfClamp(Math.round(index));
+    cfMode = 'settle';
+    cfWake();
   }
 
-  function updateCoverflow(){
-    const rect = coverflowEl.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    let closest = null;
-    let closestDist = Infinity;
+  function cfWake(){
+    if(cfFrame === null){ cfLastTime = 0; cfFrame = requestAnimationFrame(cfTick); }
+  }
 
-    coverflowItems.forEach(function(item){
-      if(item.style.display === 'none') return;
-      const r = item.getBoundingClientRect();
-      const itemCenter = r.left + r.width / 2;
-      const dist = Math.abs(itemCenter - centerX);
-      if(dist < closestDist){
-        closestDist = dist;
-        closest = item;
-      }
-    });
+  function cfAdvance(dt){
+    if(cfMode === 'settle'){
+      const next = settle(cfPosition, cfTarget, cfVelocity, dt);
+      cfPosition = next.position;
+      cfVelocity = next.velocity;
+      if(isSettled(next, cfTarget)){ cfPosition = cfTarget; cfVelocity = 0; cfMode = 'idle'; }
+    }
+  }
+  function cfIsAnimating(){ return cfMode !== 'idle' || Math.abs(cfVelocity) > 0.0001; }
+  function cfIsDragging(){ return cfMode === 'drag'; }
 
-    coverflowItems.forEach(function(item){
-      if(item.style.display === 'none') return;
-      const cover = item.querySelector('.coverflow-cover');
-      const r = item.getBoundingClientRect();
-      const itemCenter = r.left + r.width / 2;
-      const p = (itemCenter - centerX) / ITEM_STEP;
-      const side = p < 0 ? -1 : 1;
-      const absP = Math.min(Math.abs(p), 2);
-      const kf = keyframeAt(absP);
+  function cfSampleVelocity(){
+    if(cfSamples.length < 2) return 0;
+    const last = cfSamples[cfSamples.length - 1];
+    const cutoff = last.t - SAMPLE_WINDOW_MS;
+    let first = cfSamples[0];
+    for(let i = 0; i < cfSamples.length; i++){ if(cfSamples[i].t >= cutoff){ first = cfSamples[i]; break; } }
+    const dt = (last.t - first.t) / 1000;
+    if(dt <= 0) return 0;
+    return -((last.x - first.x) / PX_PER_SLOT) / dt;
+  }
 
-      const rotateY = side * -kf.rotate;
-      const translateX = -side * kf.tx;
-
-      cover.style.transform = 'translateX(' + translateX + 'px) rotateY(' + rotateY + 'deg) scale(' + kf.scale + ') translateZ(' + kf.tz + 'px)';
-      cover.style.zIndex = String(Math.round(100 - absP * 10));
-    });
-
-    if(closest){
-      const r = RELEASES[closest.dataset.slug];
+  function cfDraw(){
+    if(!cfItems.length) return;
+    const first = Math.max(0, Math.ceil(cfPosition - VISIBLE_RANGE));
+    const last = Math.min(cfItems.length - 1, Math.floor(cfPosition + VISIBLE_RANGE));
+    for(let i = 0; i < cfItems.length; i++){
+      const node = cfItems[i];
+      if(i < first || i > last){ node.style.visibility = 'hidden'; continue; }
+      const t = coverTransform(i - cfPosition);
+      node.style.transform = 'translate3d(' + t.translateX + 'px,0,' + t.translateZ + 'px) rotateY(' + t.rotateY + 'deg) scale(' + t.scale + ')';
+      node.style.opacity = String(t.opacity);
+      node.style.zIndex = String(t.zIndex);
+      node.style.visibility = 'visible';
+    }
+    const centred = Math.round(cfPosition);
+    if(centred !== cfLastIndex && centred >= 0 && centred < cfItems.length){
+      cfLastIndex = centred;
+      const slug = cfItems[centred].dataset.slug;
+      const r = RELEASES[slug];
       if(r){
         coverflowNumberEl.textContent = r.sfNumber ? 'SF-' + String(r.sfNumber).padStart(3, '0') : '';
         coverflowArtistEl.textContent = r.artist;
         coverflowTitleEl.textContent = r.title;
       }
-      const glow = COVER_COLORS[closest.dataset.slug];
+      const glow = COVER_COLORS[slug];
       if(glow) document.documentElement.style.setProperty('--glow', glow);
     }
   }
 
-  coverflowEl.addEventListener('scroll', function(){
-    if(!coverflowTicking){
-      window.requestAnimationFrame(function(){
-        updateCoverflow();
-        coverflowTicking = false;
-      });
-      coverflowTicking = true;
+  function cfTick(time){
+    const dt = cfLastTime ? (time - cfLastTime) / 1000 : 1 / 60;
+    cfLastTime = time;
+    cfAdvance(dt);
+    cfDraw();
+    if(cfIsAnimating() || cfIsDragging()){
+      cfFrame = requestAnimationFrame(cfTick);
+    } else {
+      cfFrame = null; cfLastTime = 0;
+    }
+  }
+
+  let cfDownSlug = null;
+
+  coverflowStage.addEventListener('pointerdown', function(e){
+    if(e.button !== 0) return;
+    const itemEl = e.target.closest('.coverflow-item');
+    cfDownSlug = itemEl ? itemEl.dataset.slug : null;
+    cfPointerId = e.pointerId; cfStartX = e.clientX; cfStartPosition = cfPosition;
+    cfSamples = [{ x: e.clientX, t: performance.now() }];
+    cfVelocity = 0; cfMode = 'drag'; cfDragged = false;
+    coverflowStage.setPointerCapture(e.pointerId);
+  });
+  coverflowStage.addEventListener('pointermove', function(e){
+    if(cfMode !== 'drag' || e.pointerId !== cfPointerId) return;
+    const dx = e.clientX - cfStartX;
+    if(Math.abs(dx) > 3) cfDragged = true;
+    const raw = cfStartPosition - dx / PX_PER_SLOT;
+    const limit = cfItems.length - 1;
+    cfPosition = raw < 0 ? raw * 0.32 : raw > limit ? limit + (raw - limit) * 0.32 : raw;
+    cfSamples.push({ x: e.clientX, t: performance.now() });
+    if(cfSamples.length > 12) cfSamples.shift();
+    cfWake();
+  });
+  function cfEndDrag(e){
+    if(cfMode !== 'drag' || e.pointerId !== cfPointerId) return;
+    const wasTap = !cfDragged;
+    const v = cfSampleVelocity();
+    const projected = projectRest(cfPosition, v);
+    const bounded = Math.max(cfPosition - MAX_FLING_SLOTS, Math.min(cfPosition + MAX_FLING_SLOTS, projected));
+    cfVelocity = v; cfTarget = cfClamp(Math.round(bounded)); cfMode = 'settle'; cfWake();
+    try{ coverflowStage.releasePointerCapture(e.pointerId); }catch(err){}
+    // Pointer capture retargets the click event that would normally follow
+    // this to the stage element, so each cover's own click listener never
+    // fires — a tap is detected here instead, from the item under the
+    // pointer at pointerdown, and opens its ficha directly (any cover,
+    // centred or not — clicking a cover always opens it, never just cues it).
+    if(wasTap && cfDownSlug) openReleaseModal(cfDownSlug);
+  }
+  coverflowStage.addEventListener('pointerup', cfEndDrag);
+  coverflowStage.addEventListener('pointercancel', cfEndDrag);
+
+  coverflowStage.addEventListener('keydown', function(e){
+    switch(e.key){
+      case 'ArrowLeft': e.preventDefault(); cfGoTo(Math.round(cfTarget) - 1); break;
+      case 'ArrowRight': e.preventDefault(); cfGoTo(Math.round(cfTarget) + 1); break;
+      case 'Home': e.preventDefault(); cfGoTo(0); break;
+      case 'End': e.preventDefault(); cfGoTo(cfItems.length - 1); break;
+      case 'Enter': case ' ':
+        e.preventDefault();
+        const slug = cfItems[Math.round(cfTarget)] && cfItems[Math.round(cfTarget)].dataset.slug;
+        if(slug) openReleaseModal(slug);
+        break;
     }
   });
 
-  window.addEventListener('resize', updateCoverflow);
-  window.addEventListener('load', updateCoverflow);
-  updateCoverflow();
+  coverflowStage.addEventListener('wheel', function(e){
+    if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    cfMode = 'idle'; cfVelocity = 0;
+    cfPosition = cfClamp(cfPosition + e.deltaX / PX_PER_SLOT);
+    cfWake();
+    if(cfWheelTimer) clearTimeout(cfWheelTimer);
+    cfWheelTimer = setTimeout(function(){ cfGoTo(cfPosition); }, WHEEL_IDLE_MS);
+  }, { passive: false });
+
+  function rebuildCoverflow(slugs){
+    coverflowTrack.innerHTML = '';
+    cfItems = slugs.map(function(slug){
+      const el = document.createElement('div');
+      el.className = 'coverflow-item';
+      el.dataset.slug = slug;
+      el.innerHTML = '<div class="coverflow-cover"><img src="assets/covers/' + slug + '.jpg" alt="" loading="lazy"></div>';
+      coverflowTrack.appendChild(el);
+      return el;
+    });
+    cfPosition = 0; cfVelocity = 0; cfTarget = 0; cfMode = 'idle'; cfLastIndex = -1;
+    cfDraw();
+  }
+
+  rebuildCoverflow(ALL_SLUGS);
+  window.addEventListener('resize', cfDraw);
+
+  /* ===== Search: filters the grid and rebuilds the coverflow over the
+     remaining slugs (their index positions shift, so it's simplest to
+     rebuild rather than trying to skip gaps in the physics model). ===== */
+  function updateCatalogCount(n){
+    catalogCount.textContent = n === ALL_SLUGS.length ? (n + ' entradas') : (n + ' de ' + ALL_SLUGS.length);
+  }
+  updateCatalogCount(ALL_SLUGS.length);
+
+  document.getElementById('catalogSearch').addEventListener('input', function(e){
+    const q = normalizeText(e.target.value.trim());
+    const visibleSlugs = [];
+    catalogItems.forEach(function(item){
+      const slug = item.dataset.slug;
+      const match = !q || (searchIndex[slug] || '').includes(q);
+      item.style.display = match ? '' : 'none';
+      if(match) visibleSlugs.push(slug);
+    });
+    catalogEmpty.classList.toggle('show', visibleSlugs.length === 0);
+    updateCatalogCount(visibleSlugs.length);
+    rebuildCoverflow(visibleSlugs);
+  });
+
+  /* ===== Ver Catálogo Completo / Ver Carrousel toggle ===== */
+  const coverflowWrap = document.getElementById('coverflowWrap');
+  const coverflowLabel = document.getElementById('coverflowLabel');
+  const catalogToggleBtn = document.getElementById('catalogToggleBtn');
+  const catalogFullPanel = document.getElementById('catalogFullPanel');
+
+  function setCatalogExpanded(expanded){
+    coverflowWrap.classList.toggle('hidden', expanded);
+    coverflowLabel.classList.toggle('hidden', expanded);
+    catalogFullPanel.classList.toggle('open', expanded);
+    catalogToggleBtn.textContent = expanded ? 'Ver Carrousel' : 'Ver Catálogo Completo';
+  }
+
+  catalogToggleBtn.addEventListener('click', function(){
+    setCatalogExpanded(!catalogFullPanel.classList.contains('open'));
+  });
+
+  /* ===== Lanzamientos / Artistas tabs ===== */
+  const tabButtons = [document.getElementById('tabBtnLanzamientos'), document.getElementById('tabBtnArtistas')];
+  const tabPanels = { lanzamientos: document.getElementById('tabLanzamientos'), artistas: document.getElementById('tabArtistas') };
+
+  function setActiveTab(name){
+    tabButtons.forEach(function(btn){ btn.classList.toggle('active', btn.dataset.tab === name); });
+    Object.keys(tabPanels).forEach(function(key){ tabPanels[key].classList.toggle('active', key === name); });
+  }
+
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){ setActiveTab(btn.dataset.tab); });
+  });
+
+  /* ===== Artistas tab (ported from the former artistas.html) ===== */
+  const artistGrid = document.getElementById('artistGrid');
+  const artistEmpty = document.getElementById('artistEmpty');
+  const ARTISTS_BY_SLUG = {};
+
+  ARTISTS.forEach(function(a){
+    ARTISTS_BY_SLUG[a.slug] = a;
+
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'artist-item';
+    item.dataset.slug = a.slug;
+
+    const photoWrap = document.createElement('div');
+    if(a.hasPhoto){
+      photoWrap.className = 'artist-photo';
+      const img = document.createElement('img');
+      img.src = 'assets/artists/' + a.slug + '.jpg';
+      img.alt = a.name;
+      img.loading = 'lazy';
+      photoWrap.appendChild(img);
+    } else {
+      photoWrap.className = 'artist-photo placeholder';
+      photoWrap.textContent = a.name.trim().charAt(0).toUpperCase();
+    }
+
+    const name = document.createElement('div');
+    name.className = 'artist-name';
+    name.textContent = a.name;
+
+    item.appendChild(photoWrap);
+    item.appendChild(name);
+    item.addEventListener('click', function(){ openArtistModal(a.slug); });
+    artistGrid.appendChild(item);
+  });
+
+  const artistItems = Array.from(artistGrid.querySelectorAll('.artist-item'));
+  const artistSearchIndex = {};
+  ARTISTS.forEach(function(a){
+    artistSearchIndex[a.slug] = normalizeText(a.name);
+  });
+
+  document.getElementById('artistSearch').addEventListener('input', function(e){
+    const q = normalizeText(e.target.value.trim());
+    let visibleCount = 0;
+    artistItems.forEach(function(item){
+      const match = !q || (artistSearchIndex[item.dataset.slug] || '').includes(q);
+      item.style.display = match ? '' : 'none';
+      if(match) visibleCount++;
+    });
+    artistEmpty.classList.toggle('show', visibleCount === 0);
+  });
+
+  const artistModal = document.getElementById('artistModal');
+
+  function renderReleaseList(container, list, showWith){
+    container.innerHTML = '';
+    list.forEach(function(r){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'artist-release-row';
+
+      const cover = document.createElement('div');
+      cover.className = 'artist-release-cover';
+      const img = document.createElement('img');
+      img.src = 'assets/covers/' + r.slug + '.jpg';
+      img.alt = '';
+      img.loading = 'lazy';
+      cover.appendChild(img);
+
+      const meta = document.createElement('div');
+      meta.className = 'artist-release-meta';
+      const title = document.createElement('div');
+      title.className = 'artist-release-title';
+      title.textContent = r.title;
+      const sub = document.createElement('div');
+      sub.className = 'artist-release-sub';
+      let subText = r.type + ' · ' + r.year;
+      if(showWith && r.with && r.with.length){
+        subText += ' · junto a ' + r.with.join(', ');
+      }
+      sub.textContent = subText;
+
+      meta.appendChild(title);
+      meta.appendChild(sub);
+      btn.appendChild(cover);
+      btn.appendChild(meta);
+      btn.addEventListener('click', function(){ openReleaseModal(r.slug); });
+      container.appendChild(btn);
+    });
+  }
+
+  function openArtistModal(slug){
+    const a = ARTISTS_BY_SLUG[slug];
+    if(!a) return;
+
+    const photoWrap = document.getElementById('artistModalPhotoWrap');
+    if(a.hasPhoto){
+      photoWrap.className = 'artist-modal-photo';
+      photoWrap.innerHTML = '<img id="artistModalPhoto" src="assets/artists/' + a.slug + '.jpg" alt="' + a.name.replace(/"/g,'&quot;') + '">';
+    } else {
+      photoWrap.className = 'artist-modal-photo placeholder';
+      photoWrap.textContent = a.name.trim().charAt(0).toUpperCase();
+    }
+
+    document.getElementById('artistModalName').textContent = a.name;
+
+    const membersEl = document.getElementById('artistModalMembers');
+    if(a.members && a.members.length){
+      membersEl.textContent = a.members.join(', ');
+      membersEl.style.display = '';
+    } else {
+      membersEl.style.display = 'none';
+    }
+
+    const igBtn = document.getElementById('artistModalInstagram');
+    if(a.instagram){
+      igBtn.href = 'https://instagram.com/' + a.instagram;
+      igBtn.style.display = '';
+    } else {
+      igBtn.style.display = 'none';
+    }
+
+    const spotifyBtn = document.getElementById('artistModalSpotify');
+    spotifyBtn.href = a.spotify || ('https://open.spotify.com/search/' + encodeURIComponent(a.name));
+
+    renderReleaseList(document.getElementById('artistPrincipalList'), a.principal, false);
+    document.getElementById('artistPrincipalSection').style.display = a.principal.length ? '' : 'none';
+
+    renderReleaseList(document.getElementById('artistAppearsList'), a.appearsIn, true);
+    document.getElementById('artistAppearsSection').style.display = a.appearsIn.length ? '' : 'none';
+
+    artistModal.classList.add('open');
+    lockScroll();
+  }
+
+  function closeArtistModal(){
+    artistModal.classList.remove('open');
+    unlockScroll();
+  }
+
+  artistModal.addEventListener('click', function(e){
+    if(e.target === artistModal) closeArtistModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !releaseModal.classList.contains('open')) closeArtistModal();
+  }, true);
+
+  /* A link to catalogo.html#artistas (kept alive by the old artistas.html
+     redirect stub) opens straight into the full panel on the Artistas tab. */
+  if(window.location.hash === '#artistas'){
+    setCatalogExpanded(true);
+    setActiveTab('artistas');
+  }
 </script>
 
 </body>

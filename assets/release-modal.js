@@ -1,5 +1,5 @@
 // Shared release modal (cover, tracklist, credits, streaming/video links) —
-// used by catalogo.html and artistas.html. Depends on RELEASES being loaded
+// used by catalogo.html and segunda-fundacion.html. Depends on RELEASES being loaded
 // first (assets/releases-data.js) and on the modal markup existing in the
 // page: #releaseModal, #modalCard, #listenModal, #coverLightbox and their
 // children (see catalogo.html for the reference markup).
@@ -33,6 +33,9 @@ function openReleaseModal(slug){
   const cover = document.getElementById('modalCover');
   cover.src = 'assets/covers/' + slug + '.jpg';
   cover.alt = r.title + ' — ' + r.artist;
+
+  const sfEl = document.getElementById('modalSfNumber');
+  if(sfEl) sfEl.textContent = r.sfNumber ? 'SF-' + String(r.sfNumber).padStart(3, '0') : '';
 
   document.getElementById('modalArtist').textContent = r.artist;
   document.getElementById('modalTitle').textContent = r.title;
