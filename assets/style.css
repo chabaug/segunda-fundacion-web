@@ -490,7 +490,8 @@
     padding:28px 0 8px;
   }
   .catalog-toggle-btn{
-    flex:0 0 auto;
+    flex:0 0 190px;
+    width:190px;
     font-family:inherit;
     font-size:14px;
     font-weight:800;
@@ -501,15 +502,18 @@
     background:none;
     border:1.5px solid var(--line);
     border-radius:0;
-    padding:12px 28px;
+    padding:12px 20px;
     cursor:pointer;
     transition:color .25s ease, border-color .25s ease;
   }
   .catalog-toggle-btn:hover{ color:var(--accent); border-color:var(--accent); }
   .catalog-toggle-btn.active{ color:var(--accent); border-color:var(--accent); }
+  @media (max-width:700px){
+    .catalog-toggle-btn{ flex-basis:145px; width:145px; padding:12px 8px; font-size:13px; }
+  }
   .catalog-close-btn{
     position:absolute;
-    top:50%;
+    top:0;
     left:50%;
     transform:translate(-50%, -50%);
     width:28px;
