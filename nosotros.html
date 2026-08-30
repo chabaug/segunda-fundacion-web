@@ -8,8 +8,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nosotros — Segunda Fundación</title>
 <meta name="description" content="Segunda Fundación — sello y productora independiente de música y contenido audiovisual, Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=29">
-<script src="assets/nav.js?v=29"></script>
+<link rel="stylesheet" href="assets/style.css?v=32">
+<script src="assets/nav.js?v=32"></script>
 </head>
 <body>
 
@@ -41,7 +41,7 @@
 
   <section class="page-header">
     <div class="eyebrow">Sello Independiente · Buenos Aires</div>
-    <h1 class="page-title">Nosotros</h1>
+    <h1 class="page-title"><span class="title-clip"><span class="title-inner">Nosotros</span></span></h1>
   </section>
 
   <section class="about-section">
@@ -80,7 +80,67 @@
     </div>
   </section>
 
+  <section class="contact-section">
+    <div class="section-title">Contacto</div>
+    <form class="contact-form" id="contactForm">
+      <div class="contact-field">
+        <label for="contactName">Nombre</label>
+        <input type="text" id="contactName" name="name" required autocomplete="name">
+      </div>
+      <div class="contact-field">
+        <label for="contactEmail">Email</label>
+        <input type="email" id="contactEmail" name="email" required autocomplete="email">
+      </div>
+      <div class="contact-field">
+        <label for="contactMessage">Mensaje</label>
+        <textarea id="contactMessage" name="message" rows="5" required></textarea>
+      </div>
+      <input type="hidden" name="subject" value="Nuevo mensaje desde el sitio de Segunda Fundación">
+      <input type="hidden" name="from_name" value="Segunda Fundación — Contacto">
+      <button class="contact-submit" type="submit">Enviar</button>
+      <p class="contact-status" id="contactStatus" role="status"></p>
+    </form>
+  </section>
+
 </main>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const form = e.target;
+    const status = document.getElementById('contactStatus');
+    const submitBtn = form.querySelector('.contact-submit');
+    const data = Object.fromEntries(new FormData(form).entries());
+    data.access_key = 'b111e0f1-730d-4531-9c00-c047c83d7ff5';
+
+    submitBtn.disabled = true;
+    status.textContent = 'Enviando…';
+    status.className = 'contact-status show';
+
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(data),
+    })
+      .then(function(res){ return res.json(); })
+      .then(function(json){
+        if(json.success){
+          status.textContent = '¡Gracias! Tu mensaje fue enviado.';
+          status.className = 'contact-status show ok';
+          form.reset();
+        } else {
+          throw new Error(json.message || 'Error desconocido');
+        }
+      })
+      .catch(function(){
+        status.textContent = 'No se pudo enviar. Probá de nuevo en un rato.';
+        status.className = 'contact-status show error';
+      })
+      .finally(function(){
+        submitBtn.disabled = false;
+      });
+  });
+</script>
 
 <footer>
   <div class="wrap footer-inner">

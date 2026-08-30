@@ -185,6 +185,24 @@
     color:var(--heading);
     margin:14px 0 12px;
   }
+  /* Title entrance: the word rises up out of a clipping mask instead of
+     simply fading in — reads as arriving rather than as a loading state. */
+  .title-clip{
+    display:block;
+    overflow:hidden;
+    padding-bottom:0.08em;
+  }
+  .title-inner{
+    display:block;
+    animation:titleUnmask 0.95s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+  }
+  @keyframes titleUnmask{
+    from{ transform:translateY(105%); }
+    to{ transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .title-inner{ animation:none; }
+  }
   .page-header p{
     max-width:520px;
     margin:0 auto;
@@ -665,6 +683,65 @@
     font-size:17px;
     color:var(--heading);
   }
+
+  /* CONTACT */
+  .contact-section{ padding:64px 0 0; }
+  .contact-form{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    max-width:520px;
+  }
+  .contact-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .contact-field label{
+    font-size:12px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--heading);
+  }
+  .contact-field input,
+  .contact-field textarea{
+    font-family:inherit;
+    font-size:15px;
+    color:var(--fg);
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--line);
+    padding:8px 2px;
+    outline:none;
+    resize:vertical;
+    transition:border-color .2s ease;
+  }
+  .contact-field input:focus,
+  .contact-field textarea:focus{ border-color:var(--accent); }
+  .contact-submit{
+    align-self:flex-start;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:0.3px;
+    color:#fff;
+    background:var(--accent);
+    border:2px solid transparent;
+    border-radius:10px;
+    padding:12px 32px;
+    cursor:pointer;
+    transition:opacity .2s ease;
+  }
+  .contact-submit:hover{ opacity:0.85; }
+  .contact-submit:disabled{ opacity:0.5; cursor:default; }
+  .contact-status{
+    display:none;
+    font-size:13px;
+    margin-top:-6px;
+  }
+  .contact-status.show{ display:block; }
+  .contact-status.ok{ color:var(--accent); }
+  .contact-status.error{ color:#c0392b; }
 
   /* FOOTER */
   footer{
