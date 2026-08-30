@@ -787,7 +787,13 @@
   }
   @media (max-width:700px){
     .stats-section{ padding-top:32px; }
-    .stats-grid{ gap:28px 24px; }
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:6px;
+    }
+    .stats-grid dt{ font-size:8.5px; letter-spacing:0.3px; margin-bottom:4px; }
+    .stats-grid dd{ font-size:22px; }
   }
 
   /* LINKS / CTA */
