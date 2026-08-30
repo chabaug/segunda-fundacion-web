@@ -648,39 +648,31 @@
   /* LINKS / CTA */
   .links-section{ padding:64px 0 0; }
   .link-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-    gap:14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
   }
   .link-card{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
     border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:22px;
+    border-radius:999px;
+    padding:10px 18px;
     background:var(--bg-2);
     transition:border-color .2s ease, transform .2s ease;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
   }
   .link-card .icon{
     display:inline-flex;
     color:var(--accent);
-    margin-bottom:4px;
   }
   .link-card:hover{
     border-color:var(--heading);
     transform:translateY(-2px);
   }
   .link-card .label{
-    font-size:12px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--fg);
-    opacity:0.65;
-  }
-  .link-card .name{
+    font-size:14px;
     font-weight:700;
-    font-size:17px;
     color:var(--heading);
   }
 
