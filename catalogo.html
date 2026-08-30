@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=26">
-<script src="assets/nav.js?v=26"></script>
-<script src="assets/releases-data.js?v=26"></script>
-<script src="assets/cover-colors.js?v=26"></script>
-<script src="assets/artists-data.js?v=26"></script>
+<link rel="stylesheet" href="assets/style.css?v=28">
+<script src="assets/nav.js?v=28"></script>
+<script src="assets/releases-data.js?v=28"></script>
+<script src="assets/cover-colors.js?v=28"></script>
+<script src="assets/artists-data.js?v=28"></script>
 </head>
 <body>
 
@@ -64,15 +64,11 @@
     </div>
 
     <div class="catalog-toggle-row">
-      <button class="catalog-toggle-btn" id="catalogToggleBtn" type="button">Ver Catálogo Completo</button>
+      <button class="catalog-toggle-btn" id="tabBtnLanzamientos" type="button" data-tab="lanzamientos">Lanzamientos</button>
+      <button class="catalog-toggle-btn" id="tabBtnArtistas" type="button" data-tab="artistas">Artistas</button>
     </div>
 
     <div class="catalog-full-panel" id="catalogFullPanel">
-      <div class="catalog-tabs">
-        <button class="catalog-tab-btn active" id="tabBtnLanzamientos" type="button" data-tab="lanzamientos">Lanzamientos</button>
-        <button class="catalog-tab-btn" id="tabBtnArtistas" type="button" data-tab="artistas">Artistas</button>
-      </div>
-
       <div class="catalog-tab-panel active" id="tabLanzamientos">
         <div class="catalog-grid" id="catalogGrid">
       <a class="catalog-item" data-slug="la-hora-del-mosquito-el-sega" href="https://open.spotify.com/search/La%20Hora%20del%20Mosquito%20El%20Sega" target="_blank" rel="noopener">
@@ -506,10 +502,6 @@
       </div>
 
       <div class="catalog-tab-panel" id="tabArtistas">
-        <div class="catalog-toolbar">
-          <input type="text" id="artistSearch" class="catalog-search" placeholder="Buscar artista…" autocomplete="off">
-        </div>
-        <p class="catalog-empty" id="artistEmpty">No se encontraron artistas.</p>
         <div class="artist-grid" id="artistGrid"></div>
       </div>
     </div>
@@ -597,7 +589,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=26"></script>
+<script src="assets/release-modal.js?v=28"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -679,7 +671,7 @@
   }
 
   const VISIBLE_RANGE = 6;
-  const COVER_SIZE = 200;
+  const COVER_SIZE = 260;
   const SOLVE_BASIS = 260;
   const SCALE = COVER_SIZE / SOLVE_BASIS;
   const BASE_KEYFRAMES = [
@@ -713,7 +705,7 @@
     };
   }
 
-  const PX_PER_SLOT = 70;
+  const PX_PER_SLOT = 90;
   const SAMPLE_WINDOW_MS = 90;
   const MAX_FLING_SLOTS = 8;
   const WHEEL_IDLE_MS = 110;
@@ -908,39 +900,40 @@
     rebuildCoverflow(visibleSlugs);
   });
 
-  /* ===== Ver Catálogo Completo / Ver Carrousel toggle ===== */
+  /* ===== Lanzamientos / Artistas: each button both opens its tab and,
+     clicked again while already the open one, collapses back to the
+     carousel — replacing the old separate "Ver Catálogo Completo" button. */
   const coverflowWrap = document.getElementById('coverflowWrap');
   const coverflowLabel = document.getElementById('coverflowLabel');
-  const catalogToggleBtn = document.getElementById('catalogToggleBtn');
   const catalogFullPanel = document.getElementById('catalogFullPanel');
-
-  function setCatalogExpanded(expanded){
-    coverflowWrap.classList.toggle('hidden', expanded);
-    coverflowLabel.classList.toggle('hidden', expanded);
-    catalogFullPanel.classList.toggle('open', expanded);
-    catalogToggleBtn.textContent = expanded ? 'Ver Carrousel' : 'Ver Catálogo Completo';
-  }
-
-  catalogToggleBtn.addEventListener('click', function(){
-    setCatalogExpanded(!catalogFullPanel.classList.contains('open'));
-  });
-
-  /* ===== Lanzamientos / Artistas tabs ===== */
   const tabButtons = [document.getElementById('tabBtnLanzamientos'), document.getElementById('tabBtnArtistas')];
   const tabPanels = { lanzamientos: document.getElementById('tabLanzamientos'), artistas: document.getElementById('tabArtistas') };
 
-  function setActiveTab(name){
+  function openTab(name){
+    coverflowWrap.classList.add('hidden');
+    coverflowLabel.classList.add('hidden');
+    catalogFullPanel.classList.add('open');
     tabButtons.forEach(function(btn){ btn.classList.toggle('active', btn.dataset.tab === name); });
     Object.keys(tabPanels).forEach(function(key){ tabPanels[key].classList.toggle('active', key === name); });
   }
 
+  function closeTabs(){
+    coverflowWrap.classList.remove('hidden');
+    coverflowLabel.classList.remove('hidden');
+    catalogFullPanel.classList.remove('open');
+    tabButtons.forEach(function(btn){ btn.classList.remove('active'); });
+  }
+
   tabButtons.forEach(function(btn){
-    btn.addEventListener('click', function(){ setActiveTab(btn.dataset.tab); });
+    btn.addEventListener('click', function(){
+      const isOpenAndActive = catalogFullPanel.classList.contains('open') && btn.classList.contains('active');
+      if(isOpenAndActive) closeTabs();
+      else openTab(btn.dataset.tab);
+    });
   });
 
   /* ===== Artistas tab (ported from the former artistas.html) ===== */
   const artistGrid = document.getElementById('artistGrid');
-  const artistEmpty = document.getElementById('artistEmpty');
   const ARTISTS_BY_SLUG = {};
 
   ARTISTS.forEach(function(a){
@@ -972,23 +965,6 @@
     item.appendChild(name);
     item.addEventListener('click', function(){ openArtistModal(a.slug); });
     artistGrid.appendChild(item);
-  });
-
-  const artistItems = Array.from(artistGrid.querySelectorAll('.artist-item'));
-  const artistSearchIndex = {};
-  ARTISTS.forEach(function(a){
-    artistSearchIndex[a.slug] = normalizeText(a.name);
-  });
-
-  document.getElementById('artistSearch').addEventListener('input', function(e){
-    const q = normalizeText(e.target.value.trim());
-    let visibleCount = 0;
-    artistItems.forEach(function(item){
-      const match = !q || (artistSearchIndex[item.dataset.slug] || '').includes(q);
-      item.style.display = match ? '' : 'none';
-      if(match) visibleCount++;
-    });
-    artistEmpty.classList.toggle('show', visibleCount === 0);
   });
 
   const artistModal = document.getElementById('artistModal');
@@ -1089,8 +1065,7 @@
   /* A link to catalogo.html#artistas (kept alive by the old artistas.html
      redirect stub) opens straight into the full panel on the Artistas tab. */
   if(window.location.hash === '#artistas'){
-    setCatalogExpanded(true);
-    setActiveTab('artistas');
+    openTab('artistas');
   }
 </script>
 

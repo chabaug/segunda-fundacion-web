@@ -8,10 +8,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Segunda Fundación</title>
 <meta name="description" content="Segunda Fundación — sello y productora independiente de música y contenido audiovisual, Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=26">
-<script src="assets/events-data.js?v=26"></script>
-<script src="assets/releases-data.js?v=26"></script>
-<script src="assets/nav.js?v=26"></script>
+<link rel="stylesheet" href="assets/style.css?v=28">
+<script src="assets/events-data.js?v=28"></script>
+<script src="assets/releases-data.js?v=28"></script>
+<script src="assets/nav.js?v=28"></script>
 </head>
 <body>
 
@@ -52,7 +52,7 @@
     <p>Productora independiente de música y contenido audiovisual, enfocada en artistas emergentes de la Ciudad de Buenos Aires.</p>
   </section>
 
-  <section class="latest-release" id="latestRelease" data-video-slug="radio-mercurio-sintonia-solar">
+  <section class="latest-release" id="latestRelease" data-video-date="2026-04-30">
     <div class="section-title">Último lanzamiento</div>
     <button class="latest-release-card" id="latestReleaseCard" type="button">
       <div class="latest-release-cover"><img id="latestReleaseCover" src="" alt=""></div>
@@ -149,7 +149,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=26"></script>
+<script src="assets/release-modal.js?v=28"></script>
 <script>
   (function(){
     const active = UPCOMING_EVENTS
@@ -213,14 +213,16 @@
 
   (function(){
     // Latest release module: find the newest release in the whole catalog,
-    // and the release tied to whichever video is currently embedded above
-    // (data-video-slug — updated by hand alongside the iframe, same as the
-    // video itself, since "latest upload that isn't a Short" can't be
-    // derived automatically). Whichever is more recent goes on top.
+    // and compare against the real publish date of whichever video is
+    // currently embedded above (data-video-date — updated by hand alongside
+    // the iframe, since "latest upload that isn't a Short" can't be derived
+    // automatically, and a video's own publish date can differ a lot from
+    // the release it happens to be about — e.g. "Nave" was uploaded months
+    // after the Sintonía Solar release it promotes). Whichever is more
+    // recent, the release or the video, goes on top.
     const latestReleaseSection = document.getElementById('latestRelease');
     const videoSection = document.getElementById('video');
-    const videoSlug = latestReleaseSection.dataset.videoSlug;
-    const videoRelease = RELEASES[videoSlug];
+    const videoDate = latestReleaseSection.dataset.videoDate;
 
     let latestSlug = null;
     let latestRelease = null;
@@ -242,7 +244,7 @@
     document.getElementById('latestReleaseMeta').textContent = type + ' · ' + d.toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' });
     document.getElementById('latestReleaseCard').addEventListener('click', function(){ openReleaseModal(latestSlug); });
 
-    if(videoRelease && latestRelease.date <= videoRelease.date){
+    if(videoDate && latestRelease.date <= videoDate){
       videoSection.parentNode.insertBefore(videoSection, latestReleaseSection);
     }
   })();
