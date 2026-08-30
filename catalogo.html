@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=44">
-<script src="assets/nav.js?v=44"></script>
-<script src="assets/releases-data.js?v=44"></script>
-<script src="assets/cover-colors.js?v=44"></script>
-<script src="assets/artists-data.js?v=44"></script>
+<link rel="stylesheet" href="assets/style.css?v=45">
+<script src="assets/nav.js?v=45"></script>
+<script src="assets/releases-data.js?v=45"></script>
+<script src="assets/cover-colors.js?v=45"></script>
+<script src="assets/artists-data.js?v=45"></script>
 </head>
 <body>
 
@@ -620,7 +620,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=44"></script>
+<script src="assets/release-modal.js?v=45"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -959,6 +959,7 @@
      clicked again while already the open one, collapses back to the
      carousel — replacing the old separate "Ver Catálogo Completo" button. */
   const carouselArea = document.getElementById('carouselArea');
+  const catalogSection = document.querySelector('.catalog-section');
   const toggleRow = document.querySelector('.catalog-toggle-row');
   const catalogFullPanel = document.getElementById('catalogFullPanel');
   const catalogCloseBtn = document.getElementById('catalogCloseBtn');
@@ -1010,6 +1011,7 @@
     Object.keys(tabPanels).forEach(function(key){ tabPanels[key].classList.toggle('active', key === name); });
     if(wasOpen) return;
     toggleRow.classList.add('panel-open');
+    catalogSection.classList.add('panel-open');
     if(!animate){
       carouselArea.style.display = 'none';
       carouselArea.classList.add('collapsed');
@@ -1021,6 +1023,7 @@
 
   function closeTabs(){
     toggleRow.classList.remove('panel-open');
+    catalogSection.classList.remove('panel-open');
     catalogFullPanel.classList.remove('open');
     tabButtons.forEach(function(btn){ btn.classList.remove('active'); });
     expandCarousel();
