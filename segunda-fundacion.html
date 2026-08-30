@@ -8,9 +8,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Segunda Fundación</title>
 <meta name="description" content="Segunda Fundación — sello y productora independiente de música y contenido audiovisual, Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=24">
-<script src="assets/events-data.js"></script>
-<script src="assets/nav.js"></script>
+<link rel="stylesheet" href="assets/style.css?v=25">
+<script src="assets/events-data.js?v=25"></script>
+<script src="assets/releases-data.js?v=25"></script>
+<script src="assets/nav.js?v=25"></script>
 </head>
 <body>
 
@@ -24,16 +25,23 @@
       <span class="icon"><svg viewBox="0 0 258 147" xmlns="http://www.w3.org/2000/svg"><path d="M189.4 78.5637C179.438 78.6153 172.376 68.9386 175.538 59.5685L178.414 51.0445C179.468 47.9204 177.113 44.6944 173.792 44.7127L149.573 44.8466L169.231 102.348L177.35 126.13L182.201 140.139C183.279 143.253 180.953 146.496 177.634 146.507L166.851 146.542C164.769 146.549 162.915 145.235 162.246 143.28L148.268 102.416L140.529 79.8683L128.609 44.9152L115.826 7.49481L115.665 7.02448C114.605 3.9175 116.925 0.693425 120.232 0.677566L186.14 0.361504C196.09 0.313787 203.147 9.97219 200.003 19.3361L197.107 27.9644C196.058 31.087 198.413 34.3075 201.731 34.2892L243.11 34.0613C253.071 34.0065 260.136 43.6788 256.979 53.0495L249.588 74.9924C248.93 76.9447 247.092 78.2649 245.017 78.2757L189.4 78.5637Z" fill="currentColor"/><path d="M72.1539 68.3396C82.1203 68.288 89.1851 77.9647 86.022 87.3348L83.1444 95.8589C82.0898 98.9829 84.446 102.209 87.7689 102.191L111.999 102.057L92.3316 44.5554L84.2089 20.7736L79.3558 6.76407C78.2772 3.65027 80.6042 0.407379 83.9251 0.396561L94.713 0.36142C96.796 0.35463 98.6506 1.66783 99.3199 3.62349L113.304 44.4869L121.047 67.0351L132.972 101.988L145.761 139.409L145.921 139.879C146.982 142.986 144.661 146.21 141.352 146.226L75.4153 146.542C65.4605 146.59 58.4007 136.931 61.5459 127.567L64.444 118.939C65.4928 115.816 63.1371 112.596 59.8173 112.614L4.87886 112.917C1.5571 112.935 -0.798874 109.711 0.253769 106.587L9.73895 78.4414C11.7127 72.5846 17.2291 68.6239 23.4575 68.5917L72.1539 68.3396Z" fill="currentColor"/></svg></span>
       <span class="wordmark-text">segunda fundación</span>
     </div>
+    <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">
+      <svg class="theme-icon-sun" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4.5a1 1 0 0 1-1-1V2a1 1 0 1 1 2 0v1.5a1 1 0 0 1-1 1Zm0 15a1 1 0 0 1 1 1V22a1 1 0 1 1-2 0v-1.5a1 1 0 0 1 1-1ZM4.5 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1.5a1 1 0 0 1 1 1Zm17.5-1h-1.5a1 1 0 1 0 0 2H22a1 1 0 1 0 0-2ZM6.34 7.76a1 1 0 0 1-1.42 0L3.87 6.71a1 1 0 0 1 1.42-1.42l1.05 1.06a1 1 0 0 1 0 1.41Zm12.74 12.74a1 1 0 0 1-1.41 0l-1.06-1.05a1 1 0 0 1 1.42-1.42l1.05 1.06a1 1 0 0 1 0 1.41ZM6.34 16.24a1 1 0 0 1 0 1.41L5.29 18.7a1 1 0 1 1-1.42-1.41l1.06-1.06a1 1 0 0 1 1.41 0Zm12.74-12.74a1 1 0 0 1 0 1.41l-1.05 1.06a1 1 0 1 1-1.42-1.42l1.06-1.05a1 1 0 0 1 1.41 0ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"/></svg>
+      <svg class="theme-icon-moon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M20.35 14.53A8.5 8.5 0 0 1 9.47 3.65a.75.75 0 0 0-.9-1 10 10 0 1 0 12.78 12.78.75.75 0 0 0-1-.9Z"/></svg>
+    </button>
     <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
       <span></span><span></span><span></span>
     </button>
     <nav class="nav-links" id="navLinks">
+      <a href="segunda-fundacion.html" aria-current="page">Inicio</a>
       <a href="catalogo.html">Catálogo</a>
       <a href="videoclips.html">Videoclips</a>
       <a href="eventos.html">Eventos</a>
       <a href="artistas.html">Artistas</a>
       <a href="nosotros.html">Nosotros</a>
     </nav>
+    </div>
   </div>
 </header>
 
@@ -44,6 +52,20 @@
     <div class="eyebrow">Sello Independiente · Buenos Aires</div>
     <h1>segunda fundación</h1>
     <p>Productora independiente de música y contenido audiovisual, enfocada en artistas emergentes de la Ciudad de Buenos Aires.</p>
+  </section>
+
+  <section class="latest-release" id="latestRelease" data-video-slug="radio-mercurio-sintonia-solar">
+    <div class="section-title">Último lanzamiento</div>
+    <button class="latest-release-card" id="latestReleaseCard" type="button">
+      <div class="latest-release-cover"><img id="latestReleaseCover" src="" alt=""></div>
+      <div class="latest-release-info">
+        <div class="latest-release-number" id="latestReleaseNumber"></div>
+        <h2 class="latest-release-title" id="latestReleaseTitle"></h2>
+        <div class="latest-release-artist" id="latestReleaseArtist"></div>
+        <div class="latest-release-meta" id="latestReleaseMeta"></div>
+        <span class="latest-release-link">Ver ficha →</span>
+      </div>
+    </button>
   </section>
 
   <section class="video-section" id="video">
@@ -85,6 +107,50 @@
   </div>
 </footer>
 
+<div class="modal-overlay" id="releaseModal">
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeReleaseModal()">&times;</button>
+    <div class="modal-cover" id="modalCoverWrap"><img id="modalCover" src="" alt=""></div>
+    <div class="modal-body">
+      <div class="modal-artist" id="modalArtist"></div>
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="modal-type" id="modalType"></div>
+      <div class="modal-date" id="modalDate"></div>
+      <div class="modal-links" id="modalLinks">
+        <div class="modal-video-links" id="modalVideoLinks"></div>
+        <button class="modal-link" id="modalListenBtn" type="button" onclick="openListenModal()">Escuchar</button>
+      </div>
+      <div class="modal-section" id="modalTracksSection">
+        <div class="modal-label">Canciones</div>
+        <ol class="modal-tracklist" id="modalTracklist"></ol>
+      </div>
+      <div class="modal-section" id="modalCreditsSection">
+        <div class="modal-label">Créditos</div>
+        <p class="modal-credits" id="modalCredits"></p>
+      </div>
+      <div class="modal-section" id="modalPendingSection">
+        <p class="modal-pending">Ficha completa próximamente.</p>
+      </div>
+      <div class="modal-scroll-hint-wrap">
+        <button class="modal-scroll-hint" id="modalScrollHint" type="button" aria-label="Scroll">↓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="listen-overlay" id="listenModal">
+  <div class="listen-card">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeListenModal()">&times;</button>
+    <div class="listen-title">Escuchar en...</div>
+    <div class="listen-options" id="listenOptions"></div>
+  </div>
+</div>
+
+<div class="lightbox-overlay" id="coverLightbox" onclick="closeCoverLightbox()">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script src="assets/release-modal.js?v=25"></script>
 <script>
   (function(){
     const active = UPCOMING_EVENTS
@@ -144,6 +210,42 @@
 
     const pxPerSecond = 90;
     track.style.animationDuration = Math.max(group1.getBoundingClientRect().width / pxPerSecond, 6) + 's';
+  })();
+
+  (function(){
+    // Latest release module: find the newest release in the whole catalog,
+    // and the release tied to whichever video is currently embedded above
+    // (data-video-slug — updated by hand alongside the iframe, same as the
+    // video itself, since "latest upload that isn't a Short" can't be
+    // derived automatically). Whichever is more recent goes on top.
+    const latestReleaseSection = document.getElementById('latestRelease');
+    const videoSection = document.getElementById('video');
+    const videoSlug = latestReleaseSection.dataset.videoSlug;
+    const videoRelease = RELEASES[videoSlug];
+
+    let latestSlug = null;
+    let latestRelease = null;
+    Object.keys(RELEASES).forEach(function(slug){
+      const r = RELEASES[slug];
+      if(!latestRelease || r.date > latestRelease.date){
+        latestRelease = r;
+        latestSlug = slug;
+      }
+    });
+
+    document.getElementById('latestReleaseCover').src = 'assets/covers/' + latestSlug + '.jpg';
+    document.getElementById('latestReleaseCover').alt = latestRelease.title + ' — ' + latestRelease.artist;
+    document.getElementById('latestReleaseNumber').textContent = latestRelease.sfNumber ? 'SF-' + String(latestRelease.sfNumber).padStart(3, '0') : '';
+    document.getElementById('latestReleaseTitle').textContent = latestRelease.title;
+    document.getElementById('latestReleaseArtist').textContent = latestRelease.artist;
+    const type = latestRelease.suffix === 'single' ? 'Single' : latestRelease.suffix === 'ep' ? 'EP' : 'Álbum';
+    const d = new Date(latestRelease.date + 'T00:00:00');
+    document.getElementById('latestReleaseMeta').textContent = type + ' · ' + d.toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('latestReleaseCard').addEventListener('click', function(){ openReleaseModal(latestSlug); });
+
+    if(videoRelease && latestRelease.date <= videoRelease.date){
+      videoSection.parentNode.insertBefore(videoSection, latestReleaseSection);
+    }
   })();
 </script>
 

@@ -10,7 +10,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "ra-teatro-bar.jpg"
+    "flyer_file": "ra-teatro-bar.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "ra-magenta-teatro-mandril",
@@ -23,7 +24,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "ra-magenta-teatro-mandril.jpg"
+    "flyer_file": "ra-magenta-teatro-mandril.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "quintacolumna-roseti-espacio",
@@ -37,7 +39,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "quintacolumna-roseti-espacio.jpg"
+    "flyer_file": "quintacolumna-roseti-espacio.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "lautaro-ra-vuela-el-pez",
@@ -51,7 +54,8 @@
     ],
     "confidence": "confirmed",
     "note": "Tambien hubo una feria a cargo de Espacio Paradojas (no es una banda).",
-    "flyer_file": "lautaro-ra-vuela-el-pez.jpg"
+    "flyer_file": "lautaro-ra-vuela-el-pez.jpg",
+    "aspect": 0.8
   },
   {
     "slug": "lautaro-ra-presenta-soles",
@@ -64,7 +68,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "lautaro-ra-presenta-soles.jpg"
+    "flyer_file": "lautaro-ra-presenta-soles.jpg",
+    "aspect": 0.8
   },
   {
     "slug": "panchita-trequartista-10-anos",
@@ -77,7 +82,8 @@
     ],
     "confidence": "confirmed",
     "note": "Invitados especiales en el show (no forman parte de la banda base): Dante Sultani, Franco Giambartolomei, Juani Varela, Augusto Nasso y Facundo Gemelli.",
-    "flyer_file": "panchita-trequartista-10-anos.jpg"
+    "flyer_file": "panchita-trequartista-10-anos.jpg",
+    "aspect": 0.85
   },
   {
     "slug": "quintacolumna-traer-del-manana-lalala",
@@ -90,7 +96,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "quintacolumna-traer-del-manana-lalala.jpg"
+    "flyer_file": "quintacolumna-traer-del-manana-lalala.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "jaimes-velazco-disqueria",
@@ -104,7 +111,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "jaimes-velazco-disqueria.jpg"
+    "flyer_file": "jaimes-velazco-disqueria.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "flama-panchita-la-quince",
@@ -117,7 +125,8 @@
     ],
     "confidence": "uncertain",
     "note": "No se encontro la fecha exacta del show ni un post de anuncio; se uso la fecha del posteo de recap (05/05/2025) como aproximacion. La imagen es un fotograma del video de recap (foto del lugar), no un flyer disenado.",
-    "flyer_file": "flama-panchita-la-quince.jpg"
+    "flyer_file": "flama-panchita-la-quince.jpg",
+    "aspect": 0.562
   },
   {
     "slug": "lhdm-tinachown-cc-matienzo",
@@ -130,7 +139,8 @@
     ],
     "confidence": "confirmed",
     "note": "El post solo tenia un video (reel); fecha y venue se tomaron de un flyer visible dentro del propio video, no habia imagen estatica adjunta.",
-    "flyer_file": "lhdm-tinachown-cc-matienzo.jpg"
+    "flyer_file": "lhdm-tinachown-cc-matienzo.jpg",
+    "aspect": 0.562
   },
   {
     "slug": "tinachown-valle-de-pantanos-bastet",
@@ -143,7 +153,8 @@
     ],
     "confidence": "confirmed",
     "note": "Evento de proyeccion/estreno de una live session, con apertura en vivo de Valle de Pantanos.",
-    "flyer_file": "tinachown-valle-de-pantanos-bastet.jpg"
+    "flyer_file": "tinachown-valle-de-pantanos-bastet.jpg",
+    "aspect": 0.799
   },
   {
     "slug": "lhdm-piter-mazda-la-tangente",
@@ -156,7 +167,8 @@
     ],
     "confidence": "confirmed",
     "note": "El post de anuncio era un reel (video); fecha y venue confirmados por el flyer disenado visible dentro del video.",
-    "flyer_file": "lhdm-piter-mazda-la-tangente.jpg"
+    "flyer_file": "lhdm-piter-mazda-la-tangente.jpg",
+    "aspect": 0.562
   },
   {
     "slug": "lautaro-ra-tinachown-panchita-la-quince",
@@ -170,7 +182,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "lautaro-ra-tinachown-panchita-la-quince.jpg"
+    "flyer_file": "lautaro-ra-tinachown-panchita-la-quince.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "radio-mercurio-sintonia-solar",
@@ -183,7 +196,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "radio-mercurio-sintonia-solar.jpg"
+    "flyer_file": "radio-mercurio-sintonia-solar.jpg",
+    "aspect": 0.823
   },
   {
     "slug": "dso-aniversario-mareco",
@@ -199,7 +213,8 @@
     ],
     "confidence": "uncertain",
     "note": "El caption (post de recap con fotos) no menciona el nombre del venue ni la fecha exacta del show; se uso la fecha del posteo como aproximacion. 'Explotados por Jaimes' es el proyecto de Luciano Jaimes.",
-    "flyer_file": "dso-aniversario-mareco.jpg"
+    "flyer_file": "dso-aniversario-mareco.jpg",
+    "aspect": 1.5015
   },
   {
     "slug": "lhdm-vuelve-marzo",
@@ -211,7 +226,8 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "lhdm-vuelve-marzo.jpg"
+    "flyer_file": "lhdm-vuelve-marzo.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "radiomercurio-fiebrelunar-laquince",
@@ -226,7 +242,8 @@
     ],
     "confidence": "confirmed",
     "note": "Fiesta/DJ set, no un show en formato banda tradicional.",
-    "flyer_file": "radiomercurio-fiebrelunar-laquince.jpg"
+    "flyer_file": "radiomercurio-fiebrelunar-laquince.jpg",
+    "aspect": 1.0
   },
   {
     "slug": "lhdm-quetren-julio",
@@ -239,6 +256,7 @@
     ],
     "confidence": "confirmed",
     "note": "",
-    "flyer_file": "lhdm-quetren-julio.jpg"
+    "flyer_file": "lhdm-quetren-julio.jpg",
+    "aspect": 1.0
   }
 ]

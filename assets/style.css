@@ -24,7 +24,17 @@
     --heading:#5E5E67;
     --heading-hover:#1C1D20;
     --line:#E1DACA;
+    --accent:#B5502A;
     --radius:14px;
+  }
+  [data-theme="dark"]{
+    --bg:#18140F;
+    --bg-2:#231D16;
+    --fg:#F1EAE0;
+    --heading:#AFA593;
+    --heading-hover:#FFFFFF;
+    --line:#3A3128;
+    --accent:#D9814C;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
@@ -34,6 +44,7 @@
     font-family:'Neue Haas Grotesk Display Pro', Arial, Helvetica, sans-serif;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    transition:background-color .2s ease, color .2s ease;
   }
   a{color:inherit; text-decoration:none;}
 
@@ -83,6 +94,35 @@
     color:var(--heading);
   }
   .nav-links a:hover{ color:var(--heading-hover); }
+  .nav-links a[aria-current="page"]{
+    color:var(--fg);
+    border-bottom:2px solid var(--accent);
+    padding-bottom:2px;
+  }
+
+  .nav-right{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+
+  .theme-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:32px;
+    height:32px;
+    background:none;
+    border:1px solid var(--line);
+    border-radius:50%;
+    color:var(--heading);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .theme-toggle:hover{ color:var(--heading-hover); border-color:var(--heading); }
+  .theme-icon-moon{ display:none; }
+  [data-theme="dark"] .theme-icon-sun{ display:none; }
+  [data-theme="dark"] .theme-icon-moon{ display:block; }
 
   .nav-toggle{
     display:none;
@@ -200,6 +240,74 @@
   }
 
   /* VIDEO */
+  .latest-release{ padding:40px 0 0; }
+  .latest-release-card{
+    display:flex;
+    align-items:stretch;
+    gap:24px;
+    width:100%;
+    background:none;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:0;
+    overflow:hidden;
+    cursor:pointer;
+    text-align:left;
+    font:inherit;
+    color:inherit;
+  }
+  .latest-release-cover{
+    flex:0 0 42%;
+    aspect-ratio:1/1;
+    overflow:hidden;
+    background:var(--bg-2);
+  }
+  .latest-release-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .latest-release-info{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:4px;
+    padding:20px 24px 20px 0;
+    min-width:0;
+  }
+  .latest-release-number{
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:0.5px;
+    color:var(--accent);
+  }
+  .latest-release-title{
+    font-weight:900;
+    font-size:clamp(20px, 4vw, 28px);
+    color:var(--fg);
+    line-height:1.1;
+  }
+  .latest-release-artist{
+    font-weight:700;
+    font-size:15px;
+    color:var(--heading);
+  }
+  .latest-release-meta{
+    font-size:13px;
+    color:var(--heading);
+    margin-bottom:8px;
+  }
+  .latest-release-link{
+    font-weight:700;
+    font-size:13px;
+    color:var(--fg);
+    border-bottom:1px solid var(--fg);
+    align-self:flex-start;
+    padding-bottom:1px;
+  }
+  @media (max-width:560px){
+    .latest-release-card{ flex-direction:column; }
+    .latest-release-cover{ flex-basis:auto; aspect-ratio:1/1; }
+    .latest-release-info{ padding:16px 16px 20px; }
+  }
+
   .video-section{ padding:40px 0 0; }
   .video-frame{
     position:relative;
@@ -274,23 +382,34 @@
   .catalog-grid{
     display:grid;
     grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
-    gap:22px 16px;
+    gap:0;
   }
   .catalog-item{
     display:flex;
     flex-direction:column;
-    gap:8px;
     perspective:700px;
   }
   .catalog-cover{
+    position:relative;
     width:100%;
     aspect-ratio:1/1;
     overflow:hidden;
-    border:1px solid var(--line);
     background:var(--bg-2);
     transform:rotateX(0deg) rotateY(0deg) scale(1);
     box-shadow:0 0 0 rgba(20,19,17,0);
     transition:transform .5s ease, box-shadow .5s ease;
+  }
+  .catalog-number{
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-weight:700;
+    font-size:11px;
+    letter-spacing:0.5px;
+    color:var(--accent);
+    background:var(--bg);
+    padding:2px 6px;
+    z-index:1;
   }
   .catalog-cover.tilting{ transition:box-shadow .1s ease; }
   .catalog-cover img{
@@ -299,7 +418,7 @@
     display:block;
   }
   .catalog-item:hover{ z-index:2; position:relative; }
-  .catalog-meta{ display:flex; flex-direction:column; gap:1px; }
+  .catalog-meta{ display:flex; flex-direction:column; gap:1px; padding:6px 8px 20px; }
   .catalog-meta .artist{
     font-weight:700;
     font-size:12.5px;
@@ -313,15 +432,33 @@
     line-height:1.3;
   }
 
-  /* COVERFLOW (mobile/tablet) */
+  /* COVERFLOW */
+  .coverflow-wrap{
+    position:relative;
+  }
+  .coverflow-wrap::before{
+    content:'';
+    position:absolute;
+    inset:-40px 0 0;
+    height:340px;
+    background:radial-gradient(ellipse at center, var(--glow, transparent) 0%, transparent 70%);
+    opacity:0.35;
+    pointer-events:none;
+    transition:background-color .4s ease;
+    z-index:0;
+  }
   .coverflow{
-    display:none;
+    position:relative;
+    z-index:1;
+    display:block;
     overflow-x:auto;
     overflow-y:visible;
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
     perspective:195px;
     padding:32px 0 44px;
+    padding-left:calc(50% - 55px);
+    padding-right:calc(50% - 55px);
     scrollbar-width:none;
   }
   .coverflow::-webkit-scrollbar{ display:none; }
@@ -352,11 +489,18 @@
   }
   .coverflow-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
   .coverflow-label{
-    display:none;
+    display:flex;
     flex-direction:column;
     align-items:center;
     text-align:center;
     gap:2px;
+  }
+  .coverflow-number{
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:0.5px;
+    color:var(--accent);
+    margin-bottom:2px;
   }
   .coverflow-artist{
     font-weight:700;
@@ -366,16 +510,6 @@
   .coverflow-title{
     font-size:13px;
     color:var(--fg);
-  }
-
-  @media (max-width:900px){
-    .catalog-grid{ display:none; }
-    .coverflow{
-      display:block;
-      padding-left:calc(50% - 55px);
-      padding-right:calc(50% - 55px);
-    }
-    .coverflow-label{ display:flex; }
   }
 
   /* ABOUT */
@@ -707,21 +841,31 @@
   .videos-section{ padding:40px 0 64px; }
   .video-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-    gap:28px 20px;
+    grid-template-columns:repeat(2, 1fr);
+    gap:0;
   }
   .video-card{
     display:flex;
     flex-direction:column;
-    gap:10px;
+    position:relative;
+  }
+  .video-number{
+    position:absolute;
+    top:12px;
+    left:12px;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:0.5px;
+    color:var(--accent);
+    background:var(--bg);
+    padding:2px 6px;
+    z-index:1;
   }
   .video-thumb{
     position:relative;
     width:100%;
     aspect-ratio:16/9;
     overflow:hidden;
-    border-radius:10px;
-    border:1px solid var(--line);
     background:var(--bg-2);
   }
   .video-thumb img{
@@ -731,21 +875,7 @@
     transition:transform .4s ease;
   }
   .video-card:hover .video-thumb img{ transform:scale(1.05); }
-  .video-play{
-    position:absolute;
-    inset:0;
-    margin:auto;
-    width:48px; height:48px;
-    border-radius:50%;
-    background:rgba(20,19,17,0.55);
-    color:var(--bg);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:background .2s ease;
-  }
-  .video-card:hover .video-play{ background:var(--fg); }
-  .video-meta{ display:flex; flex-direction:column; gap:1px; }
+  .video-meta{ display:flex; flex-direction:column; gap:1px; padding:10px 12px 24px; }
   .video-meta .artist{
     font-weight:700;
     font-size:13px;
@@ -757,6 +887,9 @@
     font-size:13px;
     color:var(--fg);
     line-height:1.3;
+  }
+  @media (max-width:520px){
+    .video-grid{ grid-template-columns:1fr; }
   }
   .video-lightbox-overlay{ padding:24px; }
   .video-lightbox-frame{
@@ -876,22 +1009,23 @@
   .event-tickets-active:hover{ opacity:0.85; }
 
   .flyer-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
-    gap:24px 18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px;
   }
   .flyer-card{
     display:flex;
     flex-direction:column;
     gap:8px;
     cursor:pointer;
+    /* flex-basis/flex-grow set per-card in JS from the flyer's real aspect
+       ratio, so a whole row shares one height (see eventos.html) — never
+       force a fixed aspect-ratio box here, that's what clipped text off
+       the edges of some flyers before. */
   }
   .flyer-cover{
     width:100%;
-    aspect-ratio:3/4;
     overflow:hidden;
-    border-radius:10px;
-    border:1px solid var(--line);
     background:var(--bg-2);
   }
   .flyer-cover img{
@@ -901,7 +1035,7 @@
     transition:transform .4s ease;
   }
   .flyer-card:hover .flyer-cover img{ transform:scale(1.05); }
-  .flyer-meta{ display:flex; flex-direction:column; gap:2px; }
+  .flyer-meta{ display:flex; flex-direction:column; gap:2px; padding-bottom:16px; }
   .flyer-name{
     font-weight:700;
     font-size:13px;
@@ -1074,3 +1208,41 @@
     text-decoration:underline;
   }
   .artist-release-sub{ font-size:12px; color:var(--heading); }
+
+  /* Desktop-only two-column artist modal (photo left, everything else right,
+     independently scrollable) — mobile keeps the original stacked layout
+     completely untouched below this breakpoint. */
+  @media (min-width:700px){
+    #artistModalCard{
+      display:flex;
+      align-items:stretch;
+      max-width:720px;
+      max-height:80vh;
+      overflow:hidden;
+    }
+    #artistModalCard .artist-modal-photo{
+      flex:0 0 260px;
+      width:260px;
+      height:auto;
+      border-radius:0;
+      margin:0;
+      align-self:stretch;
+    }
+    #artistModalCard .artist-modal-right{
+      flex:1;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      overflow-y:auto;
+      scrollbar-width:none;
+    }
+    #artistModalCard .artist-modal-right::-webkit-scrollbar{ display:none; }
+    #artistModalCard .artist-modal-name,
+    #artistModalCard .artist-modal-members{
+      text-align:left;
+      padding:0 28px 0 24px;
+    }
+    #artistModalCard .artist-modal-name{ margin-top:28px; }
+    #artistModalCard .artist-icon-links{ justify-content:flex-start; padding:0 0 0 24px; }
+    #artistModalCard .modal-body{ flex:1; padding-left:24px; }
+  }
