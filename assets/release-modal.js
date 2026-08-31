@@ -25,18 +25,23 @@ function getArtistSlugForRelease(slug){
   return releaseArtistSlugs[slug] || null;
 }
 
-// Reference-counted scroll lock so a modal opened on top of another (e.g. a
-// release modal opened from inside the artist modal) doesn't re-enable page
-// scroll when only the top one closes.
-window.__modalOpenCount = window.__modalOpenCount || 0;
-function lockScroll(){
-  window.__modalOpenCount++;
+// Scroll lock tracked by which modal *types* are currently open (a Set, not
+// a plain counter) so a modal opened on top of another (e.g. a release
+// modal opened from inside the artist modal) doesn't re-enable page scroll
+// when only the top one closes — but also so that re-opening an
+// already-open modal in place (e.g. hopping between artists via a bio
+// link, or between releases via the artist modal's own release rows, none
+// of which call the matching close first) doesn't inflate a plain counter
+// past what a single real close could ever bring back down to zero.
+window.__openModals = window.__openModals || new Set();
+function lockScroll(id){
+  window.__openModals.add(id);
   document.documentElement.style.overflow = 'hidden';
   document.body.style.overflow = 'hidden';
 }
-function unlockScroll(){
-  window.__modalOpenCount = Math.max(0, window.__modalOpenCount - 1);
-  if(window.__modalOpenCount === 0){
+function unlockScroll(id){
+  window.__openModals.delete(id);
+  if(window.__openModals.size === 0){
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
   }
@@ -118,7 +123,7 @@ function openReleaseModal(slug){
   }
 
   releaseModal.classList.add('open');
-  lockScroll();
+  lockScroll('release');
 
   modalCard.scrollTop = 0;
   requestAnimationFrame(updateScrollHint);
@@ -126,7 +131,7 @@ function openReleaseModal(slug){
 
 function closeReleaseModal(){
   releaseModal.classList.remove('open');
-  unlockScroll();
+  unlockScroll('release');
 }
 
 const scrollHint = document.getElementById('modalScrollHint');

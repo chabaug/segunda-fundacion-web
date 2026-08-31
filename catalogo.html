@@ -619,7 +619,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/release-modal.js?v=56"></script>
+<script src="assets/release-modal.js?v=57"></script>
 <script>
 
   document.querySelector('.catalog-grid').addEventListener('click', function(e){
@@ -1217,12 +1217,12 @@
     document.getElementById('artistAppearsSection').style.display = a.appearsIn.length ? '' : 'none';
 
     artistModal.classList.add('open');
-    lockScroll();
+    lockScroll('artist');
   }
 
   function closeArtistModal(){
     artistModal.classList.remove('open');
-    unlockScroll();
+    unlockScroll('artist');
   }
 
   artistModal.addEventListener('click', function(e){
