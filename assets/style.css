@@ -427,19 +427,9 @@
     text-transform:uppercase;
     color:var(--accent);
   }
-  .catalog-masthead-title-group{
-    order:1;
-    display:flex;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:16px;
-  }
-  .catalog-masthead-title-group .catalog-masthead-title{ order:0; }
-  .catalog-masthead-title-group .g-ytsubscribe{ position:relative; top:2px; }
   .catalog-search{
     order:2;
     flex:1 1 300px;
-    max-width:420px;
     min-width:220px;
     font-family:inherit;
     font-size:15px;
@@ -455,16 +445,10 @@
   .catalog-search:focus{ border-color:var(--accent); }
   .catalog-masthead-tools{
     order:3;
-    display:flex;
+    display:none;
     align-items:center;
     gap:16px;
     flex:0 0 auto;
-  }
-  .catalog-count{
-    flex:0 0 auto;
-    font-size:12px;
-    color:var(--heading);
-    white-space:nowrap;
   }
   .catalog-search-toggle{
     display:none;
@@ -482,8 +466,7 @@
   @media (max-width:700px){
     .catalog-masthead{ align-items:center; padding:20px 0 16px; }
     .catalog-masthead-title{ order:1; font-size:clamp(28px, 9vw, 40px); }
-    .catalog-masthead-tools{ order:2; }
-    .catalog-count{ display:none; }
+    .catalog-masthead-tools{ order:2; display:flex; }
     .catalog-search-toggle{ display:flex; }
     .catalog-search{
       order:3;
@@ -927,8 +910,8 @@
   }
 
   @media (max-width:600px){
-    .hero{ padding:70px 0 24px; }
-    .video-section{ padding-top:24px; }
+    .hero{ padding:44px 0 10px; }
+    .video-section{ padding-top:8px; }
     .nav-links{ gap:14px; font-size:13px; }
     .footer-inner{
       flex-wrap:nowrap;
@@ -1213,6 +1196,26 @@
 
   /* VIDEOCLIPS PAGE */
   .videos-section{ padding:40px 0 64px; }
+  .yt-subscribe-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-family:inherit;
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:0.3px;
+    text-transform:uppercase;
+    color:var(--bg);
+    background:var(--accent);
+    border:none;
+    border-radius:0;
+    padding:12px 20px;
+    margin:0 0 32px;
+    cursor:pointer;
+    transition:opacity .2s ease;
+  }
+  .yt-subscribe-btn:hover{ opacity:0.85; }
   .video-grid{
     display:grid;
     grid-template-columns:repeat(2, 1fr);

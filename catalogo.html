@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=57">
+<link rel="stylesheet" href="assets/style.css?v=58">
 <script src="assets/nav.js?v=55"></script>
 <script src="assets/releases-data.js?v=58"></script>
 <script src="assets/cover-colors.js?v=55"></script>
@@ -68,7 +68,6 @@
       <h1 class="catalog-masthead-title"><span class="title-clip"><span class="title-inner">Catálogo</span></span></h1>
       <input type="text" id="catalogSearch" class="catalog-search" placeholder="Buscar por artista, canción, álbum o año…" autocomplete="off">
       <div class="catalog-masthead-tools">
-        <span class="catalog-count" id="catalogCount"></span>
         <button class="catalog-search-toggle" id="catalogSearchToggle" type="button" aria-label="Buscar en el catálogo" aria-expanded="false">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm10.5 18-5.6-5.6"/></svg>
         </button>
@@ -637,7 +636,6 @@
   const catalogGrid = document.getElementById('catalogGrid');
   const catalogItems = Array.from(catalogGrid.querySelectorAll('.catalog-item'));
   const catalogEmpty = document.getElementById('catalogEmpty');
-  const catalogCount = document.getElementById('catalogCount');
   const ALL_SLUGS = catalogItems.map(function(item){ return item.dataset.slug; });
 
   const searchIndex = {};
@@ -933,11 +931,6 @@
   /* ===== Search: filters the grid and rebuilds the coverflow over the
      remaining slugs (their index positions shift, so it's simplest to
      rebuild rather than trying to skip gaps in the physics model). ===== */
-  function updateCatalogCount(n){
-    catalogCount.textContent = n === ALL_SLUGS.length ? (n + ' entradas') : (n + ' de ' + ALL_SLUGS.length);
-  }
-  updateCatalogCount(ALL_SLUGS.length);
-
   document.getElementById('catalogSearch').addEventListener('input', function(e){
     const q = normalizeText(e.target.value.trim());
     const visibleSlugs = [];
@@ -948,7 +941,6 @@
       if(match) visibleSlugs.push(slug);
     });
     catalogEmpty.classList.toggle('show', visibleSlugs.length === 0);
-    updateCatalogCount(visibleSlugs.length);
     rebuildCoverflow(visibleSlugs);
   });
 
