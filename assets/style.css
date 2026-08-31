@@ -1197,7 +1197,8 @@
   /* VIDEOCLIPS PAGE */
   .videos-section{ padding:40px 0 64px; }
   .yt-subscribe-btn{
-    display:inline-flex;
+    display:flex;
+    width:fit-content;
     align-items:center;
     justify-content:center;
     gap:8px;
@@ -1211,7 +1212,7 @@
     border:none;
     border-radius:0;
     padding:12px 20px;
-    margin:0 0 32px;
+    margin:0 auto 32px;
     cursor:pointer;
     transition:opacity .2s ease;
   }
