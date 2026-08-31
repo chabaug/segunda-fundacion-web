@@ -8,8 +8,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Videos — Segunda Fundación</title>
 <meta name="description" content="Catálogo de videos oficiales de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=56">
+<link rel="stylesheet" href="assets/style.css?v=57">
 <script src="assets/nav.js?v=55"></script>
+<script src="https://apis.google.com/js/platform.js"></script>
 </head>
 <body>
 
@@ -62,10 +63,12 @@
 
   <section class="catalog-section">
     <div class="catalog-masthead">
-      <h1 class="catalog-masthead-title"><span class="title-clip"><span class="title-inner">Videos</span></span></h1>
+      <div class="catalog-masthead-title-group">
+        <h1 class="catalog-masthead-title"><span class="title-clip"><span class="title-inner">Videos</span></span></h1>
+        <div class="g-ytsubscribe" data-channelid="UCcx5ump9mvuUcCOKatbUL2Q" data-layout="default" data-count="hidden"></div>
+      </div>
       <input type="text" id="videosSearch" class="catalog-search" placeholder="Buscar por artista o título…" autocomplete="off">
       <div class="catalog-masthead-tools">
-        <span class="catalog-count" id="videosCount"></span>
         <button class="catalog-search-toggle" id="videosSearchToggle" type="button" aria-label="Buscar en videos" aria-expanded="false">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm10.5 18-5.6-5.6"/></svg>
         </button>
@@ -274,17 +277,11 @@
   }
   const videoCards = Array.from(document.querySelectorAll('.video-card'));
   const videosEmptyEl = document.getElementById('videosEmpty');
-  const videosCountEl = document.getElementById('videosCount');
   videoCards.forEach(function(card){
     const artist = card.querySelector('.artist');
     const title = card.querySelector('.title');
     card.dataset.search = normalizeText((artist ? artist.textContent : '') + ' ' + (title ? title.textContent : ''));
   });
-
-  function updateVideosCount(n){
-    videosCountEl.textContent = n === videoCards.length ? (n + ' videos') : (n + ' de ' + videoCards.length);
-  }
-  updateVideosCount(videoCards.length);
 
   document.getElementById('videosSearch').addEventListener('input', function(e){
     const q = normalizeText(e.target.value.trim());
@@ -295,7 +292,6 @@
       if(match) visible++;
     });
     videosEmptyEl.classList.toggle('show', visible === 0);
-    updateVideosCount(visible);
   });
 
   const videosSearchEl = document.getElementById('videosSearch');

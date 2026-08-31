@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eventos — Segunda Fundación</title>
 <meta name="description" content="Shows y eventos de Segunda Fundación, sello y productora independiente de Buenos Aires: próximas fechas y catálogo de shows anteriores.">
-<link rel="stylesheet" href="assets/style.css?v=56">
+<link rel="stylesheet" href="assets/style.css?v=57">
 <script src="assets/events-data.js?v=55"></script>
 <script src="assets/nav.js?v=55"></script>
 </head>
@@ -66,7 +66,6 @@
       <h1 class="catalog-masthead-title"><span class="title-clip"><span class="title-inner">Eventos</span></span></h1>
       <input type="text" id="eventsSearch" class="catalog-search" placeholder="Buscar por nombre, banda o lugar…" autocomplete="off">
       <div class="catalog-masthead-tools">
-        <span class="catalog-count" id="eventsCount"></span>
         <button class="catalog-search-toggle" id="eventsSearchToggle" type="button" aria-label="Buscar en eventos" aria-expanded="false">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm10.5 18-5.6-5.6"/></svg>
         </button>
@@ -129,8 +128,8 @@
 
   fetch('assets/flyers/_events.json')
     .then(function(r){ return r.ok ? r.json() : []; })
-    .then(function(events){ renderPastEvents(events); updateEventsCount(); })
-    .catch(function(){ renderPastEvents([]); updateEventsCount(); });
+    .then(function(events){ renderPastEvents(events); })
+    .catch(function(){ renderPastEvents([]); });
 
   function renderPastEvents(events){
     const grid = document.getElementById('flyerGrid');
@@ -179,21 +178,8 @@
 
   /* ===== Search: filters both the upcoming-events grid and the past-events
      flyer grid by the same query, against each card's own dataset.search. ===== */
-  const eventsCountEl = document.getElementById('eventsCount');
   const upcomingEmptyEl = document.getElementById('upcomingEmpty');
   const pastEventsEmptyEl = document.getElementById('pastEventsEmpty');
-
-  function getAllEventCards(){
-    return Array.from(document.querySelectorAll('#upcomingGrid .event-card, #flyerGrid .flyer-card'));
-  }
-
-  function updateEventsCount(){
-    const all = getAllEventCards();
-    if(!all.length){ eventsCountEl.textContent = ''; return; }
-    const visible = all.filter(function(c){ return c.style.display !== 'none'; });
-    eventsCountEl.textContent = visible.length === all.length ? (all.length + ' eventos') : (visible.length + ' de ' + all.length);
-  }
-  updateEventsCount();
 
   document.getElementById('eventsSearch').addEventListener('input', function(e){
     const q = normalizeText(e.target.value.trim());
@@ -212,7 +198,6 @@
     });
     if(upcomingCards.length) upcomingEmptyEl.style.display = upcomingVisible ? 'none' : '';
     if(pastCards.length) pastEventsEmptyEl.style.display = pastVisible ? 'none' : '';
-    updateEventsCount();
   });
 
   const eventsSearchEl = document.getElementById('eventsSearch');

@@ -427,6 +427,15 @@
     text-transform:uppercase;
     color:var(--accent);
   }
+  .catalog-masthead-title-group{
+    order:1;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .catalog-masthead-title-group .catalog-masthead-title{ order:0; }
+  .catalog-masthead-title-group .g-ytsubscribe{ position:relative; top:2px; }
   .catalog-search{
     order:2;
     flex:1 1 300px;

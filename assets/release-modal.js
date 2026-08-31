@@ -48,7 +48,7 @@ function openReleaseModal(slug){
   currentRelease = r;
 
   const cover = document.getElementById('modalCover');
-  cover.src = 'assets/covers/' + slug + '.jpg';
+  cover.src = 'assets/covers/' + slug + '.webp';
   cover.alt = r.title + ' — ' + r.artist;
 
   const sfEl = document.getElementById('modalSfNumber');
