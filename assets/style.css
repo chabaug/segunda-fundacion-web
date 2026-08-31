@@ -350,9 +350,9 @@
     padding-bottom:1px;
   }
   @media (max-width:560px){
-    .latest-release-card{ flex-direction:column; }
+    .latest-release-card{ flex-direction:column; gap:0; }
     .latest-release-cover{ flex-basis:auto; aspect-ratio:1/1; }
-    .latest-release-info{ padding:16px 16px 20px; }
+    .latest-release-info{ padding:10px 16px 20px; }
   }
 
   .video-section{ padding:40px 0 0; }
@@ -1195,7 +1195,7 @@
   }
 
   /* VIDEOCLIPS PAGE */
-  .videos-section{ padding:40px 0 64px; }
+  .videos-section{ padding:16px 0 64px; }
   .yt-subscribe-btn{
     display:flex;
     width:fit-content;
