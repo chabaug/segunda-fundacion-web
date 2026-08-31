@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — Segunda Fundación</title>
 <meta name="description" content="Catálogo completo de lanzamientos de Segunda Fundación, sello y productora independiente de Buenos Aires.">
-<link rel="stylesheet" href="assets/style.css?v=61">
+<link rel="stylesheet" href="assets/style.css?v=62">
 <script src="assets/nav.js?v=55"></script>
 <script src="assets/releases-data.js?v=58"></script>
 <script src="assets/cover-colors.js?v=55"></script>
-<script src="assets/artists-data.js?v=56"></script>
+<script src="assets/artists-data.js?v=57"></script>
 </head>
 <body>
 
@@ -1075,6 +1075,62 @@
 
   const artistModal = document.getElementById('artistModal');
 
+  /* ===== Bio auto-linking: any artist or release name mentioned inside a
+     bio becomes a clickable link to that artist's/release's own ficha,
+     reusing openArtistModal/openReleaseModal. Names are matched as whole
+     words (accent-aware) against every known artist name and release
+     title, longest name first so e.g. "La Hora del Mosquito" wins over a
+     shorter overlapping candidate. ===== */
+  const BIO_LINK_TARGETS = [];
+  ARTISTS.forEach(function(a){ BIO_LINK_TARGETS.push({ name: a.name, type: 'artist', slug: a.slug }); });
+  Object.keys(RELEASES).forEach(function(slug){ BIO_LINK_TARGETS.push({ name: RELEASES[slug].title, type: 'release', slug: slug }); });
+
+  function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function linkifyBio(text, selfArtistSlug){
+    // The artist's own name is kept in the match pool (as a non-linking
+    // entry) rather than dropped outright: since the pool is scanned
+    // longest-name-first and a regex match consumes those characters, this
+    // is what stops a shorter *different* target nested inside the self
+    // name (e.g. the band "Rá" inside "Lautaro Rá") from being linked when
+    // it's really just part of the artist's own name.
+    const byName = {};
+    BIO_LINK_TARGETS.forEach(function(t){
+      const isSelf = t.type === 'artist' && t.slug === selfArtistSlug;
+      if(!(t.name in byName)) byName[t.name] = isSelf ? { name: t.name, type: null, slug: null } : t;
+    });
+    const names = Object.keys(byName).sort(function(a, b){ return b.length - a.length; });
+    const escaped = escapeHtml(text);
+    if(!names.length) return escaped;
+    const pattern = new RegExp('(^|[^A-Za-zÀ-ÿ])(' + names.map(escapeRegExp).join('|') + ')(?![A-Za-zÀ-ÿ])', 'g');
+    return escaped.replace(pattern, function(full, boundary, name){
+      const t = byName[name];
+      if(!t.type) return boundary + name;
+      return boundary + '<span class="bio-link" role="button" tabindex="0" data-type="' + t.type + '" data-slug="' + t.slug + '">' + name + '</span>';
+    });
+  }
+
+  function onBioLinkActivate(e){
+    const link = e.target.closest('.bio-link');
+    if(!link) return;
+    const slug = link.dataset.slug;
+    if(link.dataset.type === 'artist'){
+      openArtistModal(slug);
+    } else {
+      closeArtistModal();
+      openReleaseModal(slug);
+    }
+  }
+  const artistModalBioEl = document.getElementById('artistModalBio');
+  artistModalBioEl.addEventListener('click', onBioLinkActivate);
+  artistModalBioEl.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    if(!e.target.closest('.bio-link')) return;
+    e.preventDefault();
+    onBioLinkActivate(e);
+  });
+
   function renderReleaseList(container, list, showWith){
     container.innerHTML = '';
     list.forEach(function(r){
@@ -1148,7 +1204,7 @@
 
     const bioEl = document.getElementById('artistModalBio');
     if(a.bio){
-      bioEl.textContent = a.bio;
+      bioEl.innerHTML = linkifyBio(a.bio, a.slug);
       bioEl.style.display = '';
     } else {
       bioEl.style.display = 'none';
