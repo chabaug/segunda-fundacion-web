@@ -16,6 +16,13 @@ document.addEventListener('DOMContentLoaded', function(){
       const open = links.classList.toggle('open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
+
+    document.addEventListener('click', function(e){
+      if(!links.classList.contains('open')) return;
+      if(links.contains(e.target) || toggle.contains(e.target)) return;
+      links.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
   }
 
   const themeToggle = document.getElementById('themeToggle');
