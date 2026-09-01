@@ -61,6 +61,10 @@
     padding:16px 0;
     border-bottom:1px solid var(--line);
     z-index:5;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    transition:background-color .2s ease;
   }
   .nav{
     display:flex;
