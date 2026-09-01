@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', function(){
   const toggle = document.getElementById('navToggle');
   const links = document.getElementById('navLinks');
   if(toggle && links){
+    const closeMenu = function(){
+      links.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    };
+
     toggle.addEventListener('click', function(){
       const open = links.classList.toggle('open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -20,9 +25,13 @@ document.addEventListener('DOMContentLoaded', function(){
     document.addEventListener('click', function(e){
       if(!links.classList.contains('open')) return;
       if(links.contains(e.target) || toggle.contains(e.target)) return;
-      links.classList.remove('open');
-      toggle.setAttribute('aria-expanded', 'false');
+      closeMenu();
     });
+
+    window.addEventListener('scroll', function(){
+      if(!links.classList.contains('open')) return;
+      closeMenu();
+    }, {passive:true});
   }
 
   const themeToggle = document.getElementById('themeToggle');
