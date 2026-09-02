@@ -44,8 +44,10 @@ test.describe('Catalogo modals — scroll lock', () => {
     await expect(page.locator('#artistModal')).not.toHaveClass(/open/);
 
     expect(await isScrollLocked(page)).toBe(false);
-    await page.evaluate(() => window.scrollTo(0, 200));
-    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await expect.poll(async () => {
+      await page.evaluate(() => window.scrollTo(0, 200));
+      return page.evaluate(() => window.scrollY);
+    }).toBeGreaterThan(0);
   });
 
   test('closing a release opened from inside the artist modal, then the artist modal, fully unlocks scroll @bat', async ({ page }) => {
@@ -69,7 +71,9 @@ test.describe('Catalogo modals — scroll lock', () => {
     await expect(page.locator('#artistModal')).not.toHaveClass(/open/);
 
     expect(await isScrollLocked(page)).toBe(false);
-    await page.evaluate(() => window.scrollTo(0, 200));
-    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await expect.poll(async () => {
+      await page.evaluate(() => window.scrollTo(0, 200));
+      return page.evaluate(() => window.scrollY);
+    }).toBeGreaterThan(0);
   });
 });
