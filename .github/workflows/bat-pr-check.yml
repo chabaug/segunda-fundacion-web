@@ -1,3 +1,5 @@
+# Required status check for main's branch protection rule — merging is
+# blocked (even for admins) until this job passes.
 name: BAT PR check
 
 on:
