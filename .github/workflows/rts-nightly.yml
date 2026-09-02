@@ -32,7 +32,9 @@ jobs:
         run: npx playwright install --with-deps chrome
 
       - name: Run full regression suite (RTS)
-        run: npx playwright test
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: rts-results.json
+        run: npx playwright test --reporter=list,html,json
 
       - name: Upload Playwright report
         if: always()
@@ -41,3 +43,15 @@ jobs:
           name: playwright-report
           path: tests/playwright-report/
           retention-days: 14
+
+      - name: Build status summary
+        if: always()
+        continue-on-error: true
+        run: node scripts/build-status-summary.js rts-results.json RTS rts-latest.json
+
+      - name: Publish to sf-status dashboard
+        if: always()
+        continue-on-error: true
+        env:
+          STATUS_REPO_TOKEN: ${{ secrets.STATUS_REPO_TOKEN }}
+        run: bash scripts/push-status.sh rts-latest.json data/rts-latest.json
