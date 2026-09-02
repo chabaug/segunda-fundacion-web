@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browser (Chrome)
-        run: npx playwright install --with-deps chrome
+      - name: Install Playwright browsers (Chrome, Firefox, WebKit)
+        run: npx playwright install --with-deps chrome firefox webkit
 
       - name: Run BAT subset
         run: npx playwright test --grep "@bat"

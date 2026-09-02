@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test",
-    "test:bat": "playwright test --grep @bat"
+    "test": "playwright test --project=desktop --project=mobile",
+    "test:bat": "playwright test --grep @bat --project=desktop --project=mobile",
+    "test:crossbrowser": "playwright test --grep @bat --project=firefox --project=webkit",
+    "test:all": "playwright test"
   },
   "keywords": [],
   "author": "",
