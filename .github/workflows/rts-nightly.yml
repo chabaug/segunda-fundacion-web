@@ -34,7 +34,7 @@ jobs:
       - name: Run full regression suite (RTS)
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: rts-results.json
-        run: npx playwright test --reporter=list,html,json
+        run: npx playwright test --project=desktop --project=mobile --reporter=list,html,json
 
       - name: Upload Playwright report
         if: always()
