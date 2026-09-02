@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('Nav — omits the current page (and Artistas, folded into Catálogo) and hamburger menu', () => {
-  const pages = ['segunda-fundacion.html', 'catalogo.html', 'videoclips.html', 'eventos.html', 'nosotros.html'];
+  const pages = ['index.html', 'catalogo.html', 'videoclips.html', 'eventos.html', 'nosotros.html'];
 
   for (const page_ of pages) {
     const tag = page_ === 'catalogo.html' ? ' @bat' : '';
@@ -38,9 +38,9 @@ test.describe('Nav — omits the current page (and Artistas, folded into Catálo
   });
 });
 
-test.describe('Home page (segunda-fundacion.html)', () => {
+test.describe('Home page (index.html)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/segunda-fundacion.html');
+    await page.goto('/index.html');
   });
 
   test('shows a fixed single-video embed, not a channel-uploads playlist @bat', async ({ page }) => {
@@ -88,7 +88,7 @@ test.describe('Title entrance animation', () => {
   // Ported from Bateristico's PageHeader: the title rises up out of a
   // clipping mask on load rather than just appearing — the site's one
   // consistent entrance gesture across every page.
-  const pages = ['segunda-fundacion.html', 'catalogo.html', 'videoclips.html', 'eventos.html', 'nosotros.html'];
+  const pages = ['index.html', 'catalogo.html', 'videoclips.html', 'eventos.html', 'nosotros.html'];
   for (const page_ of pages) {
     const tag = page_ === 'catalogo.html' ? ' @bat' : '';
     test(`${page_} title has the mask-and-rise animation${tag}`, async ({ page }) => {
@@ -194,7 +194,7 @@ test.describe('Cross-page navigation', () => {
   }
 
   test('clicking through Inicio → Catálogo → Videoclips → Eventos → Nosotros lands on the right page each time @bat', async ({ page }) => {
-    await page.goto('/segunda-fundacion.html');
+    await page.goto('/index.html');
     await openNavIfCollapsed(page);
     await page.click('.nav-links a[href="catalogo.html"]');
     await expect(page).toHaveURL(/catalogo\.html/);
@@ -208,7 +208,7 @@ test.describe('Cross-page navigation', () => {
     await page.click('.nav-links a[href="nosotros.html"]');
     await expect(page).toHaveURL(/nosotros\.html/);
     await openNavIfCollapsed(page);
-    await page.click('.nav-links a[href="segunda-fundacion.html"]');
-    await expect(page).toHaveURL(/segunda-fundacion\.html/);
+    await page.click('.nav-links a[href="index.html"]');
+    await expect(page).toHaveURL(/index\.html/);
   });
 });

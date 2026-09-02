@@ -55,7 +55,7 @@ test.describe('Artistas — grid', () => {
   test('artists with a photo render an img, not the placeholder', async ({ page }) => {
     const card = page.locator('.artist-item', { hasText: 'Guido Antonucci' });
     await expect(card.locator('.artist-photo.placeholder')).toHaveCount(0);
-    await expect(card.locator('img')).toHaveAttribute('src', 'assets/artists/guido-antonucci.jpg');
+    await expect(card.locator('img')).toHaveAttribute('src', 'assets/artists/guido-antonucci.webp');
   });
 });
 
@@ -68,7 +68,7 @@ test.describe('Artistas — modal', () => {
     await page.locator('.artist-item', { hasText: 'Jaimes' }).click();
     await expect(page.locator('#artistModal')).toHaveClass(/open/);
     await expect(page.locator('#artistModalName')).toHaveText('Jaimes');
-    await expect(page.locator('#artistModalPhotoWrap img')).toHaveAttribute('src', 'assets/artists/jaimes.jpg');
+    await expect(page.locator('#artistModalPhotoWrap img')).toHaveAttribute('src', 'assets/artists/jaimes.webp');
   });
 
   test('no bio section is shown (feature deferred, not shipped half-done)', async ({ page }) => {

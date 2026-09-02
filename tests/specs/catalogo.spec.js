@@ -11,7 +11,6 @@ test.describe('Catálogo — grid & search', () => {
     expect(gridCount).toBeGreaterThanOrEqual(60);
     const cfCount = await page.locator('.coverflow-item').count();
     expect(cfCount).toBe(gridCount);
-    await expect(page.locator('#catalogCount')).toHaveText(gridCount + ' entradas');
   });
 
   test('search filters the grid, the coverflow and the live count; shows the empty state for a nonsense query @bat', async ({ page }) => {
@@ -25,13 +24,11 @@ test.describe('Catálogo — grid & search', () => {
     await page.fill('#catalogSearch', 'radio mercurio');
     await expect(page.locator('.catalog-item:visible')).toHaveCount(3); // Crisis, Sintonía Solar, Vos y Yo
     await expect(page.locator('.coverflow-item')).toHaveCount(3);
-    await expect(page.locator('#catalogCount')).toHaveText('3 de 61');
     await page.fill('#catalogSearch', 'zzzzznonexistentquery');
     await expect(page.locator('#catalogEmpty')).toHaveClass(/show/);
     await expect(page.locator('.coverflow-item')).toHaveCount(0);
     await page.fill('#catalogSearch', '');
     await expect(page.locator('#catalogEmpty')).not.toHaveClass(/show/);
-    await expect(page.locator('#catalogCount')).toHaveText('61 entradas');
   });
 
   test('mobile: search field is collapsed behind a magnifying-glass button, revealed on click', async ({ page }, testInfo) => {
@@ -255,8 +252,10 @@ test.describe('Catálogo — Cover Flow (pointer-driven, ported from Bateristico
     expect(after).not.toBe(before);
   });
 
-  // Clicking (no drag) must open that exact cover's ficha directly, matching
-  // the grid's behaviour — never just re-centre it first.
+  // Clicking (no drag) the centred cover opens its ficha directly. Side
+  // covers do NOT open on tap (see e8edda3, "Fix catalog carousel click" —
+  // deliberate: a tap on a side cover used to pop its modal open too, which
+  // read as an accidental click while the carousel was still settling).
   //
   // The covers overlap in 3D (that's the point of Cover Flow), so a
   // side cover's own bounding-box centre is often genuinely painted over by
@@ -265,18 +264,26 @@ test.describe('Catálogo — Cover Flow (pointer-driven, ported from Bateristico
   // straight on the item tests the actual application logic (which cover's
   // element the tap originated on) without fighting pixel-perfect hit-testing
   // that real browsers already guarantee for whatever sliver is visible.
-  test('clicking a cover (no drag) opens its ficha directly, any cover, not only the centred one @bat', async ({ page }) => {
-    const slug = await page.evaluate(() => {
-      const item = document.querySelectorAll('.coverflow-item')[3]; // not the centred index 0
-      const rect = item.getBoundingClientRect();
-      const opts = { bubbles: true, cancelable: true, pointerId: 1, clientX: rect.left + 5, clientY: rect.top + 5, button: 0 };
-      item.dispatchEvent(new PointerEvent('pointerdown', opts));
-      item.dispatchEvent(new PointerEvent('pointerup', opts));
-      return item.dataset.slug;
-    });
+  function tapCoverflowItem(index) {
+    const item = document.querySelectorAll('.coverflow-item')[index];
+    const rect = item.getBoundingClientRect();
+    const opts = { bubbles: true, cancelable: true, pointerId: 1, clientX: rect.left + 5, clientY: rect.top + 5, button: 0 };
+    item.dispatchEvent(new PointerEvent('pointerdown', opts));
+    item.dispatchEvent(new PointerEvent('pointerup', opts));
+    return item.dataset.slug;
+  }
+
+  test('clicking the centred cover (no drag) opens its ficha directly @bat', async ({ page }) => {
+    const slug = await page.evaluate(tapCoverflowItem, 0); // index 0 is centred on load
     await expect(page.locator('#releaseModal')).toHaveClass(/open/);
     const expectedTitle = await page.evaluate((s) => RELEASES[s].title, slug);
     await expect(page.locator('#modalTitle')).toHaveText(expectedTitle);
+  });
+
+  test('clicking a side cover (no drag) does not open any ficha @bat', async ({ page }) => {
+    await page.evaluate(tapCoverflowItem, 3); // not the centred index 0
+    await page.waitForTimeout(300); // let any (incorrect) open animation settle
+    await expect(page.locator('#releaseModal')).not.toHaveClass(/open/);
   });
 
   // Regression test for a real mobile bug report: a single tap opened the

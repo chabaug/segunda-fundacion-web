@@ -73,7 +73,7 @@ test.describe('Data integrity (no browser) @bat', () => {
     const releases = extractReleases();
     const missing = [];
     for (const slug of Object.keys(releases)) {
-      const coverPath = path.join(ROOT, 'assets', 'covers', `${slug}.jpg`);
+      const coverPath = path.join(ROOT, 'assets', 'covers', `${slug}.webp`);
       if (!fs.existsSync(coverPath)) missing.push(slug);
     }
     expect(missing, `missing cover files for: ${missing.join(', ')}`).toEqual([]);
@@ -82,7 +82,10 @@ test.describe('Data integrity (no browser) @bat', () => {
   test('catalog-item grid cards in catalogo.html match RELEASES 1:1', () => {
     const releases = extractReleases();
     const html = fs.readFileSync(path.join(ROOT, 'catalogo.html'), 'utf-8');
-    const gridSlugs = [...html.matchAll(/data-slug="([^"]+)"/g)].map((m) => m[1]);
+    // Scoped to real grid cards only — a JS template string elsewhere in the
+    // file (building bio-link spans) also contains a literal `data-slug="`
+    // substring and would otherwise false-positive as an extra card.
+    const gridSlugs = [...html.matchAll(/<a class="catalog-item" data-slug="([^"]+)"/g)].map((m) => m[1]);
     expect(new Set(gridSlugs).size).toBe(gridSlugs.length); // no duplicate cards
     expect(gridSlugs.sort()).toEqual(Object.keys(releases).sort());
   });
@@ -108,7 +111,7 @@ test.describe('Data integrity (no browser) @bat', () => {
   });
 
   test('every HTML page references the same style.css version', () => {
-    const pages = ['segunda-fundacion.html', 'catalogo.html', 'nosotros.html', 'videoclips.html', 'eventos.html'];
+    const pages = ['index.html', 'catalogo.html', 'nosotros.html', 'videoclips.html', 'eventos.html'];
     const versions = pages.map((p) => {
       const html = fs.readFileSync(path.join(ROOT, p), 'utf-8');
       const m = html.match(/style\.css\?v=(\d+)/);
@@ -122,7 +125,7 @@ test.describe('Data integrity (no browser) @bat', () => {
   // omitting the current page (5 real pages total) rather than showing all of
   // them with one marked active, since 6 visible links read as too many.
   test('every page nav lists the other 4 pages, omitting itself and Artistas entirely', () => {
-    const ALL_PAGES = ['segunda-fundacion.html', 'catalogo.html', 'videoclips.html', 'eventos.html', 'nosotros.html'];
+    const ALL_PAGES = ['index.html', 'catalogo.html', 'videoclips.html', 'eventos.html', 'nosotros.html'];
     for (const page of ALL_PAGES) {
       const html = fs.readFileSync(path.join(ROOT, page), 'utf-8');
       const navMatch = html.match(/<nav class="nav-links"[^>]*>([\s\S]*?)<\/nav>/);
@@ -136,5 +139,10 @@ test.describe('Data integrity (no browser) @bat', () => {
   test('artistas.html redirects to catalogo.html#artistas rather than 404ing old links', () => {
     const html = fs.readFileSync(path.join(ROOT, 'artistas.html'), 'utf-8');
     expect(html).toMatch(/url=catalogo\.html#artistas/);
+  });
+
+  test('segunda-fundacion.html redirects to index.html rather than 404ing old links', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'segunda-fundacion.html'), 'utf-8');
+    expect(html).toMatch(/url=index\.html/);
   });
 });
