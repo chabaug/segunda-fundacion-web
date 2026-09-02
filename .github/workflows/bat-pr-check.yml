@@ -33,7 +33,9 @@ jobs:
         run: npx playwright install --with-deps chrome firefox webkit
 
       - name: Run BAT subset
-        run: npx playwright test --grep "@bat"
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: bat-results.json
+        run: npx playwright test --grep "@bat" --reporter=list,html,json
 
       - name: Upload Playwright report
         if: always()
@@ -42,3 +44,19 @@ jobs:
           name: playwright-report-pr-${{ github.event.pull_request.number }}
           path: tests/playwright-report/
           retention-days: 14
+
+      # Both steps below are best-effort only (continue-on-error) — they must
+      # never affect this job's pass/fail conclusion, since this workflow is
+      # the required status check for merging to main. Only the "Run BAT
+      # subset" step above should ever fail this check.
+      - name: Build status summary
+        if: always()
+        continue-on-error: true
+        run: node scripts/build-status-summary.js bat-results.json BAT bat-latest.json
+
+      - name: Publish to sf-status dashboard
+        if: always()
+        continue-on-error: true
+        env:
+          STATUS_REPO_TOKEN: ${{ secrets.STATUS_REPO_TOKEN }}
+        run: bash scripts/push-status.sh bat-latest.json data/bat-latest.json
