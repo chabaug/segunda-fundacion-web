@@ -28,13 +28,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browser (Chrome)
-        run: npx playwright install --with-deps chrome
+      - name: Install Playwright browsers (Chrome, Firefox)
+        run: npx playwright install --with-deps chrome firefox
 
       - name: Run full regression suite (RTS)
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: rts-results.json
-        run: npx playwright test --project=desktop --project=mobile --reporter=list,html,json
+        run: npx playwright test --project=desktop --project=mobile --project=firefox --reporter=list,html,json
 
       - name: Upload Playwright report
         if: always()
