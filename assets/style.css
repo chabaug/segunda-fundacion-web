@@ -1386,7 +1386,11 @@
   }
   .upcoming-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(360px, 1fr));
+    /* min(360px, 100%) instead of a bare 360px: on a phone narrower than
+       360px + the page's own side padding, a bare minmax minimum would
+       force the card wider than the screen and overflow off the right
+       edge — min() lets the column shrink to fit instead. */
+    grid-template-columns:repeat(auto-fill, minmax(min(360px, 100%), 1fr));
     gap:20px;
   }
   .event-card{
