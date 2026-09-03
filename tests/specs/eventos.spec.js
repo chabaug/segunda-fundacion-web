@@ -3,13 +3,15 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('Eventos', () => {
   test.beforeEach(async ({ page }) => {
+    // No route mock here on purpose: with no netlify dev / Function running
+    // in the test harness, /api/events genuinely 404s, exercising the same
+    // graceful-empty path a real outage would — same invariant the old
+    // "both paused in events-data.js" comment was guarding.
     await page.goto('/eventos.html');
+    await page.waitForTimeout(300); // let the fetch/render microtask settle
   });
 
   test('Próximos shows: empty-state message and populated grid are mutually exclusive', async ({ page }) => {
-    // Fiebre Lunar Vol. 2 and Presentación de UGAM are paused in
-    // assets/events-data.js until a Passline link exists, so this asserts
-    // the same invariant as the past-events grid rather than a fixed count.
     const emptyVisible = await page.locator('#upcomingEmpty').isVisible();
     const cardCount = await page.locator('.event-card').count();
     if (emptyVisible) {
@@ -68,24 +70,25 @@ test.describe('Eventos', () => {
 
 test.describe('Eventos — event modal', () => {
   const FIEBRE = {
+    id: 'fiebre-lunar-vol-2-2026-10-03',
     name: 'Fiebre Lunar Vol. 2',
     date: '2026-10-03',
     dateLabel: 'Sábado 3 de octubre, 2026',
-    venue: 'Quetrén Club Cultural',
-    venueAddress: 'Av. Olazábal 1784, CABA',
-    venueInstagram: 'https://instagram.com/quetren.club',
-    lineup: 'Radio Mercurio, Lu Kompel, Emi Esparza + DJs',
+    venue: {
+      name: 'Quetrén Club Cultural',
+      address: 'Av. Olazábal 1784, CABA',
+      link: 'https://instagram.com/quetren.club',
+    },
     ticketUrl: 'https://passline.com/eventos/fiebre-lunar-vol-2',
     flyer: 'assets/flyers/radiomercurio-fiebrelunar-laquince.jpg',
-    description: null,
+    description: 'Regresa la Fiebre Lunar!',
+    artists: [{ name: 'Radio Mercurio' }, { name: 'Lu Kompel' }, { name: 'Emi Esparza' }],
+    otherLinks: [{ label: 'Menú', url: 'https://quetren.club/menu' }],
   };
 
   test.beforeEach(async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: 'const UPCOMING_EVENTS = ' + JSON.stringify([FIEBRE]) + ';',
-        contentType: 'application/javascript',
-      })
+    await page.route('**/api/events', (route) =>
+      route.fulfill({ body: JSON.stringify([FIEBRE]), contentType: 'application/json' })
     );
     await page.goto('/eventos.html');
   });
@@ -99,19 +102,27 @@ test.describe('Eventos — event modal', () => {
     await expect(modal).toHaveClass(/open/);
     await expect(page.locator('#eventModalTitle')).toHaveText(FIEBRE.name);
     await expect(page.locator('#eventModalDate')).toHaveText(FIEBRE.dateLabel);
-    await expect(page.locator('#eventModalVenueName')).toHaveText(FIEBRE.venue);
-    await expect(page.locator('#eventModalVenueName')).toHaveAttribute('href', FIEBRE.venueInstagram);
-    await expect(page.locator('#eventModalAddressLink')).toHaveText(FIEBRE.venueAddress + ' (Ver ubicación)');
-    await expect(page.locator('#eventModalDescription')).toHaveText(FIEBRE.lineup); // falls back to lineup
+    await expect(page.locator('#eventModalVenueName')).toHaveText(FIEBRE.venue.name);
+    await expect(page.locator('#eventModalVenueName')).toHaveAttribute('href', FIEBRE.venue.link);
+    await expect(page.locator('#eventModalAddressLink')).toHaveText(FIEBRE.venue.address + ' (Ver ubicación)');
+    await expect(page.locator('#eventModalDescription')).toHaveText(FIEBRE.description);
     await expect(page.locator('#eventModalCover')).toBeVisible();
 
     const mapsHref = await page.locator('#eventModalAddressLink').getAttribute('href');
-    expect(mapsHref).toBe('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(FIEBRE.venue + ', ' + FIEBRE.venueAddress));
+    expect(mapsHref).toBe('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(FIEBRE.venue.name + ', ' + FIEBRE.venue.address));
 
     const buyLink = page.locator('#eventModalBuyLink');
     await expect(buyLink).toBeVisible();
     await expect(buyLink).toHaveAttribute('href', FIEBRE.ticketUrl);
     await expect(buyLink).toHaveCSS('text-transform', 'uppercase');
+
+    const artistChips = page.locator('#eventModalArtists .event-modal-chip');
+    await expect(artistChips).toHaveCount(FIEBRE.artists.length);
+    await expect(artistChips.first()).toHaveText(FIEBRE.artists[0].name);
+
+    const otherLinkChips = page.locator('#eventModalOtherLinks .event-modal-chip');
+    await expect(otherLinkChips).toHaveCount(FIEBRE.otherLinks.length);
+    await expect(otherLinkChips.first()).toHaveAttribute('href', FIEBRE.otherLinks[0].url);
   });
 
   test('closes on backdrop click and on Escape', async ({ page }) => {

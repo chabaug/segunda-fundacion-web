@@ -1582,6 +1582,25 @@
     margin-bottom:4px;
     white-space:pre-line;
   }
+  .event-modal-artists, .event-modal-other-links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:14px;
+  }
+  .event-modal-chip{
+    display:inline-flex;
+    align-items:center;
+    font-size:12.5px;
+    font-weight:700;
+    padding:5px 11px;
+    border-radius:99px;
+    border:1px solid var(--line);
+    color:var(--heading);
+    background:var(--bg-2);
+    text-decoration:none;
+  }
+  a.event-modal-chip:hover{ color:var(--heading-hover); border-color:var(--heading-hover); }
 
   /* Desktop-only two-column event modal (flyer left, complete/uncropped —
      everything else right, independently scrollable) — mirrors

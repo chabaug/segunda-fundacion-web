@@ -12,8 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/style.css?v=74">
-<script src="assets/events-data.js?v=55"></script>
+<link rel="stylesheet" href="assets/style.css?v=75">
 <script src="assets/nav.js?v=57"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7e6ab57033cc4714802f9b01417f7c0e"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
@@ -124,6 +123,8 @@
         <a class="event-modal-address" id="eventModalAddressLink" target="_blank" rel="noopener"></a>
       </div>
       <p class="event-modal-description" id="eventModalDescription"></p>
+      <div class="event-modal-artists" id="eventModalArtists"></div>
+      <div class="event-modal-other-links" id="eventModalOtherLinks"></div>
     </div>
   </div>
 </div>
@@ -133,13 +134,6 @@
     return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   }
 
-  // On mobile, when a show is actively selling tickets, past shows start
-  // collapsed behind a button (same idea as the Lanzamientos/Artistas
-  // toggle on catalogo.html) so the active event's card is what a phone
-  // screen shows first, not a wall of old flyers underneath it.
-  if(UPCOMING_EVENTS.some(function(e){ return e.ticketUrl; })){
-    document.body.classList.add('has-active-event');
-  }
   const pastEventsToggleBtn = document.getElementById('pastEventsToggleBtn');
   pastEventsToggleBtn.addEventListener('click', function(){
     const section = document.getElementById('pastEventsSection');
@@ -147,21 +141,41 @@
     pastEventsToggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
   });
 
-  (function renderUpcomingEvents(){
+  // Live from the Eventos API (netlify/functions/events.mts) instead of a
+  // build-time UPCOMING_EVENTS const — a new/edited/toggled event from
+  // admin/eventos.html shows up here on next page load, no redeploy needed.
+  let upcomingEvents = [];
+  fetch('/api/events')
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(events){ upcomingEvents = events || []; renderUpcomingEvents(); })
+    .catch(function(){ renderUpcomingEvents(); });
+
+  function renderUpcomingEvents(){
     const grid = document.getElementById('upcomingGrid');
     const empty = document.getElementById('upcomingEmpty');
-    empty.style.display = UPCOMING_EVENTS.length ? 'none' : '';
-    UPCOMING_EVENTS.forEach(function(ev){
+    empty.style.display = upcomingEvents.length ? 'none' : '';
+
+    // On mobile, when a show is actively selling tickets, past shows start
+    // collapsed behind a button (same idea as the Lanzamientos/Artistas
+    // toggle on catalogo.html) so the active event's card is what a phone
+    // screen shows first, not a wall of old flyers underneath it.
+    if(upcomingEvents.some(function(e){ return e.ticketUrl; })){
+      document.body.classList.add('has-active-event');
+    }
+
+    upcomingEvents.forEach(function(ev){
       const card = document.createElement('div');
       card.className = 'event-card';
-      card.dataset.search = normalizeText([ev.name, ev.venue, ev.venueAddress, ev.lineup].join(' '));
+      const artistNames = (ev.artists || []).map(function(a){ return a.name; });
+      card.dataset.search = normalizeText([ev.name, ev.venue && ev.venue.name, ev.venue && ev.venue.address, artistNames.join(' ')].join(' '));
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', 'Ver evento: ' + ev.name);
       const coverHtml = ev.flyer
         ? '<div class="event-card-cover"><img src="' + ev.flyer + '" alt="' + ev.name.replace(/"/g,'&quot;') + '" loading="lazy"></div>'
         : '';
-      const venueLine = ev.venue + (ev.venueAddress ? ' — ' + ev.venueAddress : '');
+      const venue = ev.venue || {};
+      const venueLine = (venue.name || '') + (venue.address ? ' — ' + venue.address : '');
       const ticketsHtml = ev.ticketUrl
         ? '<a class="event-tickets event-tickets-active" href="' + ev.ticketUrl + '" target="_blank" rel="noopener">Comprar entradas</a>'
         : '<span class="event-tickets event-tickets-pending">Entradas próximamente</span>';
@@ -185,7 +199,7 @@
       });
       grid.appendChild(card);
     });
-  })();
+  }
 
   fetch('assets/flyers/_events.json')
     .then(function(r){ return r.ok ? r.json() : []; })
@@ -271,20 +285,21 @@
 
     document.getElementById('eventModalDate').textContent = ev.dateLabel;
     document.getElementById('eventModalTitle').textContent = ev.name;
-    document.getElementById('eventModalDescription').textContent = ev.description || ev.lineup;
+    document.getElementById('eventModalDescription').textContent = ev.description || '';
 
+    const venue = ev.venue || {};
     const venueNameLink = document.getElementById('eventModalVenueName');
-    venueNameLink.textContent = ev.venue;
-    if(ev.venueInstagram){
-      venueNameLink.href = ev.venueInstagram;
+    venueNameLink.textContent = venue.name || '';
+    if(venue.link){
+      venueNameLink.href = venue.link;
     } else {
       venueNameLink.removeAttribute('href');
     }
 
     const addressLink = document.getElementById('eventModalAddressLink');
-    if(ev.venueAddress){
-      addressLink.textContent = ev.venueAddress + ' (Ver ubicación)';
-      addressLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.venue + ', ' + ev.venueAddress);
+    if(venue.address){
+      addressLink.textContent = venue.address + ' (Ver ubicación)';
+      addressLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((venue.name || '') + ', ' + venue.address);
       addressLink.style.display = '';
     } else {
       addressLink.style.display = 'none';
@@ -297,6 +312,30 @@
     } else {
       buyLink.style.display = 'none';
     }
+
+    const artistsWrap = document.getElementById('eventModalArtists');
+    artistsWrap.innerHTML = '';
+    (ev.artists || []).forEach(function(a){
+      const el = a.link ? document.createElement('a') : document.createElement('span');
+      el.className = 'event-modal-chip';
+      el.textContent = a.name;
+      if(a.link){ el.href = a.link; el.target = '_blank'; el.rel = 'noopener'; }
+      artistsWrap.appendChild(el);
+    });
+    artistsWrap.style.display = (ev.artists && ev.artists.length) ? '' : 'none';
+
+    const otherLinksWrap = document.getElementById('eventModalOtherLinks');
+    otherLinksWrap.innerHTML = '';
+    (ev.otherLinks || []).forEach(function(l){
+      const el = document.createElement('a');
+      el.className = 'event-modal-chip';
+      el.href = l.url;
+      el.target = '_blank';
+      el.rel = 'noopener';
+      el.textContent = l.label;
+      otherLinksWrap.appendChild(el);
+    });
+    otherLinksWrap.style.display = (ev.otherLinks && ev.otherLinks.length) ? '' : 'none';
 
     eventModal.classList.add('open');
     lockScroll('event');
