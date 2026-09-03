@@ -170,4 +170,78 @@ test.describe('Eventos — event modal', () => {
     await expect(arrow).toBeHidden();
     await expect(page.locator('#pastEventsBody')).toBeVisible();
   });
+
+  test('"Shows anteriores" matches the plain "Próximos shows" title\'s font exactly', async ({ page }) => {
+    // Regression guard: .events-toggle-btn's reset once used `font:inherit`,
+    // which also resets font-size/font-weight (they're part of the font
+    // shorthand) and silently overrode .section-title's 13px/700 — making
+    // this title render smaller/thinner than the one right above it.
+    const fontOf = (loc) =>
+      loc.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return {
+          fontSize: s.fontSize,
+          fontWeight: s.fontWeight,
+          letterSpacing: s.letterSpacing,
+          textTransform: s.textTransform,
+          color: s.color,
+        };
+      });
+    // "Próximos shows" is the first .section-title in document order.
+    const proximos = await fontOf(page.locator('.section-title').first());
+    const anteriores = await fontOf(page.locator('#pastEventsToggleBtn'));
+    expect(anteriores).toEqual(proximos);
+  });
+
+  test('event card flyer never overflows the viewport, even on a very narrow phone', async ({ page }) => {
+    // Regression guard: .upcoming-grid's minmax(360px, 1fr) used to force
+    // every card to be at least 360px wide regardless of how much room was
+    // actually available, overflowing the card off the right edge on any
+    // phone narrower than ~408px.
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.reload();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    expect(overflow).toBe(0);
+
+    const card = await page.locator('.event-card').first().boundingBox();
+    expect(card.x + card.width).toBeLessThanOrEqual(320);
+  });
+
+  test('event card flyer is 16:9 on mobile, and fills the row with no dead space on desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload();
+    const mobileCover = await page.locator('.event-card-cover').boundingBox();
+    expect(mobileCover.width / mobileCover.height).toBeCloseTo(16 / 9, 1);
+
+    // Desktop: image left / info right. The cover has no fixed aspect ratio
+    // here — it stretches to match the info column's height exactly, so a
+    // short flyer never leaves empty background space below it.
+    await page.setViewportSize({ width: 1000, height: 700 });
+    await page.reload();
+    const cover = await page.locator('.event-card-cover').boundingBox();
+    const main = await page.locator('.event-card-main').boundingBox();
+    expect(Math.abs(cover.height - main.height)).toBeLessThan(1);
+  });
+
+  test('event card flyer height is capped so the whole card fits a short mobile screen', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 600 });
+    await page.reload();
+    const cover = await page.locator('.event-card-cover').boundingBox();
+    expect(cover.height).toBeLessThanOrEqual(600 * 0.34 + 1);
+  });
+
+  test('event modal flyer is complete/uncropped on desktop, sized to its own aspect ratio', async ({ page }) => {
+    await page.setViewportSize({ width: 1000, height: 700 });
+    await page.reload();
+    await page.locator('.event-card').first().click();
+    const cover = await page.locator('.event-modal-cover').boundingBox();
+    const img = await page.locator('#eventModalCover').boundingBox();
+    // The image fills its column exactly — no letterboxed background around
+    // it — because the column's own width is derived from the image's
+    // aspect ratio rather than forced into a fixed box.
+    expect(Math.abs(cover.width - img.width)).toBeLessThan(1);
+    expect(Math.abs(cover.height - img.height)).toBeLessThan(1);
+  });
 });

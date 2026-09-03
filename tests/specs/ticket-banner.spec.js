@@ -141,6 +141,63 @@ test.describe('Nav — Eventos link shine when a ticket is active', () => {
     await page.goto('/catalogo.html');
     await expect(page.locator('.nav-links a[href="eventos.html"]')).toHaveClass(/event-live/);
   });
+
+  test('desktop: the shine is clipped to the letters, not a bar sliding over the whole link', async ({ page }) => {
+    await page.route('**/assets/events-data.js*', (route) =>
+      route.fulfill({
+        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
+        contentType: 'application/javascript',
+      })
+    );
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/catalogo.html');
+    const link = page.locator('.nav-links a[href="eventos.html"]');
+    const cs = await link.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return {
+        backgroundClip: s.webkitBackgroundClip || s.backgroundClip,
+        textFillColor: s.webkitTextFillColor,
+        animationName: s.animationName,
+      };
+    });
+    // background-clip:text + a transparent text fill is what makes the
+    // gradient only paint inside the glyph shapes instead of a rectangle
+    // over the link's whole box.
+    expect(cs.backgroundClip).toBe('text');
+    expect(cs.textFillColor).toBe('rgba(0, 0, 0, 0)');
+    expect(cs.animationName).toBe('nav-shine');
+  });
+
+  test('mobile: the shine is a constant solid color instead of the sweep', async ({ page }) => {
+    await page.route('**/assets/events-data.js*', (route) =>
+      route.fulfill({
+        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
+        contentType: 'application/javascript',
+      })
+    );
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/catalogo.html');
+    await page.locator('#navToggle').click();
+    const link = page.locator('.nav-links a[href="eventos.html"]');
+
+    const matchesAccentFluor = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--accent-fluor)';
+      document.body.appendChild(probe);
+      const expected = getComputedStyle(probe).color;
+      document.body.removeChild(probe);
+      const real = getComputedStyle(document.querySelector('.nav-links a[href="eventos.html"]')).color;
+      return expected === real;
+    });
+    expect(matchesAccentFluor).toBe(true);
+
+    const cs = await link.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { animationName: s.animationName, backgroundImage: s.backgroundImage };
+    });
+    expect(cs.animationName).toBe('none');
+    expect(cs.backgroundImage).toBe('none');
+  });
 });
 
 test.describe('Header wordmark on narrow viewports', () => {
