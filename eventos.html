@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/style.css?v=71">
+<link rel="stylesheet" href="assets/style.css?v=73">
 <script src="assets/events-data.js?v=55"></script>
 <script src="assets/nav.js?v=57"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7e6ab57033cc4714802f9b01417f7c0e"}'></script><!-- End Cloudflare Web Analytics -->
@@ -85,8 +85,11 @@
   </section>
 
   <section class="events-section" id="pastEventsSection">
-    <div class="section-title">Shows anteriores</div>
-    <button class="events-toggle-btn" id="pastEventsToggleBtn" type="button" aria-expanded="false" aria-controls="pastEventsBody">Ver shows anteriores</button>
+    <button class="section-title events-toggle-btn" id="pastEventsToggleBtn" type="button" aria-expanded="false" aria-controls="pastEventsBody">
+      <span>Shows anteriores</span>
+      <span class="events-toggle-line" aria-hidden="true"></span>
+      <span class="events-toggle-arrow" aria-hidden="true">⌄</span>
+    </button>
     <div id="pastEventsBody">
       <p class="events-empty" id="pastEventsEmpty">Catálogo en construcción.</p>
       <div class="flyer-grid" id="flyerGrid"></div>
@@ -142,7 +145,6 @@
     const section = document.getElementById('pastEventsSection');
     const expanded = section.classList.toggle('expanded');
     pastEventsToggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    pastEventsToggleBtn.textContent = expanded ? 'Ocultar shows anteriores' : 'Ver shows anteriores';
   });
 
   (function renderUpcomingEvents(){

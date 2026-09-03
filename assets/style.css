@@ -1359,29 +1359,49 @@
   /* EVENTOS PAGE */
   .events-section{ padding:40px 0 0; }
   .events-section + .events-section{ padding-top:56px; }
+  @media (max-width:700px){
+    /* Only the first section (Próximos shows) — the rule above already
+       overrides this for the second (Shows anteriores), which keeps its
+       larger gap since it's separating two full sections, not following
+       straight after the page's own title. */
+    .events-section{ padding-top:16px; }
+  }
   .events-empty{
     color:var(--heading);
     font-size:14px;
     padding:4px 0 8px;
   }
+  /* The "Shows anteriores" title doubles as the collapse toggle (mobile,
+     when an event is active — see below) instead of a separate repeated
+     button underneath it. Outside that condition it's just a button
+     styled to look exactly like the plain .section-title div it replaces:
+     same line, no visible arrow, not interactive-looking. */
   .events-toggle-btn{
-    display:none;
-    font-family:inherit;
-    font-size:13px;
-    font-weight:800;
-    letter-spacing:0.5px;
-    text-transform:uppercase;
-    color:var(--heading);
+    width:100%;
     background:none;
-    border:1.5px solid var(--line);
-    border-radius:var(--radius);
-    padding:12px 20px;
-    cursor:pointer;
-    transition:color .25s ease, border-color .25s ease;
+    border:none;
+    font:inherit;
+    text-align:left;
+    padding:0;
+    cursor:default;
   }
-  .events-toggle-btn:hover{ color:var(--accent); border-color:var(--accent); }
+  .events-toggle-btn::after{ content:none; }
+  .events-toggle-line{
+    height:1px;
+    flex:1;
+    background:var(--line);
+  }
+  .events-toggle-arrow{
+    display:none;
+    font-size:14px;
+    line-height:1;
+    transition:transform .2s ease;
+  }
   @media (max-width:700px){
-    body.has-active-event .events-toggle-btn{ display:block; margin-bottom:16px; }
+    body.has-active-event .events-toggle-btn{ cursor:pointer; }
+    body.has-active-event .events-toggle-btn:hover{ color:var(--accent); }
+    body.has-active-event .events-toggle-arrow{ display:inline-block; }
+    body.has-active-event #pastEventsSection.expanded .events-toggle-arrow{ transform:rotate(180deg); }
     body.has-active-event #pastEventsSection:not(.expanded) #pastEventsBody{ display:none; }
   }
   .upcoming-grid{
