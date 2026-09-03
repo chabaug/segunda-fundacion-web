@@ -128,30 +128,46 @@ test.describe('Eventos — event modal', () => {
     await expect(modal).not.toHaveClass(/open/);
   });
 
-  test('clicking "Comprar entradas" on the card opens the ticket link, not the modal', async ({ page }) => {
+  test('clicking "Comprar entradas" on the card opens a new tab for the ticket link, not the modal', async ({ page }) => {
+    // Checks the link's own target/href statically rather than the popup's
+    // eventual url() — passline.com is a real external domain the test
+    // sandbox can't actually reach, so waiting on that navigation to land
+    // would be flaky. Confirming the popup event fires (proof target=_blank
+    // really opened a new tab) plus the static attributes covers the same
+    // behavior deterministically.
+    const link = page.locator('.event-tickets-active').first();
+    await expect(link).toHaveAttribute('href', FIEBRE.ticketUrl);
+    await expect(link).toHaveAttribute('target', '_blank');
     const [popup] = await Promise.all([
       page.waitForEvent('popup'),
-      page.locator('.event-tickets-active').first().click(),
+      link.click(),
     ]);
-    expect(popup.url()).toBe(FIEBRE.ticketUrl);
+    expect(popup).toBeTruthy();
     await expect(page.locator('#eventModal')).not.toHaveClass(/open/);
   });
 
-  test('past shows start collapsed behind a toggle on mobile, but not on desktop', async ({ page }) => {
+  test('the "Shows anteriores" title doubles as a collapse toggle on mobile, but not on desktop', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
     const toggle = page.locator('#pastEventsToggleBtn');
+    const arrow = page.locator('.events-toggle-arrow');
     await expect(toggle).toBeVisible();
-    await expect(toggle).toHaveText('Ver shows anteriores');
+    await expect(toggle).toContainText('Shows anteriores'); // arrow is part of the same button
+    await expect(arrow).toBeVisible();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(page.locator('#pastEventsBody')).toBeHidden();
 
     await toggle.click();
-    await expect(toggle).toHaveText('Ocultar shows anteriores');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(arrow).toHaveCSS('transform', /matrix/); // rotated 180deg, not the identity matrix
     await expect(page.locator('#pastEventsBody')).toBeVisible();
 
+    // Desktop: same title, but it's not a functional toggle — no visible
+    // arrow, and Shows anteriores is never hidden in the first place.
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.reload();
-    await expect(page.locator('#pastEventsToggleBtn')).toBeHidden();
+    await expect(page.locator('#pastEventsToggleBtn')).toBeVisible();
+    await expect(arrow).toBeHidden();
     await expect(page.locator('#pastEventsBody')).toBeVisible();
   });
 });
