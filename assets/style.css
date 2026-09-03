@@ -1380,7 +1380,7 @@
     width:100%;
     background:none;
     border:none;
-    font:inherit;
+    font-family:inherit;
     text-align:left;
     padding:0;
     cursor:default;
