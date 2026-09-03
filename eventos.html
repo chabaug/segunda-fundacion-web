@@ -144,10 +144,19 @@
   // Live from the Eventos API (netlify/functions/events.mts) instead of a
   // build-time UPCOMING_EVENTS const — a new/edited/toggled event from
   // admin/eventos.html shows up here on next page load, no redeploy needed.
+  // The API returns both "active" (upcoming) and "past" events; "past" ones
+  // (auto-set the day after an active event's date, see sweepExpired) merge
+  // into the Shows Anteriores flyer grid alongside the static archive below.
   let upcomingEvents = [];
-  fetch('/api/events')
+  let apiPastEvents = [];
+  const apiEventsFetch = fetch('/api/events')
     .then(function(r){ return r.ok ? r.json() : []; })
-    .then(function(events){ upcomingEvents = events || []; renderUpcomingEvents(); })
+    .then(function(events){
+      events = events || [];
+      upcomingEvents = events.filter(function(e){ return e.status === 'active'; });
+      apiPastEvents = events.filter(function(e){ return e.status === 'past'; });
+      renderUpcomingEvents();
+    })
     .catch(function(){ renderUpcomingEvents(); });
 
   function renderUpcomingEvents(){
@@ -201,10 +210,49 @@
     });
   }
 
-  fetch('assets/flyers/_events.json')
+  // The static archive (old Instagram-export flyers, hand-curated once) and
+  // the live "past" events from the Eventos API are two different shapes —
+  // normalize both to one common card shape before merging/sorting/
+  // rendering, so renderPastEvents doesn't need to know where an item came
+  // from.
+  function normalizeStaticPastEvent(ev){
+    return {
+      name: ev.name,
+      date: ev.date || '',
+      venueLine: ev.venue || '',
+      bandsText: (ev.bands || []).join(', '),
+      imgSrc: ev.flyer_file ? 'assets/flyers/' + ev.flyer_file : null,
+      aspect: ev.aspect || 1,
+    };
+  }
+
+  function normalizeApiPastEvent(ev){
+    const venue = ev.venue || {};
+    return {
+      name: ev.name,
+      date: ev.date || '',
+      venueLine: venue.name || '',
+      bandsText: (ev.artists || []).map(function(a){ return a.name; }).join(', '),
+      // No real dimensions to measure ahead of time for an admin-uploaded
+      // flyer (unlike the static archive, which had aspect pre-computed
+      // from the actual images) — 0.75 (a typical portrait poster ratio)
+      // is a reasonable default rather than plumbing an extra image-load
+      // step through the justified-row layout.
+      imgSrc: ev.flyer || null,
+      aspect: 0.75,
+    };
+  }
+
+  const staticPastFetch = fetch('assets/flyers/_events.json')
     .then(function(r){ return r.ok ? r.json() : []; })
-    .then(function(events){ renderPastEvents(events); })
-    .catch(function(){ renderPastEvents([]); });
+    .catch(function(){ return []; });
+
+  Promise.all([staticPastFetch, apiEventsFetch.then(function(){ return apiPastEvents; })])
+    .then(function(results){
+      const merged = results[0].map(normalizeStaticPastEvent).concat(results[1].map(normalizeApiPastEvent));
+      merged.sort(function(a, b){ return a.date.localeCompare(b.date); });
+      renderPastEvents(merged);
+    });
 
   function renderPastEvents(events){
     const grid = document.getElementById('flyerGrid');
@@ -222,27 +270,38 @@
     // aspect-ratio (not a fixed box) means nothing gets cropped off the
     // sides the way a forced 3:4 box used to.
     const TARGET_HEIGHT = 220;
+    // Most recent first (events arrive already sorted oldest-first).
     events.slice().reverse().forEach(function(ev){
       const card = document.createElement('div');
-      card.className = 'flyer-card';
-      card.dataset.search = normalizeText([ev.name, ev.venue, (ev.bands || []).join(' ')].join(' '));
-      const aspect = ev.aspect || 1;
-      card.style.flexGrow = String(aspect);
-      card.style.flexBasis = (TARGET_HEIGHT * aspect) + 'px';
-      const dateObj = new Date((ev.date || '').slice(0,10) + 'T00:00:00');
-      const dateLabel = isNaN(dateObj) ? (ev.date || '') : dateObj.toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' });
-      card.innerHTML =
-        '<div class="flyer-cover" style="aspect-ratio:' + aspect + ';"><img src="assets/flyers/' + ev.flyer_file + '" alt="' + ev.name.replace(/"/g,'&quot;') + '" loading="lazy"></div>' +
+      card.className = 'flyer-card' + (ev.imgSrc ? '' : ' flyer-card-no-image');
+      card.dataset.search = normalizeText([ev.name, ev.venueLine, ev.bandsText].join(' '));
+      const dateObj = new Date(ev.date.slice(0,10) + 'T00:00:00');
+      const dateLabel = isNaN(dateObj) ? ev.date : dateObj.toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' });
+      const metaHtml =
         '<div class="flyer-meta">' +
           '<span class="flyer-name">' + ev.name + '</span>' +
-          '<span class="flyer-date">' + dateLabel + (ev.venue ? ' — ' + ev.venue : '') + '</span>' +
-          '<span class="flyer-bands">' + (ev.bands || []).join(', ') + '</span>' +
+          '<span class="flyer-date">' + dateLabel + (ev.venueLine ? ' — ' + ev.venueLine : '') + '</span>' +
+          '<span class="flyer-bands">' + ev.bandsText + '</span>' +
         '</div>';
-      card.addEventListener('click', function(){
-        document.getElementById('flyerLightboxImg').src = 'assets/flyers/' + ev.flyer_file;
-        document.getElementById('flyerLightboxImg').alt = ev.name;
-        document.getElementById('flyerLightbox').classList.add('open');
-      });
+      if(ev.imgSrc){
+        card.style.flexGrow = String(ev.aspect);
+        card.style.flexBasis = (TARGET_HEIGHT * ev.aspect) + 'px';
+        card.innerHTML =
+          '<div class="flyer-cover" style="aspect-ratio:' + ev.aspect + ';"><img src="' + ev.imgSrc + '" alt="' + ev.name.replace(/"/g,'&quot;') + '" loading="lazy"></div>' +
+          metaHtml;
+        card.addEventListener('click', function(){
+          document.getElementById('flyerLightboxImg').src = ev.imgSrc;
+          document.getElementById('flyerLightboxImg').alt = ev.name;
+          document.getElementById('flyerLightbox').classList.add('open');
+        });
+      } else {
+        // No flyer uploaded for this one — a text-only card rather than
+        // silently dropping it from the archive. Fixed width since there's
+        // no image aspect ratio to size it by.
+        card.style.flexGrow = '0';
+        card.style.flexBasis = '260px';
+        card.innerHTML = metaHtml;
+      }
       grid.appendChild(card);
     });
   }

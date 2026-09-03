@@ -4,6 +4,14 @@ export type EventArtist = { name: string; link?: string };
 export type EventOtherLink = { label: string; url: string };
 export type EventVenue = { name?: string; address?: string; link?: string };
 
+// "active" = upcoming, promoted (banner/nav shine/Próximos shows).
+// "inactive" = manually paused by Augusto (cancelled/postponed) — hidden
+// everywhere, never auto-transitions to "past" on its own, since the date
+// passing doesn't mean it actually happened.
+// "past" = auto-set the day after an "active" event's date — shows in
+// Shows Anteriores instead of Próximos shows.
+export type EventStatus = "active" | "inactive" | "past";
+
 export type SfEvent = {
   id: string;
   name: string;
@@ -15,7 +23,7 @@ export type SfEvent = {
   description?: string;
   artists: EventArtist[];
   otherLinks: EventOtherLink[];
-  active: boolean;
+  status: EventStatus;
   createdAt: string;
   updatedAt: string;
 };
@@ -50,20 +58,20 @@ export function nowISO(): string {
   return new Date().toISOString();
 }
 
-// An event auto-deactivates the day after it happens, unless Augusto has
-// already turned it off himself — this mirrors the same computation used
-// both on every API read (so it's correct even with zero traffic between
-// visits) and in the daily scheduled sweep (so it still happens even if
-// nobody hits the API that day).
+// An "active" event auto-moves to "past" the day after it happens, unless
+// Augusto has already paused it himself ("inactive" never auto-transitions —
+// see the EventStatus comment above). Runs both on every API read (so it's
+// correct even with zero traffic between visits) and in the daily scheduled
+// sweep (so it still happens even if nobody hits the API that day).
 export function sweepExpired(events: SfEvent[]): { events: SfEvent[]; changed: boolean } {
   const todayISO = new Date().toISOString().slice(0, 10);
   let changed = false;
   const swept = events.map((ev) => {
-    if (!ev.active || !ev.date) return ev;
+    if (ev.status !== "active" || !ev.date) return ev;
     const dayAfter = addDaysISO(ev.date, 1);
     if (todayISO > dayAfter) {
       changed = true;
-      return { ...ev, active: false, updatedAt: nowISO() };
+      return { ...ev, status: "past" as const, updatedAt: nowISO() };
     }
     return ev;
   });
@@ -128,6 +136,7 @@ export function toPublicShape(ev: SfEvent) {
     description: ev.description || "",
     artists: ev.artists || [],
     otherLinks: ev.otherLinks || [],
+    status: ev.status,
   };
 }
 

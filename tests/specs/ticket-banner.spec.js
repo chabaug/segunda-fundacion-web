@@ -18,6 +18,7 @@ const FIEBRE = {
   description: '',
   artists: [{ name: 'Radio Mercurio' }, { name: 'Lu Kompel' }, { name: 'Emi Esparza' }],
   otherLinks: [],
+  status: 'active',
 };
 
 const UGAM = {
@@ -28,6 +29,7 @@ const UGAM = {
   venue: { name: 'La Tangente', address: '', link: '' },
   ticketUrl: null,
   flyer: null,
+  status: 'active',
   description: '',
   artists: [{ name: 'Lautaro Rá' }],
   otherLinks: [],
@@ -39,6 +41,16 @@ test.describe('Home page — ticket banner', () => {
     await page.goto('/segunda-fundacion.html');
     await expect(page.locator('#ticketBanner')).not.toHaveClass(/show/);
     await expect(page.locator('#ticketBanner')).toBeHidden();
+  });
+
+  test('a "past" event never shows in the banner even if it still has a ticketUrl', async ({ page }) => {
+    // Regression guard: the API returns active + past events together (past
+    // ones feed Shows Anteriores on eventos.html), and a past show can still
+    // carry its old ticketUrl — the banner must filter on status, not just
+    // ticketUrl presence.
+    await mockEvents(page, [{ ...FIEBRE, status: 'past', ticketUrl: 'https://passline.com/old' }]);
+    await page.goto('/segunda-fundacion.html');
+    await expect(page.locator('#ticketBanner')).not.toHaveClass(/show/);
   });
 
   test('shows the single event name and links straight to its ticket URL when only one is active @bat', async ({ page }) => {

@@ -84,6 +84,7 @@ test.describe('Eventos — event modal', () => {
     description: 'Regresa la Fiebre Lunar!',
     artists: [{ name: 'Radio Mercurio' }, { name: 'Lu Kompel' }, { name: 'Emi Esparza' }],
     otherLinks: [{ label: 'Menú', url: 'https://quetren.club/menu' }],
+    status: 'active',
   };
 
   test.beforeEach(async ({ page }) => {
@@ -254,5 +255,102 @@ test.describe('Eventos — event modal', () => {
     // aspect ratio rather than forced into a fixed box.
     expect(Math.abs(cover.width - img.width)).toBeLessThan(1);
     expect(Math.abs(cover.height - img.height)).toBeLessThan(1);
+  });
+});
+
+test.describe('Eventos — "past" status merges into Shows Anteriores', () => {
+  const ACTIVE_EVENT = {
+    id: 'active-show-2026-12-01',
+    name: 'Show Activo',
+    date: '2026-12-01',
+    dateLabel: 'Martes 1 de diciembre, 2026',
+    venue: { name: 'Venue Activo' },
+    ticketUrl: null,
+    flyer: null,
+    description: '',
+    artists: [],
+    otherLinks: [],
+    status: 'active',
+  };
+
+  const PAST_WITH_FLYER = {
+    id: 'past-with-flyer-2026-01-15',
+    name: 'Show Pasado Con Flyer',
+    date: '2026-01-15',
+    dateLabel: 'Jueves 15 de enero, 2026',
+    venue: { name: 'Venue Pasado' },
+    ticketUrl: 'https://passline.com/old-ticket-link',
+    flyer: '/api/flyers/past-with-flyer-2026-01-15-123',
+    description: '',
+    artists: [{ name: 'Banda Pasada' }],
+    otherLinks: [],
+    status: 'past',
+  };
+
+  const PAST_NO_FLYER = {
+    id: 'past-no-flyer-2026-02-20',
+    name: 'Show Pasado Sin Flyer',
+    date: '2026-02-20',
+    dateLabel: 'Viernes 20 de febrero, 2026',
+    venue: { name: 'Otro Venue' },
+    ticketUrl: null,
+    flyer: null,
+    description: '',
+    artists: [{ name: 'Otra Banda' }],
+    otherLinks: [],
+    status: 'past',
+  };
+
+  const STATIC_ARCHIVE_ITEM = {
+    name: 'Show Histórico del Export',
+    date: '2025-06-10',
+    venue: 'Venue Histórico',
+    bands: ['Banda Histórica'],
+    flyer_file: 'show-historico.jpg',
+    aspect: 1.5,
+  };
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/events', (route) =>
+      route.fulfill({
+        body: JSON.stringify([ACTIVE_EVENT, PAST_WITH_FLYER, PAST_NO_FLYER]),
+        contentType: 'application/json',
+      })
+    );
+    await page.route('**/assets/flyers/_events.json', (route) =>
+      route.fulfill({ body: JSON.stringify([STATIC_ARCHIVE_ITEM]), contentType: 'application/json' })
+    );
+    await page.goto('/eventos.html');
+    await page.waitForTimeout(300);
+  });
+
+  test('only the active event shows in Próximos shows @bat', async ({ page }) => {
+    await expect(page.locator('.event-card')).toHaveCount(1);
+    await expect(page.locator('.event-card .event-name')).toHaveText(ACTIVE_EVENT.name);
+  });
+
+  test('both past API events plus the static archive item all show in Shows anteriores', async ({ page }) => {
+    await expect(page.locator('.flyer-card')).toHaveCount(3);
+    const names = await page.locator('.flyer-name').allTextContents();
+    expect(names).toContain(PAST_WITH_FLYER.name);
+    expect(names).toContain(PAST_NO_FLYER.name);
+    expect(names).toContain(STATIC_ARCHIVE_ITEM.name);
+  });
+
+  test('a past API event with a flyer opens the lightbox on its own uploaded image', async ({ page }) => {
+    const toggle = page.locator('#pastEventsToggleBtn');
+    if (await toggle.isVisible()) await toggle.click();
+    const card = page.locator('.flyer-card', { hasText: PAST_WITH_FLYER.name });
+    await expect(card.locator('.flyer-cover img')).toHaveAttribute('src', PAST_WITH_FLYER.flyer);
+    await card.click();
+    await expect(page.locator('#flyerLightbox')).toHaveClass(/open/);
+    await expect(page.locator('#flyerLightboxImg')).toHaveAttribute('src', PAST_WITH_FLYER.flyer);
+  });
+
+  test('a past API event with no flyer renders a text-only card instead of disappearing', async ({ page }) => {
+    const card = page.locator('.flyer-card', { hasText: PAST_NO_FLYER.name });
+    await expect(card).toHaveClass(/flyer-card-no-image/);
+    await expect(card.locator('.flyer-cover')).toHaveCount(0);
+    await expect(card.locator('.flyer-bands')).toHaveText('Otra Banda');
   });
 });
