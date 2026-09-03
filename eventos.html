@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/style.css?v=63">
+<link rel="stylesheet" href="assets/style.css?v=74">
 <script src="assets/events-data.js?v=55"></script>
 <script src="assets/nav.js?v=57"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7e6ab57033cc4714802f9b01417f7c0e"}'></script><!-- End Cloudflare Web Analytics -->
@@ -84,10 +84,16 @@
     <div class="upcoming-grid" id="upcomingGrid"></div>
   </section>
 
-  <section class="events-section">
-    <div class="section-title">Shows anteriores</div>
-    <p class="events-empty" id="pastEventsEmpty">Catálogo en construcción.</p>
-    <div class="flyer-grid" id="flyerGrid"></div>
+  <section class="events-section" id="pastEventsSection">
+    <button class="section-title events-toggle-btn" id="pastEventsToggleBtn" type="button" aria-expanded="false" aria-controls="pastEventsBody">
+      <span>Shows anteriores</span>
+      <span class="events-toggle-line" aria-hidden="true"></span>
+      <span class="events-toggle-arrow" aria-hidden="true">⌄</span>
+    </button>
+    <div id="pastEventsBody">
+      <p class="events-empty" id="pastEventsEmpty">Catálogo en construcción.</p>
+      <div class="flyer-grid" id="flyerGrid"></div>
+    </div>
   </section>
 
 </main>
@@ -103,10 +109,43 @@
   <img id="flyerLightboxImg" src="" alt="">
 </div>
 
+<div class="modal-overlay" id="eventModal">
+  <div class="modal-card" id="eventModalCard">
+    <button class="modal-close" aria-label="Cerrar" onclick="closeEventModal()">&times;</button>
+    <div class="event-modal-cover" id="eventModalCoverWrap">
+      <img id="eventModalCover" src="" alt="">
+    </div>
+    <div class="modal-body">
+      <div class="modal-date" id="eventModalDate"></div>
+      <h2 class="modal-title" id="eventModalTitle"></h2>
+      <a class="event-modal-buy" id="eventModalBuyLink" target="_blank" rel="noopener">Comprar entradas</a>
+      <div class="event-modal-venue-block">
+        <a class="event-modal-venue-name" id="eventModalVenueName" target="_blank" rel="noopener"></a>
+        <a class="event-modal-address" id="eventModalAddressLink" target="_blank" rel="noopener"></a>
+      </div>
+      <p class="event-modal-description" id="eventModalDescription"></p>
+    </div>
+  </div>
+</div>
+
 <script>
   function normalizeText(s){
     return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   }
+
+  // On mobile, when a show is actively selling tickets, past shows start
+  // collapsed behind a button (same idea as the Lanzamientos/Artistas
+  // toggle on catalogo.html) so the active event's card is what a phone
+  // screen shows first, not a wall of old flyers underneath it.
+  if(UPCOMING_EVENTS.some(function(e){ return e.ticketUrl; })){
+    document.body.classList.add('has-active-event');
+  }
+  const pastEventsToggleBtn = document.getElementById('pastEventsToggleBtn');
+  pastEventsToggleBtn.addEventListener('click', function(){
+    const section = document.getElementById('pastEventsSection');
+    const expanded = section.classList.toggle('expanded');
+    pastEventsToggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  });
 
   (function renderUpcomingEvents(){
     const grid = document.getElementById('upcomingGrid');
@@ -115,18 +154,35 @@
     UPCOMING_EVENTS.forEach(function(ev){
       const card = document.createElement('div');
       card.className = 'event-card';
-      card.dataset.search = normalizeText([ev.name, ev.venue, ev.lineup].join(' '));
+      card.dataset.search = normalizeText([ev.name, ev.venue, ev.venueAddress, ev.lineup].join(' '));
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', 'Ver evento: ' + ev.name);
+      const coverHtml = ev.flyer
+        ? '<div class="event-card-cover"><img src="' + ev.flyer + '" alt="' + ev.name.replace(/"/g,'&quot;') + '" loading="lazy"></div>'
+        : '';
+      const venueLine = ev.venue + (ev.venueAddress ? ' — ' + ev.venueAddress : '');
       const ticketsHtml = ev.ticketUrl
-        ? '<a class="event-tickets event-tickets-active" href="' + ev.ticketUrl + '" target="_blank" rel="noopener">Comprar entradas →</a>'
+        ? '<a class="event-tickets event-tickets-active" href="' + ev.ticketUrl + '" target="_blank" rel="noopener">Comprar entradas</a>'
         : '<span class="event-tickets event-tickets-pending">Entradas próximamente</span>';
       card.innerHTML =
+        coverHtml +
+        '<div class="event-card-main">' +
         '<div class="event-card-body">' +
           '<div class="event-date">' + ev.dateLabel + '</div>' +
           '<h3 class="event-name">' + ev.name + '</h3>' +
-          '<div class="event-venue">' + ev.venue + '</div>' +
-          '<div class="event-lineup">' + ev.lineup + '</div>' +
+          '<div class="event-venue">' + venueLine + '</div>' +
         '</div>' +
-        ticketsHtml;
+        '<div class="event-card-footer">' +
+          '<span class="event-view-hint">Ver evento →</span>' +
+          ticketsHtml +
+        '</div>' +
+        '</div>';
+      card.querySelector('.event-tickets').addEventListener('click', function(e){ e.stopPropagation(); });
+      card.addEventListener('click', function(){ openEventModal(ev); });
+      card.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openEventModal(ev); }
+      });
       grid.appendChild(card);
     });
   })();
@@ -180,6 +236,84 @@
   function closeFlyerLightbox(){
     document.getElementById('flyerLightbox').classList.remove('open');
   }
+
+  /* ===== Event modal: flyer, date, venue (links to Instagram) + address
+     (links to Google Maps), ticket link. Scroll lock uses the same
+     Set-based approach as release-modal.js (see that file's comment) so it
+     composes safely if this page ever gains a second modal on top of this
+     one. ===== */
+  window.__openModals = window.__openModals || new Set();
+  function lockScroll(id){
+    window.__openModals.add(id);
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+  function unlockScroll(id){
+    window.__openModals.delete(id);
+    if(window.__openModals.size === 0){
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+  }
+
+  const eventModal = document.getElementById('eventModal');
+
+  function openEventModal(ev){
+    const coverWrap = document.getElementById('eventModalCoverWrap');
+    const cover = document.getElementById('eventModalCover');
+    if(ev.flyer){
+      cover.src = ev.flyer;
+      cover.alt = ev.name;
+      coverWrap.style.display = '';
+    } else {
+      coverWrap.style.display = 'none';
+    }
+
+    document.getElementById('eventModalDate').textContent = ev.dateLabel;
+    document.getElementById('eventModalTitle').textContent = ev.name;
+    document.getElementById('eventModalDescription').textContent = ev.description || ev.lineup;
+
+    const venueNameLink = document.getElementById('eventModalVenueName');
+    venueNameLink.textContent = ev.venue;
+    if(ev.venueInstagram){
+      venueNameLink.href = ev.venueInstagram;
+    } else {
+      venueNameLink.removeAttribute('href');
+    }
+
+    const addressLink = document.getElementById('eventModalAddressLink');
+    if(ev.venueAddress){
+      addressLink.textContent = ev.venueAddress + ' (Ver ubicación)';
+      addressLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.venue + ', ' + ev.venueAddress);
+      addressLink.style.display = '';
+    } else {
+      addressLink.style.display = 'none';
+    }
+
+    const buyLink = document.getElementById('eventModalBuyLink');
+    if(ev.ticketUrl){
+      buyLink.href = ev.ticketUrl;
+      buyLink.style.display = '';
+    } else {
+      buyLink.style.display = 'none';
+    }
+
+    eventModal.classList.add('open');
+    lockScroll('event');
+  }
+
+  function closeEventModal(){
+    eventModal.classList.remove('open');
+    unlockScroll('event');
+  }
+
+  eventModal.addEventListener('click', function(e){
+    if(e.target === eventModal) closeEventModal();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeEventModal();
+  });
 
   /* ===== Search: filters both the upcoming-events grid and the past-events
      flyer grid by the same query, against each card's own dataset.search. ===== */
