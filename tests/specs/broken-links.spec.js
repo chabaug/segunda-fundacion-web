@@ -108,7 +108,12 @@ test.describe('Internal navigation — no broken links or console errors, on eve
         expect(res.status(), `${page_} -> ${href}`).toBe(200);
       }
 
-      expect(errors, `uncaught JS errors on ${page_}:\n${errors.join('\n')}`).toEqual([]);
+      // WebKit blocks the third-party Cloudflare Web Analytics beacon
+      // (cloudflareinsights.com) as a cross-origin access-control failure and
+      // surfaces it as a page error; Chrome/Firefox don't. It's the beacon
+      // script's own network call, not our code, so it's not a real bug.
+      const ownErrors = errors.filter((e) => !e.includes('cloudflareinsights.com'));
+      expect(ownErrors, `uncaught JS errors on ${page_}:\n${ownErrors.join('\n')}`).toEqual([]);
     });
   }
 });
