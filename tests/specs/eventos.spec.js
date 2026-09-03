@@ -51,6 +51,11 @@ test.describe('Eventos', () => {
     const cardCount = await page.locator('.flyer-card').count();
     test.skip(cardCount === 0, 'no flyer data published yet');
 
+    // On mobile, with an active event, past shows start collapsed behind a
+    // toggle button — expand it before asserting on the (now-visible) grid.
+    const toggle = page.locator('#pastEventsToggleBtn');
+    if (await toggle.isVisible()) await toggle.click();
+
     const first = page.locator('.flyer-card').first();
     await expect(first.locator('.flyer-cover img')).toBeVisible();
     await expect(first.locator('.flyer-name')).not.toHaveText('');
@@ -66,7 +71,9 @@ test.describe('Eventos — event modal', () => {
     name: 'Fiebre Lunar Vol. 2',
     date: '2026-10-03',
     dateLabel: 'Sábado 3 de octubre, 2026',
-    venue: 'Quetrén Club Cultural — Av. Olazábal 1784, CABA',
+    venue: 'Quetrén Club Cultural',
+    venueAddress: 'Av. Olazábal 1784, CABA',
+    venueInstagram: 'https://instagram.com/quetren.club',
     lineup: 'Radio Mercurio, Lu Kompel, Emi Esparza + DJs',
     ticketUrl: 'https://passline.com/eventos/fiebre-lunar-vol-2',
     flyer: 'assets/flyers/radiomercurio-fiebrelunar-laquince.jpg',
@@ -92,12 +99,14 @@ test.describe('Eventos — event modal', () => {
     await expect(modal).toHaveClass(/open/);
     await expect(page.locator('#eventModalTitle')).toHaveText(FIEBRE.name);
     await expect(page.locator('#eventModalDate')).toHaveText(FIEBRE.dateLabel);
-    await expect(page.locator('#eventModalVenue')).toHaveText(FIEBRE.venue);
+    await expect(page.locator('#eventModalVenueName')).toHaveText(FIEBRE.venue);
+    await expect(page.locator('#eventModalVenueName')).toHaveAttribute('href', FIEBRE.venueInstagram);
+    await expect(page.locator('#eventModalAddressLink')).toHaveText(FIEBRE.venueAddress + ' (Ver ubicación)');
     await expect(page.locator('#eventModalDescription')).toHaveText(FIEBRE.lineup); // falls back to lineup
     await expect(page.locator('#eventModalCover')).toBeVisible();
 
-    const mapsHref = await page.locator('#eventModalMapsLink').getAttribute('href');
-    expect(mapsHref).toBe('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(FIEBRE.venue));
+    const mapsHref = await page.locator('#eventModalAddressLink').getAttribute('href');
+    expect(mapsHref).toBe('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(FIEBRE.venue + ', ' + FIEBRE.venueAddress));
 
     const buyLink = page.locator('#eventModalBuyLink');
     await expect(buyLink).toBeVisible();
@@ -126,5 +135,23 @@ test.describe('Eventos — event modal', () => {
     ]);
     expect(popup.url()).toBe(FIEBRE.ticketUrl);
     await expect(page.locator('#eventModal')).not.toHaveClass(/open/);
+  });
+
+  test('past shows start collapsed behind a toggle on mobile, but not on desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload();
+    const toggle = page.locator('#pastEventsToggleBtn');
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveText('Ver shows anteriores');
+    await expect(page.locator('#pastEventsBody')).toBeHidden();
+
+    await toggle.click();
+    await expect(toggle).toHaveText('Ocultar shows anteriores');
+    await expect(page.locator('#pastEventsBody')).toBeVisible();
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.reload();
+    await expect(page.locator('#pastEventsToggleBtn')).toBeHidden();
+    await expect(page.locator('#pastEventsBody')).toBeVisible();
   });
 });
