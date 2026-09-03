@@ -22,12 +22,19 @@ export type SfEvent = {
 
 const EVENTS_KEY = "all";
 
+// Strong consistency: every write here is a read-modify-write over the
+// single "all" document (load, filter/patch, save whole array back). Under
+// the default eventual consistency, a delete immediately followed by
+// another write can read a stale pre-delete snapshot and resurrect the
+// just-deleted event (confirmed happening in a real smoke test) - this is a
+// low-traffic single-admin tool, so paying for strong reads is cheap and
+// removes that whole class of lost-write bugs.
 export function getEventsStore() {
-  return getStore("events");
+  return getStore({ name: "events", consistency: "strong" });
 }
 
 export function getFlyersStore() {
-  return getStore("flyers");
+  return getStore({ name: "flyers", consistency: "strong" });
 }
 
 export async function loadEvents(): Promise<SfEvent[]> {
