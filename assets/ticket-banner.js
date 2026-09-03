@@ -13,8 +13,12 @@
     .catch(function(){});
 
   function renderBanner(allEvents){
+    // The API also returns "past" events (for Shows Anteriores on
+    // eventos.html) — a past show can still have its old ticketUrl set, so
+    // filter to status "active" explicitly rather than trusting ticketUrl
+    // presence alone.
     const active = allEvents
-      .filter(function(e){ return e.ticketUrl; })
+      .filter(function(e){ return e.status === 'active' && e.ticketUrl; })
       .sort(function(a, b){ return a.date.localeCompare(b.date); });
     if(!active.length) return;
 

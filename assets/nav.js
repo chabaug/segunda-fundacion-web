@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function(){
   fetch('/api/events')
     .then(function(r){ return r.ok ? r.json() : []; })
     .then(function(events){
-      if (!events || !events.some(function(e){ return e.ticketUrl; })) return;
+      if (!events || !events.some(function(e){ return e.status === 'active' && e.ticketUrl; })) return;
       document.querySelectorAll('.nav-links a[href="eventos.html"]').forEach(function(a){
         a.classList.add('event-live');
       });

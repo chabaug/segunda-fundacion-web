@@ -120,8 +120,9 @@
 
       <div class="field" style="flex-direction:row;align-items:center;gap:10px;">
         <label class="toggle"><input type="checkbox" name="active" id="activeToggle" checked><span class="toggle-slider"></span></label>
-        <span style="font-size:13px;">Evento activo (visible en el sitio)</span>
+        <span style="font-size:13px;">Evento activo (destildá para pausarlo/cancelarlo)</span>
       </div>
+      <p id="pastNotice" style="font-size:12px;color:var(--heading);display:none;">Este evento ya pasó — se muestra en Shows Anteriores. Guardar acá no lo reactiva; usá el interruptor de la lista para eso.</p>
 
       <div style="display:flex;gap:10px;margin-top:10px;">
         <button type="submit" class="btn btn-accent">Guardar</button>
@@ -140,6 +141,7 @@
   var token = localStorage.getItem(TOKEN_KEY) || "";
   var events = [];
   var editingId = null; // null = creating new
+  var editingStatus = null; // status of the event being edited, or null when creating
   var pendingFlyerFile = null;
 
   function api(path, opts){
@@ -207,7 +209,8 @@
       pill.className = "toggle";
       var chk = document.createElement("input");
       chk.type = "checkbox";
-      chk.checked = !!ev.active;
+      chk.checked = ev.status === "active";
+      chk.title = ev.status === "past" ? "Reactivar (vuelve a Próximos shows)" : "";
       chk.addEventListener("change", function(){ toggleActive(ev.id, chk.checked); });
       var slider = document.createElement("span");
       slider.className = "toggle-slider";
@@ -217,8 +220,8 @@
       var statusText = document.createElement("span");
       statusText.style.marginLeft = "8px";
       statusText.style.fontSize = "12px";
-      statusText.style.color = "var(--heading)";
-      statusText.textContent = ev.active ? "Activo" : "Inactivo";
+      statusText.style.color = ev.status === "past" ? "#B5502A" : "var(--heading)";
+      statusText.textContent = ev.status === "active" ? "Activo" : ev.status === "past" ? "Pasado" : "Inactivo";
       tdStatus.appendChild(statusText);
       tr.appendChild(tdStatus);
 
@@ -244,16 +247,17 @@
     });
   }
 
-  function toggleActive(id, active){
+  function toggleActive(id, checked){
+    var status = checked ? "active" : "inactive";
     api("/api/events/" + id, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active: active }),
+      body: JSON.stringify({ status: status }),
     }).then(function(r){ return r.json(); }).then(function(updated){
       var idx = events.findIndex(function(e){ return e.id === id; });
       if (idx !== -1) events[idx] = updated;
       renderList();
-      showToast(active ? "Evento activado" : "Evento desactivado");
+      showToast(checked ? "Evento activado" : "Evento desactivado");
     }).catch(function(){ showToast("Error al actualizar", true); });
   }
 
@@ -309,7 +313,9 @@
 
   function openForm(ev){
     editingId = ev ? ev.id : null;
+    editingStatus = ev ? ev.status : null;
     pendingFlyerFile = null;
+    document.getElementById("pastNotice").style.display = (ev && ev.status === "past") ? "" : "none";
     document.getElementById("formTitle").textContent = ev ? "Editar evento" : "Nuevo evento";
     form.reset();
     document.getElementById("artistsList").innerHTML = "";
@@ -326,7 +332,7 @@
       form.venueLink.value = (ev.venue && ev.venue.link) || "";
       form.ticketUrl.value = ev.ticketUrl || "";
       form.description.value = ev.description || "";
-      document.getElementById("activeToggle").checked = ev.active !== false;
+      document.getElementById("activeToggle").checked = ev.status !== "inactive";
       (ev.artists || []).forEach(function(a){
         addSubrow(document.getElementById("artistsList"), ["Nombre del artista", "Link"], [a.name, a.link]);
       });
@@ -374,7 +380,14 @@
       description: form.description.value.trim(),
       artists: readSubrows(document.getElementById("artistsList")).map(function(p){ return { name: p[0], link: p[1] || undefined }; }),
       otherLinks: readSubrows(document.getElementById("otherLinksList")).map(function(p){ return { label: p[0], url: p[1] }; }),
-      active: document.getElementById("activeToggle").checked,
+      // Unchecked always means "pause it". Checked means "active" for a new
+      // event, but for an existing "past" one it means "leave it in the
+      // archive" — the form isn't how you un-archive something, the list
+      // toggle is (see toggleActive), so a routine edit-save never silently
+      // promotes a past show back into Próximos shows.
+      status: document.getElementById("activeToggle").checked
+        ? (editingStatus === "past" ? "past" : "active")
+        : "inactive",
     };
   }
 

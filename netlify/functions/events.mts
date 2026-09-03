@@ -23,15 +23,16 @@ export default async (req: Request, context: Context) => {
   if (changed) await saveEvents(swept);
   let events = swept;
 
-  // GET /api/events           -> public, only active
-  // GET /api/events?admin=1   -> requires token, everything
+  // GET /api/events           -> public: active (upcoming) + past events,
+  //                              never inactive (manually paused/cancelled)
+  // GET /api/events?admin=1   -> requires token, everything including inactive
   if (req.method === "GET" && !id) {
     const isAdmin = url.searchParams.get("admin") === "1";
     if (isAdmin) {
       if (!isAuthorized(req)) return unauthorizedResponse();
       return jsonResponse(events);
     }
-    return jsonResponse(events.filter((e) => e.active).map(toPublicShape));
+    return jsonResponse(events.filter((e) => e.status === "active" || e.status === "past").map(toPublicShape));
   }
 
   // POST /api/events -> create
@@ -59,7 +60,7 @@ export default async (req: Request, context: Context) => {
       description: body.description || "",
       artists: Array.isArray(body.artists) ? body.artists : [],
       otherLinks: Array.isArray(body.otherLinks) ? body.otherLinks : [],
-      active: body.active !== false,
+      status: body.status === "inactive" ? "inactive" : "active",
       createdAt: now,
       updatedAt: now,
     };
@@ -78,11 +79,14 @@ export default async (req: Request, context: Context) => {
     const body = await req.json().catch(() => ({}));
     const patchable: (keyof SfEvent)[] = [
       "name", "date", "time", "venue", "ticketUrl", "description",
-      "artists", "otherLinks", "active",
+      "artists", "otherLinks", "status",
     ];
     for (const key of patchable) {
       if (key in body) (ev as any)[key] = body[key];
     }
+    // Manually flipping status back to "active" (e.g. un-archiving a past
+    // event, or reactivating one that was paused) is the deliberate
+    // override path — sweepExpired only ever demotes, never promotes.
     ev.updatedAt = nowISO();
     await saveEvents(events);
     return jsonResponse(ev);

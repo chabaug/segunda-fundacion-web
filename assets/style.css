@@ -1671,6 +1671,14 @@
   }
   .flyer-card:hover .flyer-cover img{ transform:scale(1.05); }
   .flyer-meta{ display:flex; flex-direction:column; gap:2px; padding-bottom:16px; }
+  .flyer-card-no-image{
+    justify-content:center;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px;
+  }
+  .flyer-card-no-image .flyer-meta{ padding-bottom:0; }
   .flyer-name{
     font-weight:700;
     font-size:13px;
