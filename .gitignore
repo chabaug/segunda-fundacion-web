@@ -3,3 +3,4 @@ tests/playwright-report/
 tests/test-results/
 tests/*-results.json
 .netlify/
+.env

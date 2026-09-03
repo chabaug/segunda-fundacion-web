@@ -1,45 +1,48 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-function eventsScript(events) {
-  return 'const UPCOMING_EVENTS = ' + JSON.stringify(events) + ';';
+function mockEvents(page, events) {
+  return page.route('**/api/events', (route) =>
+    route.fulfill({ body: JSON.stringify(events), contentType: 'application/json' })
+  );
 }
 
 const FIEBRE = {
+  id: 'fiebre-lunar-vol-2-2026-10-03',
   name: 'Fiebre Lunar Vol. 2',
   date: '2026-10-03',
   dateLabel: 'Sábado 3 de octubre, 2026',
-  venue: 'Quetrén Club Cultural',
-  lineup: 'Radio Mercurio, Lu Kompel, Emi Esparza + DJs',
+  venue: { name: 'Quetrén Club Cultural', address: '', link: '' },
   ticketUrl: null,
+  flyer: null,
+  description: '',
+  artists: [{ name: 'Radio Mercurio' }, { name: 'Lu Kompel' }, { name: 'Emi Esparza' }],
+  otherLinks: [],
 };
 
 const UGAM = {
+  id: 'presentacion-de-ugam-2026-10-28',
   name: 'Presentación de UGAM',
   date: '2026-10-28',
   dateLabel: 'Miércoles 28 de octubre, 2026',
-  venue: 'La Tangente',
-  lineup: 'Lautaro Rá',
+  venue: { name: 'La Tangente', address: '', link: '' },
   ticketUrl: null,
+  flyer: null,
+  description: '',
+  artists: [{ name: 'Lautaro Rá' }],
+  otherLinks: [],
 };
 
 test.describe('Home page — ticket banner', () => {
   test('stays hidden when no upcoming event has a ticket link', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({ body: eventsScript([FIEBRE, UGAM]), contentType: 'application/javascript' })
-    );
+    await mockEvents(page, [FIEBRE, UGAM]);
     await page.goto('/segunda-fundacion.html');
     await expect(page.locator('#ticketBanner')).not.toHaveClass(/show/);
     await expect(page.locator('#ticketBanner')).toBeHidden();
   });
 
   test('shows the single event name and links straight to its ticket URL when only one is active @bat', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: eventsScript([FIEBRE, { ...UGAM, ticketUrl: 'https://passline.com/eventos/ugam-real' }]),
-        contentType: 'application/javascript',
-      })
-    );
+    await mockEvents(page, [FIEBRE, { ...UGAM, ticketUrl: 'https://passline.com/eventos/ugam-real' }]);
     await page.goto('/segunda-fundacion.html');
     const banner = page.locator('#ticketBanner');
     await expect(banner).toHaveClass(/show/);
@@ -52,15 +55,10 @@ test.describe('Home page — ticket banner', () => {
   test('concatenates names soonest-first and links to Eventos when more than one is active', async ({ page }) => {
     // Deliberately declared out of date order to prove the banner sorts by
     // date rather than trusting array order.
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: eventsScript([
-          { ...UGAM, ticketUrl: 'https://passline.com/eventos/ugam-real' },
-          { ...FIEBRE, ticketUrl: 'https://passline.com/eventos/fiebre-real' },
-        ]),
-        contentType: 'application/javascript',
-      })
-    );
+    await mockEvents(page, [
+      { ...UGAM, ticketUrl: 'https://passline.com/eventos/ugam-real' },
+      { ...FIEBRE, ticketUrl: 'https://passline.com/eventos/fiebre-real' },
+    ]);
     await page.goto('/segunda-fundacion.html');
     const banner = page.locator('#ticketBanner');
     await expect(banner).toHaveClass(/show/);
@@ -71,12 +69,7 @@ test.describe('Home page — ticket banner', () => {
   });
 
   test('renders two identical, container-filling groups for a seamless marquee loop, with a positive animation duration', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
-        contentType: 'application/javascript',
-      })
-    );
+    await mockEvents(page, [{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]);
     await page.goto('/segunda-fundacion.html');
 
     // Exactly 2 groups (for the translateX(-50%) loop trick), each repeated
@@ -96,12 +89,7 @@ test.describe('Home page — ticket banner', () => {
   });
 
   test('banner text renders in white for legibility against the highlight background', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
-        contentType: 'application/javascript',
-      })
-    );
+    await mockEvents(page, [{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]);
     await page.goto('/segunda-fundacion.html');
     const color = await page.locator('.ticket-banner-text').first().evaluate((el) => getComputedStyle(el).color);
     expect(color).toBe('rgb(255, 255, 255)');
@@ -124,34 +112,23 @@ test.describe('Ticket banner — present everywhere except Eventos', () => {
 
 test.describe('Nav — Eventos link shine when a ticket is active', () => {
   test('stays plain when no upcoming event has a ticket link', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({ body: eventsScript([FIEBRE, UGAM]), contentType: 'application/javascript' })
-    );
+    await mockEvents(page, [FIEBRE, UGAM]);
     await page.goto('/catalogo.html');
     await expect(page.locator('.nav-links a[href="eventos.html"]')).not.toHaveClass(/event-live/);
   });
 
   test('gets the shine class on every page once an event has a ticket link @bat', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
-        contentType: 'application/javascript',
-      })
-    );
+    await mockEvents(page, [{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]);
     await page.goto('/catalogo.html');
     await expect(page.locator('.nav-links a[href="eventos.html"]')).toHaveClass(/event-live/);
   });
 
   test('desktop: the shine is clipped to the letters, not a bar sliding over the whole link', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
-        contentType: 'application/javascript',
-      })
-    );
+    await mockEvents(page, [{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/catalogo.html');
     const link = page.locator('.nav-links a[href="eventos.html"]');
+    await expect(link).toHaveClass(/event-live/);
     const cs = await link.evaluate((el) => {
       const s = getComputedStyle(el);
       return {
@@ -169,16 +146,12 @@ test.describe('Nav — Eventos link shine when a ticket is active', () => {
   });
 
   test('mobile: the shine is a constant solid color instead of the sweep', async ({ page }) => {
-    await page.route('**/assets/events-data.js*', (route) =>
-      route.fulfill({
-        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
-        contentType: 'application/javascript',
-      })
-    );
+    await mockEvents(page, [{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/catalogo.html');
     await page.locator('#navToggle').click();
     const link = page.locator('.nav-links a[href="eventos.html"]');
+    await expect(link).toHaveClass(/event-live/);
 
     const matchesAccentFluor = await page.evaluate(() => {
       const probe = document.createElement('span');

@@ -11,7 +11,7 @@ async function gotoArtistas(page) {
 test.describe('Artistas — no-photo placeholder', () => {
   // Every real artist currently has a photo, so the hasPhoto:false code path
   // is exercised with a synthetic artist mocked in over the real data file —
-  // same pattern as ticket-banner.spec.js does for events-data.js.
+  // same pattern as ticket-banner.spec.js does for the Eventos API route.
   const NO_PHOTO_ARTIST = {
     slug: 'placeholder-test-artist',
     name: 'Placeholder Testeitor',
