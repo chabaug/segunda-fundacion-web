@@ -34,11 +34,17 @@ document.addEventListener('DOMContentLoaded', function(){
     }, {passive:true});
   }
 
-  if (typeof UPCOMING_EVENTS !== 'undefined' && UPCOMING_EVENTS.some(function(e){ return e.ticketUrl; })) {
-    document.querySelectorAll('.nav-links a[href="eventos.html"]').forEach(function(a){
-      a.classList.add('event-live');
-    });
-  }
+  // Live from the Eventos API — see assets/ticket-banner.js for the same
+  // fetch on pages that also render the banner.
+  fetch('/api/events')
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(events){
+      if (!events || !events.some(function(e){ return e.ticketUrl; })) return;
+      document.querySelectorAll('.nav-links a[href="eventos.html"]').forEach(function(a){
+        a.classList.add('event-live');
+      });
+    })
+    .catch(function(){});
 
   const themeToggle = document.getElementById('themeToggle');
   if(themeToggle){
