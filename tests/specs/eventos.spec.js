@@ -60,3 +60,71 @@ test.describe('Eventos', () => {
     await expect(page.locator('#flyerLightbox')).not.toHaveClass(/open/);
   });
 });
+
+test.describe('Eventos — event modal', () => {
+  const FIEBRE = {
+    name: 'Fiebre Lunar Vol. 2',
+    date: '2026-10-03',
+    dateLabel: 'Sábado 3 de octubre, 2026',
+    venue: 'Quetrén Club Cultural — Av. Olazábal 1784, CABA',
+    lineup: 'Radio Mercurio, Lu Kompel, Emi Esparza + DJs',
+    ticketUrl: 'https://passline.com/eventos/fiebre-lunar-vol-2',
+    flyer: 'assets/flyers/radiomercurio-fiebrelunar-laquince.jpg',
+    description: null,
+  };
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/assets/events-data.js*', (route) =>
+      route.fulfill({
+        body: 'const UPCOMING_EVENTS = ' + JSON.stringify([FIEBRE]) + ';',
+        contentType: 'application/javascript',
+      })
+    );
+    await page.goto('/eventos.html');
+  });
+
+  test('card shows a "ver evento" hint and opens the modal with the event\'s info @bat', async ({ page }) => {
+    const card = page.locator('.event-card').first();
+    await expect(card.locator('.event-view-hint')).toHaveText('Ver evento →');
+
+    await card.click();
+    const modal = page.locator('#eventModal');
+    await expect(modal).toHaveClass(/open/);
+    await expect(page.locator('#eventModalTitle')).toHaveText(FIEBRE.name);
+    await expect(page.locator('#eventModalDate')).toHaveText(FIEBRE.dateLabel);
+    await expect(page.locator('#eventModalVenue')).toHaveText(FIEBRE.venue);
+    await expect(page.locator('#eventModalDescription')).toHaveText(FIEBRE.lineup); // falls back to lineup
+    await expect(page.locator('#eventModalCover')).toBeVisible();
+
+    const mapsHref = await page.locator('#eventModalMapsLink').getAttribute('href');
+    expect(mapsHref).toBe('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(FIEBRE.venue));
+
+    const buyLink = page.locator('#eventModalBuyLink');
+    await expect(buyLink).toBeVisible();
+    await expect(buyLink).toHaveAttribute('href', FIEBRE.ticketUrl);
+    await expect(buyLink).toHaveCSS('text-transform', 'uppercase');
+  });
+
+  test('closes on backdrop click and on Escape', async ({ page }) => {
+    await page.locator('.event-card').first().click();
+    const modal = page.locator('#eventModal');
+    await expect(modal).toHaveClass(/open/);
+
+    await modal.click({ position: { x: 4, y: 4 } }); // outside the card, on the backdrop
+    await expect(modal).not.toHaveClass(/open/);
+
+    await page.locator('.event-card').first().click();
+    await expect(modal).toHaveClass(/open/);
+    await page.keyboard.press('Escape');
+    await expect(modal).not.toHaveClass(/open/);
+  });
+
+  test('clicking "Comprar entradas" on the card opens the ticket link, not the modal', async ({ page }) => {
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup'),
+      page.locator('.event-tickets-active').first().click(),
+    ]);
+    expect(popup.url()).toBe(FIEBRE.ticketUrl);
+    await expect(page.locator('#eventModal')).not.toHaveClass(/open/);
+  });
+});

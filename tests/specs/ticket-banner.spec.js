@@ -44,7 +44,7 @@ test.describe('Home page — ticket banner', () => {
     const banner = page.locator('#ticketBanner');
     await expect(banner).toHaveClass(/show/);
     await expect(banner).toBeVisible();
-    await expect(banner.locator('.ticket-banner-text').first()).toHaveText('Entradas en venta: Presentación de UGAM');
+    await expect(banner.locator('.ticket-banner-text').first()).toHaveText('Entradas para Presentación de UGAM');
     await expect(banner).toHaveAttribute('href', 'https://passline.com/eventos/ugam-real');
     await expect(banner).toHaveAttribute('target', '_blank');
   });
@@ -65,7 +65,7 @@ test.describe('Home page — ticket banner', () => {
     const banner = page.locator('#ticketBanner');
     await expect(banner).toHaveClass(/show/);
     await expect(banner.locator('.ticket-banner-text').first()).toHaveText(
-      'Entradas en venta: Fiebre Lunar Vol. 2  ·  Presentación de UGAM'
+      'Entradas para Fiebre Lunar Vol. 2   ·   Entradas para Presentación de UGAM'
     );
     await expect(banner).toHaveAttribute('href', /eventos\.html$/);
   });
@@ -105,6 +105,41 @@ test.describe('Home page — ticket banner', () => {
     await page.goto('/segunda-fundacion.html');
     const color = await page.locator('.ticket-banner-text').first().evaluate((el) => getComputedStyle(el).color);
     expect(color).toBe('rgb(255, 255, 255)');
+  });
+});
+
+test.describe('Ticket banner — present everywhere except Eventos', () => {
+  test('renders on every other real page @bat', async ({ page }) => {
+    for (const path of ['/segunda-fundacion.html', '/catalogo.html', '/videoclips.html', '/nosotros.html']) {
+      await page.goto(path);
+      await expect(page.locator('#ticketBanner')).toHaveCount(1);
+    }
+  });
+
+  test('is absent on eventos.html, which already lists the same info as full cards', async ({ page }) => {
+    await page.goto('/eventos.html');
+    await expect(page.locator('#ticketBanner')).toHaveCount(0);
+  });
+});
+
+test.describe('Nav — Eventos link shine when a ticket is active', () => {
+  test('stays plain when no upcoming event has a ticket link', async ({ page }) => {
+    await page.route('**/assets/events-data.js*', (route) =>
+      route.fulfill({ body: eventsScript([FIEBRE, UGAM]), contentType: 'application/javascript' })
+    );
+    await page.goto('/catalogo.html');
+    await expect(page.locator('.nav-links a[href="eventos.html"]')).not.toHaveClass(/event-live/);
+  });
+
+  test('gets the shine class on every page once an event has a ticket link @bat', async ({ page }) => {
+    await page.route('**/assets/events-data.js*', (route) =>
+      route.fulfill({
+        body: eventsScript([{ ...FIEBRE, ticketUrl: 'https://passline.com/x' }]),
+        contentType: 'application/javascript',
+      })
+    );
+    await page.goto('/catalogo.html');
+    await expect(page.locator('.nav-links a[href="eventos.html"]')).toHaveClass(/event-live/);
   });
 });
 
