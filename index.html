@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/style.css?v=63">
+<link rel="stylesheet" href="assets/style.css?v=71">
 <script src="assets/events-data.js?v=55"></script>
 <script src="assets/releases-data.js?v=58"></script>
 <script src="assets/nav.js?v=57"></script>
@@ -193,67 +193,8 @@
 </div>
 
 <script src="assets/release-modal.js?v=57"></script>
+<script src="assets/ticket-banner.js?v=1"></script>
 <script>
-  (function(){
-    const active = UPCOMING_EVENTS
-      .filter(function(e){ return e.ticketUrl; })
-      .sort(function(a, b){ return a.date.localeCompare(b.date); });
-    if(!active.length) return;
-
-    const banner = document.getElementById('ticketBanner');
-    const text = 'Entradas en venta: ' + active.map(function(e){ return e.name; }).join('  ·  ');
-
-    if(active.length === 1){
-      banner.href = active[0].ticketUrl;
-      banner.target = '_blank';
-      banner.rel = 'noopener';
-    } else {
-      banner.href = 'eventos.html';
-    }
-
-    banner.classList.add('show');
-
-    // Build enough repeated copies of the text to comfortably fill the
-    // banner regardless of viewport width or how long the concatenated
-    // event names are, then duplicate that whole run once more so the
-    // marquee can loop seamlessly (translateX(-50%) lands exactly back
-    // at the start of the second, identical run).
-    const track = document.getElementById('ticketBannerTrack');
-    const probe = document.createElement('span');
-    probe.className = 'ticket-banner-text';
-    probe.textContent = text;
-    probe.style.visibility = 'hidden';
-    probe.style.position = 'absolute';
-    document.body.appendChild(probe);
-    const singleWidth = probe.getBoundingClientRect().width;
-    document.body.removeChild(probe);
-
-    const containerWidth = banner.getBoundingClientRect().width || window.innerWidth;
-    const copies = Math.max(2, Math.ceil(containerWidth / singleWidth) + 1);
-
-    function buildGroup(){
-      const group = document.createElement('div');
-      group.className = 'ticket-banner-group';
-      for(let i = 0; i < copies; i++){
-        const span = document.createElement('span');
-        span.className = 'ticket-banner-text';
-        span.textContent = text;
-        if(i > 0) span.setAttribute('aria-hidden', 'true');
-        group.appendChild(span);
-      }
-      return group;
-    }
-
-    const group1 = buildGroup();
-    track.appendChild(group1);
-    track.appendChild(buildGroup());
-    group1.querySelectorAll('.ticket-banner-text')[0].removeAttribute('aria-hidden');
-    track.querySelectorAll('.ticket-banner-group')[1].setAttribute('aria-hidden', 'true');
-
-    const pxPerSecond = 90;
-    track.style.animationDuration = Math.max(group1.getBoundingClientRect().width / pxPerSecond, 6) + 's';
-  })();
-
   (function(){
     // Latest release module: find the newest release in the whole catalog,
     // and compare against the real publish date of whichever video is

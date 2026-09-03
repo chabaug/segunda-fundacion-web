@@ -12,11 +12,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/style.css?v=63">
+<link rel="stylesheet" href="assets/style.css?v=71">
+<script src="assets/events-data.js?v=55"></script>
 <script src="assets/nav.js?v=57"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7e6ab57033cc4714802f9b01417f7c0e"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
 <body>
+
+<a class="ticket-banner" id="ticketBanner" href="#">
+  <div class="ticket-banner-track" id="ticketBannerTrack"></div>
+</a>
 
 <header>
   <div class="nav">
@@ -158,6 +163,7 @@
 
 </main>
 
+<script src="assets/ticket-banner.js?v=1"></script>
 <script>
   document.getElementById('contactForm').addEventListener('submit', function(e){
     e.preventDefault();
