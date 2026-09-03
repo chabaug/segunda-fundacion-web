@@ -1,0 +1,13 @@
+{
+  "name": "segunda-fundacion-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Segunda Fundación site + Netlify Functions API for the Eventos admin panel",
+  "devDependencies": {
+    "@netlify/functions": "^3.0.0",
+    "netlify-cli": "^17.0.0"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.0.0"
+  }
+}
