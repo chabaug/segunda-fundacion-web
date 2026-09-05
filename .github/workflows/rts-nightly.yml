@@ -19,11 +19,30 @@ jobs:
         with:
           node-version: '18'
           cache: npm
-          cache-dependency-path: tests/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            tests/package-lock.json
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
+      # releases-store.spec.js / youtube-store.spec.js dynamically import a
+      # netlify/lib/*.mts module at the repo root (needs @netlify/blobs from
+      # the root node_modules), and releases-api-live.spec.js /
+      # auth-login-live.spec.js boot a real `netlify dev` (needs netlify-cli
+      # itself) -- the tests/ install below doesn't cover either, since
+      # tests/ is a sibling directory, not an ancestor. Unlike the BAT
+      # workflow's lighter --omit=dev version of this same fix, RTS needs
+      # the devDependencies too for netlify-cli. Deliberately bypasses the
+      # committed root package-lock.json (which carries stale "extraneous"
+      # per-platform Rollup entries from netlify-cli that make npm ci
+      # hard-fail with EBADPLATFORM on Linux) and does a fresh, unlocked
+      # resolve instead, which correctly skips incompatible-platform
+      # optional deps the normal way.
+      - name: Install root dependencies
+        working-directory: .
+        run: npm install --no-save --package-lock=false
 
       - name: Install dependencies
         run: npm ci
@@ -34,6 +53,16 @@ jobs:
       - name: Run full regression suite (RTS)
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: rts-results.json
+          # releases-api-live.spec.js and auth-login-live.spec.js boot a real
+          # `netlify dev`, which injects whatever's already in the process
+          # env into the Functions it runs -- these dummy values match what
+          # both spec files hardcode as their expected local-dev credentials
+          # (see the repo's gitignored .env, which only exists on dev
+          # machines, not in CI).
+          EVENTS_ADMIN_TOKEN: local-dev-test-token
+          CATALOG_ADMIN_TOKEN: local-dev-test-token
+          EVENTS_ADMIN_USER: augusto
+          EVENTS_ADMIN_PASSWORD: local-dev-test-password
         run: npx playwright test --project=desktop --project=mobile --project=firefox --project=webkit --reporter=list,html,json
 
       - name: Upload Playwright report
