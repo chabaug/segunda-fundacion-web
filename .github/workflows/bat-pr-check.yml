@@ -20,21 +20,25 @@ jobs:
         with:
           node-version: '18'
           cache: npm
-          cache-dependency-path: tests/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            tests/package-lock.json
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      # youtube-store.spec.js (like releases-store.spec.js on feat/releases-api)
-      # dynamically imports netlify/lib/youtube-store.mts at the repo root,
-      # which resolves its @netlify/blobs import from the root node_modules —
-      # the tests/ install below doesn't cover it, since tests/ is a sibling
-      # directory, not an ancestor. Bypasses the committed root
-      # package-lock.json (stale "extraneous" per-platform Rollup entries
-      # from netlify-cli make npm ci hard-fail with EBADPLATFORM on Linux)
-      # and does a fresh, unlocked resolve of just the root "dependencies"
-      # instead — @netlify/blobs has none of its own to pull in.
+      # releases-store.spec.js and youtube-store.spec.js both dynamically
+      # import a netlify/lib/*.mts module at the repo root, which resolves
+      # its @netlify/blobs import from the root node_modules — the tests/
+      # install below doesn't cover it, since tests/ is a sibling directory,
+      # not an ancestor. Deliberately bypasses the committed root
+      # package-lock.json (which carries stale "extraneous" per-platform
+      # Rollup entries from netlify-cli that make npm ci hard-fail with
+      # EBADPLATFORM on Linux, even with --omit=dev) and does a fresh,
+      # unlocked resolve of just the root "dependencies" instead —
+      # @netlify/blobs has none of its own, so there's nothing else this
+      # could pull in.
       - name: Install root dependencies
         working-directory: .
         run: npm install --no-save --package-lock=false --omit=dev
