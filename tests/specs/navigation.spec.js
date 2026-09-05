@@ -68,8 +68,21 @@ test.describe('Home page (index.html)', () => {
     // the Sintonía Solar release it's actually about — comparing against the
     // linked release's own date (the old approach) put the older-dated
     // release module on top even though the video was clearly more recent.
-    const videoDate = await page.locator('#latestRelease').getAttribute('data-video-date');
-    expect(videoDate).toBe('2026-04-30');
+    // The video's real date normally comes from /api/youtube-video (see
+    // netlify/functions/youtube-sweep.mts) instead of a hand-maintained
+    // attribute — mocked here since the plain static test server doesn't
+    // run Netlify Functions. Reusing the same fixture date the old
+    // data-video-date="2026-04-30" attribute had keeps this exercising the
+    // "video wins" branch.
+    const mockVideo = { videoId: 'pRbvFopJc-s', title: 'Radio Mercurio — Nave', publishedAt: '2026-04-30' };
+    await page.route('**/api/youtube-video', (route) =>
+      route.fulfill({ body: JSON.stringify(mockVideo), contentType: 'application/json' })
+    );
+    await page.reload();
+    await page.waitForFunction(
+      (videoId) => document.getElementById('videoFrame').src.includes(videoId),
+      mockVideo.videoId
+    );
 
     const sections = await page.locator('main.wrap > section').evaluateAll((els) =>
       els.map((e) => e.id).filter((id) => id === 'latestRelease' || id === 'video')
@@ -79,7 +92,7 @@ test.describe('Home page (index.html)', () => {
       for (const slug in RELEASES) if (!d || RELEASES[slug].date > d) d = RELEASES[slug].date;
       return d;
     });
-    const expectedOrder = videoDate >= latestDate ? ['video', 'latestRelease'] : ['latestRelease', 'video'];
+    const expectedOrder = mockVideo.publishedAt >= latestDate ? ['video', 'latestRelease'] : ['latestRelease', 'video'];
     expect(sections).toEqual(expectedOrder);
   });
 });
