@@ -271,6 +271,14 @@
         <p class="empty" id="testsEmpty" hidden>Todavía no hay datos de tests publicados.</p>
       </div>
 
+      <div class="card" id="runDetailCard" hidden>
+        <div class="card-head">
+          <h3>Detalle — qué falló y qué se salteó</h3>
+          <span class="meta" id="runDetailMeta"></span>
+        </div>
+        <div id="runDetail"></div>
+      </div>
+
       <div class="card">
         <div class="card-head">
           <h3>Historial</h3>
@@ -293,7 +301,7 @@
       </div>
 
       <div class="card">
-        <h3>Pendientes de tests — por qué hay skips o fallas conocidas</h3>
+        <h3>Notas curadas — contexto que no sale del reporte</h3>
         <ul class="pend-list" id="testPendList"></ul>
       </div>
     </section>

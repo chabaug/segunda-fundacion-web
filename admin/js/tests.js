@@ -156,6 +156,149 @@ function renderHistory() {
   });
 }
 
+// ---------- detalle de fallas y skips ----------
+
+// The curated notes in sf-status quote the test title, sometimes truncated
+// with an ellipsis and followed by the projects it applies to. Match on a
+// prefix of the quoted part rather than on equality, so a note keeps
+// attaching to its test even when the quote was shortened by hand.
+function curatedNoteFor(title) {
+  const items = (data && data.testPendientes && data.testPendientes.items) || [];
+  const normalized = String(title || "").toLowerCase();
+  for (const item of items) {
+    const quoted = String(item.title || "").match(/"([^"]+)"/);
+    if (!quoted) continue;
+    const needle = quoted[1].replace(/[.…]+$/, "").toLowerCase().trim();
+    if (!needle) continue;
+    if (normalized.indexOf(needle.slice(0, 40)) !== -1) return item.reason || null;
+  }
+  return null;
+}
+
+// One row per test, not per project: the same skip reported on desktop,
+// firefox and webkit is one thing to understand, not three.
+function groupByTest(entries) {
+  const groups = new Map();
+  (entries || []).forEach(function (entry) {
+    const key = (entry.file || "") + " ▸ " + (entry.title || "");
+    if (!groups.has(key)) {
+      groups.set(key, {
+        file: entry.file,
+        title: entry.title,
+        location: entry.location || null,
+        projects: [],
+        reason: entry.reason || null,
+        error: entry.error || null,
+      });
+    }
+    const group = groups.get(key);
+    if (entry.project && group.projects.indexOf(entry.project) === -1) group.projects.push(entry.project);
+    if (!group.reason && entry.reason) group.reason = entry.reason;
+    if (!group.error && entry.error) group.error = entry.error;
+    if (!group.location && entry.location) group.location = entry.location;
+  });
+  return Array.from(groups.values());
+}
+
+function detailItem(group, kind, runUrl) {
+  const curated = curatedNoteFor(group.title);
+  const own = kind === "failure" ? group.error : group.reason;
+
+  const why = el("div", { class: "pend-detail" });
+  if (own) {
+    why.appendChild(el("div", { class: kind === "failure" ? "detail-mono" : "", text: own }));
+  }
+  if (curated) {
+    why.appendChild(el("div", { style: own ? "margin-top:6px;" : "" }, [
+      el("span", { class: "what", text: "Nota: " }),
+      el("span", { text: curated }),
+    ]));
+  }
+  if (!own && !curated) {
+    why.appendChild(el("span", {
+      class: "what",
+      text: kind === "failure"
+        ? "Sin detalle en el reporte — abrí la corrida para ver el error completo."
+        : "Sin motivo registrado. Se toma del segundo argumento de test.skip(cond, \"motivo\"), o de una nota curada en sf-status.",
+    }));
+  }
+
+  const chips = el("span", { class: "row-actions" });
+  group.projects.forEach(function (project) {
+    chips.appendChild(el("span", { class: "status-pill neutral", text: project }));
+  });
+  if (kind === "failure" && runUrl) {
+    chips.appendChild(el("a", { class: "btn btn-sm", href: runUrl, target: "_blank", rel: "noopener", text: "Ver corrida" }));
+  }
+
+  return el("li", null, [
+    el("div", { class: "pend-head" }, [
+      el("span", { class: "pend-title", text: group.title }),
+      chips,
+    ]),
+    el("div", { class: "what", text: group.file + (group.location ? " · " + group.location : "") }),
+    why,
+  ]);
+}
+
+function plural(n, singular, many) {
+  return n + " " + (n === 1 ? singular : many);
+}
+
+function suiteDetailBlock(summary) {
+  const failures = groupByTest(summary.failures);
+  const skips = groupByTest(summary.skips);
+  if (!failures.length && !skips.length) return null;
+
+  const block = el("div", { style: "margin-bottom:22px;" });
+  block.appendChild(el("h4", {
+    style: "font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--heading);margin:0 0 10px;",
+    text: summary.suite + " — " + plural(summary.counts.failed, "falla", "fallas")
+      + " · " + plural(summary.counts.skipped, "skip", "skips")
+      + (summary.commit ? " · " + summary.commit : ""),
+  }));
+
+  if (failures.length) {
+    const list = el("ul", { class: "pend-list" });
+    failures.forEach(function (group) { list.appendChild(detailItem(group, "failure", summary.runUrl)); });
+    block.appendChild(el("div", { class: "detail-group bad" }, [
+      el("div", { class: "detail-group-label", text: "Fallas" }),
+      list,
+    ]));
+  }
+  if (skips.length) {
+    const list = el("ul", { class: "pend-list" });
+    skips.forEach(function (group) { list.appendChild(detailItem(group, "skip", summary.runUrl)); });
+    block.appendChild(el("div", { class: "detail-group" + (failures.length ? " spaced" : "") }, [
+      el("div", { class: "detail-group-label", text: "Skips" }),
+      list,
+    ]));
+  }
+  return block;
+}
+
+function renderRunDetail() {
+  const card = $("runDetailCard");
+  const wrap = clear($("runDetail"));
+  const blocks = suites().map(suiteDetailBlock).filter(Boolean);
+
+  if (!blocks.length) {
+    card.hidden = suites().length === 0;
+    if (!card.hidden) {
+      $("runDetailMeta").textContent = "";
+      wrap.appendChild(el("p", { class: "empty", text: "Sin fallas ni skips en la última corrida de ninguna de las dos suites." }));
+    }
+    return;
+  }
+  card.hidden = false;
+
+  const totalFailed = suites().reduce(function (n, s) { return n + s.counts.failed; }, 0);
+  const totalSkipped = suites().reduce(function (n, s) { return n + s.counts.skipped; }, 0);
+  $("runDetailMeta").textContent = plural(totalFailed, "falla", "fallas")
+    + " · " + plural(totalSkipped, "skip", "skips") + " en total";
+  blocks.forEach(function (block) { wrap.appendChild(block); });
+}
+
 function renderTestPendientes() {
   const list = clear($("testPendList"));
   const items = (data && Array.isArray(data.testPendientes && data.testPendientes.items))
@@ -183,6 +326,7 @@ function renderTestPendientes() {
 
 function renderAll() {
   renderLatest();
+  renderRunDetail();
   renderTestPendientes();
   if (!$("histPanel").hidden) renderHistory();
 }

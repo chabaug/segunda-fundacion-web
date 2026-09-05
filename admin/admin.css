@@ -113,7 +113,18 @@ table.data-table td{ padding:8px; border-bottom:1px solid var(--line); vertical-
 @media (max-width:560px){ .cov-row{ grid-template-columns:1fr 60px; } .cov-row .cov-bar{ grid-column:1 / -1; } }
 .gap-list{ list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; }
 .gap-list li{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13px; border:1px solid var(--line); border-radius:8px; padding:7px 10px; background:var(--bg); }
-.gap-list li .what{ color:var(--heading); font-size:12px; }
+/* Secondary/annotating text. Standalone rather than scoped to .gap-list —
+   the failure/skip detail uses it too. */
+.what{ color:var(--heading); font-size:12px; }
+
+/* ---------- detalle de fallas / skips ---------- */
+.detail-group.spaced{ margin-top:16px; }
+.detail-group-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--heading); margin-bottom:7px; }
+.detail-group.bad .detail-group-label{ color:#B5502A; }
+.detail-group.bad .pend-list li{ border-color:rgba(181,80,42,.45); }
+/* The assertion message is code, not prose — keep it monospaced and let a
+   long one scroll inside its own box instead of stretching the card. */
+.detail-mono{ font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; line-height:1.5; background:rgba(0,0,0,.04); border-radius:6px; padding:7px 9px; overflow-x:auto; white-space:pre-wrap; word-break:break-word; }
 
 /* ---------- pendientes ---------- */
 .pend-list{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }

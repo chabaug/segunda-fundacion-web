@@ -130,7 +130,17 @@ function wirePendientes() {
 
 // ================== COBERTURA DE CONTENIDO ==================
 function covRow(label, done, total, kind) {
-  const pct = total ? Math.round((done / total) * 100) : 100;
+  // Nothing to measure yet (no active shows, say) is not the same as
+  // everything being complete — an empty bar reads honestly, where a full
+  // green one would claim a completeness that was never checked.
+  if (!total) {
+    return el("div", { class: "cov-row" }, [
+      el("div", { class: "cov-label", text: label }),
+      el("div", { class: "cov-bar" }, [el("span", { style: "width:0%" })]),
+      el("div", { class: "cov-n", text: "—" }),
+    ]);
+  }
+  const pct = Math.round((done / total) * 100);
   const barClass = kind === "info" ? "cov-bar info" : pct >= 100 ? "cov-bar" : pct >= 70 ? "cov-bar warn" : "cov-bar bad";
   const bar = el("div", { class: barClass }, [el("span", { style: "width:" + pct + "%" })]);
   return el("div", { class: "cov-row" }, [
