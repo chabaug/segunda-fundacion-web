@@ -62,9 +62,9 @@ jobs:
           path: tests/playwright-report/
           retention-days: 14
 
-      # Both steps below are best-effort only (continue-on-error) — they must
-      # never affect this job's pass/fail conclusion, since this workflow is
-      # the required status check for merging to main. Only the "Run BAT
+      # Every step below is best-effort only (continue-on-error) — none of
+      # them may affect this job's pass/fail conclusion, since this workflow
+      # is the required status check for merging to main. Only the "Run BAT
       # subset" step above should ever fail this check.
       - name: Build status summary
         if: always()
@@ -77,3 +77,15 @@ jobs:
         env:
           STATUS_REPO_TOKEN: ${{ secrets.STATUS_REPO_TOKEN }}
         run: bash scripts/push-status.sh bat-latest.json data/bat-latest.json
+
+      # Rolling history behind the admin portal's "ultimas 10 corridas"
+      # chart. Best-effort like every other publish step here -- it must
+      # never fail the required status check.
+      - name: Append run to BAT history
+        if: always()
+        continue-on-error: true
+        env:
+          STATUS_REPO_TOKEN: ${{ secrets.STATUS_REPO_TOKEN }}
+        run: |
+          node scripts/append-status-history.js bat-latest.json data/bat-history.json bat-history.json
+          bash scripts/push-status.sh bat-history.json data/bat-history.json

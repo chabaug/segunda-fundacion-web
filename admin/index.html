@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Segunda Fundación</title>
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/style.css?v=75">
+<link rel="stylesheet" href="admin.css?v=1">
+<!-- Charts for the Tests section. Loaded from the CDN rather than vendored;
+     every section degrades to a plain message if it fails to load. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js" defer></script>
+</head>
+<body>
+
+<div id="gate">
+  <h1>Admin — Segunda Fundación</h1>
+  <p>Ingresá con tu usuario y contraseña.</p>
+  <input type="text" id="gateUser" placeholder="Usuario" autocomplete="username">
+  <input type="password" id="gatePassword" placeholder="Contraseña" autocomplete="current-password">
+  <button class="btn btn-accent" id="gateSubmit">Entrar</button>
+  <p id="gateError">Usuario o contraseña inválidos.</p>
+</div>
+
+<div id="app" hidden>
+  <div class="admin-top">
+    <div class="admin-top-inner">
+      <div class="admin-brand">
+        <h1>Panel de administración</h1>
+        <div class="sub">segundafundacion.com.ar</div>
+      </div>
+      <button class="btn btn-sm btn-ghost" id="logoutBtn">Salir</button>
+    </div>
+    <nav class="admin-nav">
+      <button class="nav-btn" type="button" id="navEventos" data-section="eventos">Eventos</button>
+      <button class="nav-btn" type="button" id="navLanzamientos" data-section="lanzamientos">Lanzamientos</button>
+      <button class="nav-btn" type="button" id="navTests" data-section="tests">Tests</button>
+      <button class="nav-btn" type="button" id="navEstado" data-section="estado">Estado del sitio</button>
+    </nav>
+  </div>
+
+  <div class="admin-wrap">
+
+    <!-- ==================== EVENTOS ==================== -->
+    <section class="admin-section" id="section-eventos" hidden>
+      <div class="section-head">
+        <div>
+          <h2>Eventos</h2>
+          <div class="sub">Próximos shows — banner y tarjetas de segundafundacion.com.ar</div>
+        </div>
+        <button class="btn btn-accent" id="newEventBtn">+ Nuevo evento</button>
+      </div>
+
+      <div class="card">
+        <h3>Listado</h3>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Evento</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="eventsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="eventFormSection" hidden>
+        <h3 id="eventFormTitle">Nuevo evento</h3>
+        <form id="eventForm">
+          <div class="field-grid">
+            <div class="field"><label>Nombre</label><input type="text" name="name" required></div>
+            <div class="field"><label>Fecha</label><input type="date" name="date" required></div>
+            <div class="field"><label>Hora (opcional)</label><input type="time" name="time"></div>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>Venue — nombre</label><input type="text" name="venueName"></div>
+            <div class="field"><label>Venue — dirección</label><input type="text" name="venueAddress"></div>
+            <div class="field"><label>Venue — link (Instagram, etc.)</label><input type="url" name="venueLink"></div>
+          </div>
+          <div class="field"><label>Link para comprar entradas</label><input type="url" name="ticketUrl"></div>
+          <div class="field"><label>Bio / descripción</label><textarea name="description"></textarea></div>
+
+          <div class="field">
+            <label>Artistas</label>
+            <div id="artistsList"></div>
+            <button type="button" class="btn btn-sm list-add" id="addArtistBtn">+ Agregar artista</button>
+          </div>
+
+          <div class="field">
+            <label>Otros links (reservas, menú, Facebook, etc.)</label>
+            <div id="otherLinksList"></div>
+            <button type="button" class="btn btn-sm list-add" id="addLinkBtn">+ Agregar link</button>
+          </div>
+
+          <div class="field">
+            <label>Flyer</label>
+            <div class="media-row">
+              <img class="media-preview" id="flyerPreview" src="" alt="" style="display:none;">
+              <input type="file" id="flyerInput" accept="image/*">
+            </div>
+          </div>
+
+          <div class="field" style="flex-direction:row;align-items:center;gap:10px;">
+            <label class="toggle"><input type="checkbox" name="active" id="activeToggle" checked><span class="toggle-slider"></span></label>
+            <span style="font-size:13px;">Evento activo (destildá para pausarlo/cancelarlo)</span>
+          </div>
+          <p id="pastNotice" class="hint warn" style="display:none;">Este evento ya pasó — se muestra en Shows Anteriores. Guardar acá no lo reactiva; usá el interruptor de la lista para eso.</p>
+
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button type="submit" class="btn btn-accent">Guardar</button>
+            <button type="button" class="btn" id="cancelEventFormBtn">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== LANZAMIENTOS ==================== -->
+    <section class="admin-section" id="section-lanzamientos" hidden>
+      <div class="section-head">
+        <div>
+          <h2>Lanzamientos</h2>
+          <div class="sub">Se publican solos en la fecha, o al toque con "Publicar ahora"</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tabReleasesBtn" type="button">Lanzamientos</button>
+        <button class="tab-btn" id="tabArtistsBtn" type="button">Artistas</button>
+      </div>
+
+      <div class="tab-panel" id="tabReleases">
+        <div class="card">
+          <div class="card-head">
+            <h3>Listado</h3>
+            <button class="btn btn-accent" id="newReleaseBtn">+ Nuevo lanzamiento</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Artista</th><th>Título</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+              <tbody id="releasesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" id="releaseFormSection" hidden>
+          <h3 id="releaseFormTitle">Nuevo lanzamiento</h3>
+          <form id="releaseForm">
+            <div class="field-grid">
+              <div class="field">
+                <label>Artista</label>
+                <input type="text" name="artist" id="releaseArtistInput" list="knownArtists" required>
+                <span class="hint" id="artistHint"></span>
+              </div>
+              <div class="field"><label>Título</label><input type="text" name="title" required></div>
+              <div class="field">
+                <label>Tipo</label>
+                <select name="suffix">
+                  <option value="single">Single</option>
+                  <option value="ep">EP</option>
+                  <option value="album">Álbum</option>
+                </select>
+              </div>
+            </div>
+            <datalist id="knownArtists"></datalist>
+
+            <div class="field-grid cols-2">
+              <div class="field"><label>Fecha de lanzamiento</label><input type="date" name="releaseDate" required></div>
+              <div class="field"><label>Número de catálogo (SF-, opcional)</label><input type="number" name="sfNumber" min="1"></div>
+            </div>
+
+            <div class="field">
+              <label>Canciones</label>
+              <div id="tracksList"></div>
+              <button type="button" class="btn btn-sm list-add" id="addTrackBtn">+ Agregar canción</button>
+            </div>
+
+            <div class="field"><label>Créditos</label><textarea name="credits" placeholder="Producción: ..., Mezcla y masterización: ..., Tapa: ..."></textarea></div>
+
+            <div class="field-grid">
+              <div class="field"><label>Spotify</label><input type="url" name="streamingSpotify"></div>
+              <div class="field"><label>YouTube Music</label><input type="url" name="streamingYoutube"></div>
+              <div class="field"><label>Tidal</label><input type="url" name="streamingTidal"></div>
+              <div class="field"><label>Apple Music</label><input type="url" name="streamingApple"></div>
+              <div class="field"><label>Deezer</label><input type="url" name="streamingDeezer"></div>
+              <div class="field"><label>Bandcamp</label><input type="url" name="streamingBandcamp"></div>
+            </div>
+            <div class="field"><label>Video oficial (YouTube)</label><input type="url" name="video"></div>
+
+            <div class="field">
+              <label>Tapa</label>
+              <div class="media-row">
+                <img class="media-preview" id="coverPreview" src="" alt="" style="display:none;">
+                <input type="file" id="coverInput" accept="image/*">
+              </div>
+            </div>
+
+            <p class="hint" id="releaseStatusHint" style="margin:10px 0;"></p>
+
+            <div style="display:flex;gap:10px;margin-top:10px;">
+              <button type="submit" class="btn btn-accent">Guardar</button>
+              <button type="button" class="btn" id="cancelReleaseFormBtn">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tabArtists" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h3>Listado</h3>
+            <button class="btn btn-accent" id="newArtistBtn">+ Nuevo artista</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Nombre</th><th>Instagram</th><th>Ficha</th><th></th></tr></thead>
+              <tbody id="artistsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" id="artistFormSection" hidden>
+          <h3 id="artistFormTitle">Nuevo artista</h3>
+          <form id="artistForm">
+            <div class="field-grid cols-2">
+              <div class="field"><label>Nombre</label><input type="text" name="name" required></div>
+              <div class="field"><label>Instagram (sin @)</label><input type="text" name="instagram"></div>
+            </div>
+            <div class="field"><label>Spotify (link de artista)</label><input type="url" name="spotify"></div>
+            <div class="field"><label>Bio</label><textarea name="bio" placeholder="Bio en prosa, la misma que se muestra en la ficha pública."></textarea></div>
+
+            <div class="field">
+              <label>Integrantes (si es banda)</label>
+              <div id="membersList"></div>
+              <button type="button" class="btn btn-sm list-add" id="addMemberBtn">+ Agregar integrante</button>
+            </div>
+
+            <div class="field">
+              <label>Foto</label>
+              <div class="media-row">
+                <img class="media-preview" id="artistPhotoPreview" src="" alt="" style="display:none;">
+                <input type="file" id="artistPhotoInput" accept="image/*">
+              </div>
+            </div>
+
+            <p class="hint warn" id="artistCompleteHint"></p>
+
+            <div style="display:flex;gap:10px;margin-top:10px;">
+              <button type="submit" class="btn btn-accent">Guardar</button>
+              <button type="button" class="btn" id="cancelArtistFormBtn">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TESTS ==================== -->
+    <section class="admin-section" id="section-tests" hidden>
+      <div class="section-head">
+        <div>
+          <h2>Tests</h2>
+          <div class="sub">BAT (en cada PR) y RTS (nightly completo) — Playwright</div>
+        </div>
+        <button class="btn btn-sm" id="testsReloadBtn">Actualizar</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Última corrida</h3>
+          <span class="meta" id="testsMeta"></span>
+        </div>
+        <div class="stat-row" id="testStats"></div>
+        <div class="chart-wrap"><canvas id="testsChart"></canvas></div>
+        <p class="empty" id="testsEmpty" hidden>Todavía no hay datos de tests publicados.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Historial</h3>
+          <div class="row-actions">
+            <button class="tab-btn active" type="button" id="histSuiteBAT" data-suite="BAT">BAT</button>
+            <button class="tab-btn" type="button" id="histSuiteRTS" data-suite="RTS">RTS</button>
+            <button class="btn btn-sm" type="button" id="histToggleBtn" aria-expanded="false">Ver últimas 10 corridas</button>
+          </div>
+        </div>
+        <div id="histPanel" hidden>
+          <div class="chart-wrap tall"><canvas id="histChart"></canvas></div>
+          <div class="table-scroll" style="margin-top:16px;">
+            <table class="data-table">
+              <thead><tr><th>Fecha</th><th>Commit</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Duración</th><th></th></tr></thead>
+              <tbody id="histTbody"></tbody>
+            </table>
+          </div>
+          <p class="empty" id="histEmpty" hidden></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Pendientes de tests — por qué hay skips o fallas conocidas</h3>
+        <ul class="pend-list" id="testPendList"></ul>
+      </div>
+    </section>
+
+    <!-- ==================== ESTADO DEL SITIO ==================== -->
+    <section class="admin-section" id="section-estado" hidden>
+      <div class="section-head">
+        <div>
+          <h2>Estado del sitio</h2>
+          <div class="sub">Qué falta implementar, qué falta cargar y qué está cubierto por tests</div>
+        </div>
+        <button class="btn btn-sm" id="estadoReloadBtn">Actualizar</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Pendientes de implementación</h3>
+          <button class="btn btn-accent btn-sm" id="newPendienteBtn">+ Nuevo pendiente</button>
+        </div>
+        <div id="pendienteFormWrap" hidden>
+          <form id="pendienteForm" style="border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px;background:var(--bg);">
+            <div class="field-grid cols-2">
+              <div class="field"><label>Título</label><input type="text" name="title" required></div>
+              <div class="field">
+                <label>Categoría</label>
+                <select name="category">
+                  <option value="esperando-terceros">Esperando a terceros</option>
+                  <option value="decision-pendiente">Decisión pendiente</option>
+                  <option value="implementacion">A implementar</option>
+                  <option value="dato-menor">Dato menor sin resolver</option>
+                  <option value="info">Info / contexto</option>
+                </select>
+              </div>
+            </div>
+            <div class="field"><label>Detalle</label><textarea name="detail"></textarea></div>
+            <div style="display:flex;gap:10px;">
+              <button type="submit" class="btn btn-accent btn-sm">Guardar</button>
+              <button type="button" class="btn btn-sm" id="cancelPendienteBtn">Cancelar</button>
+            </div>
+          </form>
+        </div>
+        <ul class="pend-list" id="pendientesList"></ul>
+        <p class="empty" id="pendientesEmpty" hidden>Sin pendientes cargados.</p>
+        <p style="margin:14px 0 0;font-size:12px;color:var(--heading);opacity:.75;">
+          Se guardan en Netlify Blobs, detrás del token de admin — no viven en el repo, que es público.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Cobertura de contenido</h3>
+          <span class="meta" id="contentCovMeta"></span>
+        </div>
+        <div id="contentCov"></div>
+        <div id="contentGaps"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Cobertura de tests por página</h3>
+          <span class="meta" id="testCovMeta"></span>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Página</th><th>Specs</th><th>Tests</th><th>@bat</th><th>Estado</th></tr></thead>
+            <tbody id="testCovTbody"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="testCovEmpty" hidden></p>
+        <div id="unitSpecs" style="margin-top:16px;"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script type="module" src="js/app.js?v=1"></script>
+
+</body>
+</html>

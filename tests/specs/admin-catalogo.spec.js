@@ -1,12 +1,14 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { mockAdminApi, openPortal } = require('../support/admin-portal');
 
-// admin/catalogo.html talks to /api/releases and /api/artists (no netlify
-// dev running in this test harness) -- every test mocks those routes with
-// page.route(), same convention as eventos.spec.js uses for /api/events.
-// This covers the UI logic (gating, badge computation, the new-artist
-// hint, tab switching, payload building) in isolation from the real
-// backend, which is covered separately by releases-api-live.spec.js.
+// The Lanzamientos section of /admin/index.html talks to /api/releases and
+// /api/artists (no netlify dev running in this test harness) -- every test
+// mocks those routes, same convention as eventos.spec.js uses for
+// /api/events. This covers the UI logic (badge computation, the new-artist
+// hint, tab switching, payload building) in isolation from the real backend,
+// which is covered separately by releases-api-live.spec.js. The gate itself
+// is covered once, for the whole portal, in admin-portal.spec.js.
 
 const RELEASE_PUBLISHED = {
   slug: 'artist-a-song-1', artist: 'Artist A', artistSlug: 'artist-a', title: 'Song 1',
@@ -33,61 +35,13 @@ const ARTIST_INCOMPLETE = {
   createdAt: 'x', updatedAt: 'y', // no bio, no photoKey
 };
 
-const TOKEN = 'test-token';
-
-function isAdminGet(urlPath, pathname) {
-  const url = new URL(urlPath);
-  return url.pathname === pathname && url.searchParams.get('admin') === '1';
-}
-
-async function mockAdminApi(page, { releases, artists, tokenValid = true }) {
-  // Matched via a URL predicate rather than a glob string with a literal
-  // "?" in it -- Playwright's glob routing treats "?" as a one-character
-  // wildcard, which is easy to get subtly wrong for query strings.
-  await page.route((url) => isAdminGet(url.href, '/api/releases'), async (route) => {
-    const auth = await route.request().headerValue('authorization');
-    if (tokenValid === false || auth !== `Bearer ${TOKEN}`) {
-      return route.fulfill({ status: 401, body: JSON.stringify({ error: 'unauthorized' }) });
-    }
-    return route.fulfill({ body: JSON.stringify(releases), contentType: 'application/json' });
-  });
-  await page.route((url) => isAdminGet(url.href, '/api/artists'), (route) =>
-    route.fulfill({ body: JSON.stringify(artists), contentType: 'application/json' })
-  );
-}
-
-async function login(page) {
-  await page.fill('#gateToken', TOKEN);
-  await page.click('#gateSubmit');
-  await expect(page.locator('#app')).toBeVisible();
-}
-
-test.describe('Admin Catálogo — gate', () => {
-  test('wrong token shows an error and keeps the gate up', async ({ page }) => {
-    await mockAdminApi(page, { releases: [], artists: [], tokenValid: false });
-    await page.goto('/admin/catalogo.html');
-    await page.fill('#gateToken', 'wrong-token');
-    await page.click('#gateSubmit');
-    await expect(page.locator('#gateError')).toBeVisible();
-    await expect(page.locator('#app')).toBeHidden();
-  });
-
-  test('correct token enters the app @bat', async ({ page }) => {
-    await mockAdminApi(page, { releases: [], artists: [] });
-    await page.goto('/admin/catalogo.html');
-    await login(page);
-    await expect(page.locator('#gate')).toBeHidden();
-  });
-});
-
 test.describe('Admin Catálogo — releases list', () => {
   test.beforeEach(async ({ page }) => {
     await mockAdminApi(page, {
       releases: [RELEASE_PUBLISHED, RELEASE_SCHEDULED_FUTURE, RELEASE_BLOCKED],
       artists: [ARTIST_COMPLETE, ARTIST_INCOMPLETE],
     });
-    await page.goto('/admin/catalogo.html');
-    await login(page);
+    await openPortal(page, 'lanzamientos');
   });
 
   test('shows the right status pill per release: published, scheduled, and blocked-on-incomplete-artist @bat', async ({ page }) => {
@@ -116,8 +70,7 @@ test.describe('Admin Catálogo — releases list', () => {
 test.describe('Admin Catálogo — artists list', () => {
   test.beforeEach(async ({ page }) => {
     await mockAdminApi(page, { releases: [], artists: [ARTIST_COMPLETE, ARTIST_INCOMPLETE] });
-    await page.goto('/admin/catalogo.html');
-    await login(page);
+    await openPortal(page, 'lanzamientos');
     await page.click('#tabArtistsBtn');
   });
 
@@ -140,8 +93,7 @@ test.describe('Admin Catálogo — artists list', () => {
 test.describe('Admin Catálogo — new release form', () => {
   test.beforeEach(async ({ page }) => {
     await mockAdminApi(page, { releases: [], artists: [ARTIST_COMPLETE] });
-    await page.goto('/admin/catalogo.html');
-    await login(page);
+    await openPortal(page, 'lanzamientos');
     await page.click('#newReleaseBtn');
   });
 
@@ -166,10 +118,10 @@ test.describe('Admin Catálogo — new release form', () => {
     });
 
     await page.fill('#releaseArtistInput', 'Artist A');
-    await page.fill('input[name=title]', 'New Song');
-    await page.fill('input[name=releaseDate]', '2099-06-01');
+    await page.fill('#releaseForm input[name=title]', 'New Song');
+    await page.fill('#releaseForm input[name=releaseDate]', '2099-06-01');
     await page.fill('#tracksList .subrow input', 'New Song');
-    await page.fill('input[name=streamingSpotify]', 'https://open.spotify.com/track/abc');
+    await page.fill('#releaseForm input[name=streamingSpotify]', 'https://open.spotify.com/track/abc');
     await page.click('#releaseForm button[type=submit]');
 
     await expect.poll(() => sentBody).not.toBeNull();
@@ -184,15 +136,14 @@ test.describe('Admin Catálogo — new release form', () => {
 test.describe('Admin Catálogo — new artist form', () => {
   test.beforeEach(async ({ page }) => {
     await mockAdminApi(page, { releases: [], artists: [] });
-    await page.goto('/admin/catalogo.html');
-    await login(page);
+    await openPortal(page, 'lanzamientos');
     await page.click('#tabArtistsBtn');
     await page.click('#newArtistBtn');
   });
 
   test('the completeness hint tracks bio text as it\'s typed, and starts non-empty for a fresh form', async ({ page }) => {
     await expect(page.locator('#artistCompleteHint')).toContainText('Falta bio y foto');
-    await page.fill('textarea[name=bio]', 'A real bio.');
+    await page.fill('#artistForm textarea[name=bio]', 'A real bio.');
     await expect(page.locator('#artistCompleteHint')).toContainText('Falta foto');
     await expect(page.locator('#artistCompleteHint')).not.toContainText('bio y foto');
   });
@@ -208,8 +159,8 @@ test.describe('Admin Catálogo — new artist form', () => {
         contentType: 'application/json',
       });
     });
-    await page.fill('input[name=name]', 'New Artist');
-    await page.fill('input[name=instagram]', '@new_artist_handle');
+    await page.fill('#artistForm input[name=name]', 'New Artist');
+    await page.fill('#artistForm input[name=instagram]', '@new_artist_handle');
     await page.click('#artistForm button[type=submit]');
     await expect.poll(() => sentBody).not.toBeNull();
     expect(sentBody.instagram).toBe('new_artist_handle');

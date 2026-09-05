@@ -4,3 +4,17 @@
 
 [functions]
   directory = "netlify/functions"
+
+# The two admin panels were merged into a single portal at /admin. Old
+# bookmarks land on the right section instead of a 404.
+[[redirects]]
+  from = "/admin/eventos.html"
+  to = "/admin/#eventos"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/admin/catalogo.html"
+  to = "/admin/#lanzamientos"
+  status = 301
+  force = true
