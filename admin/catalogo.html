@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin Catálogo — Segunda Fundación</title>
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="stylesheet" href="../assets/style.css?v=75">
+<style>
+  body{ background:var(--bg); color:var(--fg); font-family:'Neue Haas Grotesk Display Pro', Arial, Helvetica, sans-serif; margin:0; padding:0 0 80px; }
+  .admin-wrap{ max-width:1040px; margin:0 auto; padding:32px 20px; }
+  .admin-header{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+  .admin-header h1{ font-size:22px; color:var(--heading); margin:0; }
+  .admin-header .sub{ font-size:13px; color:var(--heading); opacity:.75; }
+  .btn{ font:inherit; font-size:13px; font-weight:700; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--bg-2); color:var(--fg); cursor:pointer; }
+  .btn:hover{ border-color:var(--heading); }
+  .btn-accent{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn-accent:hover{ opacity:.9; }
+  .btn-danger{ background:transparent; border-color:#B5502A; color:#B5502A; }
+  .btn-sm{ padding:5px 10px; font-size:12px; }
+  .tabs{ display:flex; gap:8px; margin-bottom:20px; }
+  .tab-btn{ font:inherit; font-size:13px; font-weight:700; padding:8px 16px; border-radius:99px; border:1px solid var(--line); background:var(--bg-2); color:var(--heading); cursor:pointer; }
+  .tab-btn.active{ background:var(--heading); color:var(--bg); border-color:var(--heading); }
+  .tab-panel[hidden]{ display:none; }
+  .section{ background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin-bottom:20px; }
+  .section h2{ font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--heading); margin:0 0 14px; }
+  table.data-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.data-table th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--heading); padding:0 8px 8px; border-bottom:1px solid var(--line); }
+  table.data-table td{ padding:8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  .status-pill{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
+  .status-pill.published{ background:rgba(53,140,90,.15); color:#2E8358; }
+  .status-pill.scheduled{ background:rgba(0,0,0,.08); color:var(--heading); }
+  .status-pill.blocked{ background:rgba(181,80,42,.15); color:#B5502A; }
+  .status-pill.complete{ background:rgba(53,140,90,.15); color:#2E8358; }
+  .status-pill.incomplete{ background:rgba(181,80,42,.15); color:#B5502A; }
+  .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .field{ display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
+  .field label{ font-size:12px; font-weight:700; color:var(--heading); }
+  .field .hint{ font-size:11px; color:var(--heading); opacity:.8; }
+  .field .hint.warn{ color:#B5502A; opacity:1; font-weight:700; }
+  .field input[type=text], .field input[type=date], .field input[type=number], .field input[type=url], .field select, .field textarea{
+    font:inherit; font-size:14px; padding:8px 10px; border-radius:7px; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+  }
+  .field textarea{ min-height:100px; resize:vertical; }
+  .field-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px 14px; }
+  .field-grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+  @media (max-width:640px){ .field-grid, .field-grid.cols-2{ grid-template-columns:1fr; } }
+  .subrow{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .subrow input{ flex:1; font:inherit; font-size:13px; padding:7px 9px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+  .list-add{ font-size:12px; }
+  .media-preview{ width:110px; height:110px; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:var(--bg); }
+  .media-row{ display:flex; align-items:center; gap:14px; }
+  #gate{ max-width:360px; margin:120px auto; text-align:center; }
+  #gate input{ width:100%; box-sizing:border-box; font:inherit; padding:10px; border-radius:7px; border:1px solid var(--line); margin:14px 0; background:var(--bg-2); color:var(--fg); }
+  #toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--heading); color:var(--bg); padding:9px 16px; border-radius:8px; font-size:13px; font-weight:700; z-index:50; }
+  #toast[hidden]{ display:none; }
+  #toast.danger{ background:#B5502A; }
+  #app[hidden]{ display:none; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1 style="color:var(--heading);font-size:18px;">Admin Catálogo</h1>
+  <p style="font-size:13px;color:var(--heading);">Ingresá el token de administración.</p>
+  <input type="password" id="gateToken" placeholder="Token" autocomplete="off">
+  <button class="btn btn-accent" id="gateSubmit" style="width:100%;">Entrar</button>
+  <p id="gateError" style="color:#B5502A;font-size:12px;display:none;">Token inválido.</p>
+</div>
+
+<div class="admin-wrap" id="app" hidden>
+  <div class="admin-header">
+    <div>
+      <h1>Catálogo</h1>
+      <div class="sub">Lanzamientos y artistas — se publican solos en la fecha, o al toque con "Publicar ahora"</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabReleasesBtn" type="button">Lanzamientos</button>
+    <button class="tab-btn" id="tabArtistsBtn" type="button">Artistas</button>
+  </div>
+
+  <!-- ==================== RELEASES TAB ==================== -->
+  <div class="tab-panel" id="tabReleases">
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h2 style="margin:0;">Listado</h2>
+        <button class="btn btn-accent" id="newReleaseBtn">+ Nuevo lanzamiento</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Artista</th><th>Título</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="releasesTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="section" id="releaseFormSection" hidden>
+      <h2 id="releaseFormTitle">Nuevo lanzamiento</h2>
+      <form id="releaseForm">
+        <div class="field-grid">
+          <div class="field">
+            <label>Artista</label>
+            <input type="text" name="artist" id="releaseArtistInput" list="knownArtists" required>
+            <span class="hint" id="artistHint"></span>
+          </div>
+          <div class="field"><label>Título</label><input type="text" name="title" required></div>
+          <div class="field">
+            <label>Tipo</label>
+            <select name="suffix">
+              <option value="single">Single</option>
+              <option value="ep">EP</option>
+              <option value="album">Álbum</option>
+            </select>
+          </div>
+        </div>
+        <datalist id="knownArtists"></datalist>
+
+        <div class="field-grid cols-2">
+          <div class="field"><label>Fecha de lanzamiento</label><input type="date" name="releaseDate" required></div>
+          <div class="field"><label>Número de catálogo (SF-, opcional)</label><input type="number" name="sfNumber" min="1"></div>
+        </div>
+
+        <div class="field">
+          <label>Canciones</label>
+          <div id="tracksList"></div>
+          <button type="button" class="btn btn-sm list-add" id="addTrackBtn">+ Agregar canción</button>
+        </div>
+
+        <div class="field"><label>Créditos</label><textarea name="credits" placeholder="Producción: ..., Mezcla y masterización: ..., Tapa: ..."></textarea></div>
+
+        <div class="field-grid">
+          <div class="field"><label>Spotify</label><input type="url" name="streamingSpotify"></div>
+          <div class="field"><label>YouTube Music</label><input type="url" name="streamingYoutube"></div>
+          <div class="field"><label>Tidal</label><input type="url" name="streamingTidal"></div>
+          <div class="field"><label>Apple Music</label><input type="url" name="streamingApple"></div>
+          <div class="field"><label>Deezer</label><input type="url" name="streamingDeezer"></div>
+          <div class="field"><label>Bandcamp</label><input type="url" name="streamingBandcamp"></div>
+        </div>
+        <div class="field"><label>Video oficial (YouTube)</label><input type="url" name="video"></div>
+
+        <div class="field">
+          <label>Tapa</label>
+          <div class="media-row">
+            <img class="media-preview" id="coverPreview" src="" alt="" style="display:none;">
+            <input type="file" id="coverInput" accept="image/*">
+          </div>
+        </div>
+
+        <p class="hint" id="releaseStatusHint" style="margin:10px 0;"></p>
+
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button type="submit" class="btn btn-accent">Guardar</button>
+          <button type="button" class="btn" id="cancelReleaseFormBtn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== ARTISTS TAB ==================== -->
+  <div class="tab-panel" id="tabArtists" hidden>
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h2 style="margin:0;">Listado</h2>
+        <button class="btn btn-accent" id="newArtistBtn">+ Nuevo artista</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Nombre</th><th>Instagram</th><th>Ficha</th><th></th></tr></thead>
+        <tbody id="artistsTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="section" id="artistFormSection" hidden>
+      <h2 id="artistFormTitle">Nuevo artista</h2>
+      <form id="artistForm">
+        <div class="field-grid cols-2">
+          <div class="field"><label>Nombre</label><input type="text" name="name" required></div>
+          <div class="field"><label>Instagram (sin @)</label><input type="text" name="instagram"></div>
+        </div>
+        <div class="field"><label>Spotify (link de artista)</label><input type="url" name="spotify"></div>
+        <div class="field"><label>Bio</label><textarea name="bio" placeholder="Bio en prosa, la misma que se muestra en la ficha pública."></textarea></div>
+
+        <div class="field">
+          <label>Integrantes (si es banda)</label>
+          <div id="membersList"></div>
+          <button type="button" class="btn btn-sm list-add" id="addMemberBtn">+ Agregar integrante</button>
+        </div>
+
+        <div class="field">
+          <label>Foto</label>
+          <div class="media-row">
+            <img class="media-preview" id="artistPhotoPreview" src="" alt="" style="display:none;">
+            <input type="file" id="artistPhotoInput" accept="image/*">
+          </div>
+        </div>
+
+        <p class="hint warn" id="artistCompleteHint"></p>
+
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button type="submit" class="btn btn-accent">Guardar</button>
+          <button type="button" class="btn" id="cancelArtistFormBtn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script>
+(function(){
+  "use strict";
+  var TOKEN_KEY = "sfCatalogAdminToken";
+  var token = localStorage.getItem(TOKEN_KEY) || "";
+  var releases = [];
+  var artists = [];
+  var editingReleaseSlug = null; // null = creating new
+  var editingArtistSlug = null;
+  var pendingCoverFile = null;
+  var pendingPhotoFile = null;
+
+  function api(path, opts){
+    opts = opts || {};
+    opts.headers = Object.assign({ "Authorization": "Bearer " + token }, opts.headers || {});
+    return fetch(path, opts);
+  }
+
+  function showToast(msg, danger){
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = danger ? "danger" : "";
+    t.hidden = false;
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ t.hidden = true; }, 2600);
+  }
+
+  function todayISO(){ return new Date().toISOString().slice(0, 10); }
+
+  function isArtistComplete(a){
+    return !!a && !!a.bio && a.bio.trim().length > 0 && !!a.photoKey;
+  }
+
+  function findArtist(slug){
+    for (var i = 0; i < artists.length; i++) if (artists[i].slug === slug) return artists[i];
+    return null;
+  }
+
+  // Mirrors slugify() in netlify/lib/releases-store.mts closely enough for
+  // client-side "does this artist already exist" matching -- the backend's
+  // own slugify is still the source of truth for the actual slug it saves.
+  function slugifyGuess(s){
+    return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[¡!¿?]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  function loadAll(){
+    return Promise.all([
+      api("/api/releases?admin=1").then(function(r){ return r.json(); }),
+      api("/api/artists?admin=1").then(function(r){ return r.json(); }),
+    ]).then(function(results){
+      releases = results[0];
+      artists = results[1];
+    });
+  }
+
+  function checkToken(){
+    return api("/api/releases?admin=1").then(function(r){
+      if (r.status === 401) return false;
+      return loadAll().then(function(){ return true; });
+    });
+  }
+
+  function enterApp(){
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("app").hidden = false;
+    renderReleasesList();
+    renderArtistsList();
+    renderArtistDatalist();
+  }
+
+  document.getElementById("gateSubmit").addEventListener("click", function(){
+    token = document.getElementById("gateToken").value.trim();
+    checkToken().then(function(ok){
+      if (ok){
+        localStorage.setItem(TOKEN_KEY, token);
+        enterApp();
+      } else {
+        document.getElementById("gateError").style.display = "block";
+      }
+    });
+  });
+
+  if (token){
+    checkToken().then(function(ok){ if (ok) enterApp(); });
+  }
+
+  // ---------------- tabs ----------------
+  document.getElementById("tabReleasesBtn").addEventListener("click", function(){ switchTab("releases"); });
+  document.getElementById("tabArtistsBtn").addEventListener("click", function(){ switchTab("artists"); });
+  function switchTab(name){
+    var releasesOn = name === "releases";
+    document.getElementById("tabReleases").hidden = !releasesOn;
+    document.getElementById("tabArtists").hidden = releasesOn;
+    document.getElementById("tabReleasesBtn").className = "tab-btn" + (releasesOn ? " active" : "");
+    document.getElementById("tabArtistsBtn").className = "tab-btn" + (releasesOn ? "" : " active");
+  }
+
+  // ---------------- shared subrow helper ----------------
+  function addSubrow(container, placeholder, value){
+    var row = document.createElement("div");
+    row.className = "subrow";
+    var input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = placeholder;
+    input.value = value || "";
+    var removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "btn btn-sm";
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", function(){ row.remove(); });
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    container.appendChild(row);
+    return row;
+  }
+  function readSubrows(container){
+    return Array.from(container.querySelectorAll(".subrow input")).map(function(input){ return input.value.trim(); })
+      .filter(function(v){ return v; });
+  }
+
+  // ================== RELEASES ==================
+  function releaseStatusBadge(rel){
+    if (rel.status === "published"){
+      return { cls: "published", text: "Publicado" };
+    }
+    var due = rel.releaseDate && rel.releaseDate <= todayISO();
+    var artist = findArtist(rel.artistSlug);
+    if (due && !isArtistComplete(artist)){
+      return { cls: "blocked", text: "⚠ Bloqueado — falta ficha de " + rel.artist };
+    }
+    return { cls: "scheduled", text: due ? "Programado (publicando…)" : "Programado" };
+  }
+
+  function renderReleasesList(){
+    var tbody = document.getElementById("releasesTbody");
+    tbody.innerHTML = "";
+    releases.slice().sort(function(a,b){ return (b.releaseDate||"").localeCompare(a.releaseDate||""); }).forEach(function(rel){
+      var tr = document.createElement("tr");
+
+      var tdArtist = document.createElement("td");
+      tdArtist.textContent = rel.artist;
+      tr.appendChild(tdArtist);
+
+      var tdTitle = document.createElement("td");
+      tdTitle.textContent = rel.title;
+      tr.appendChild(tdTitle);
+
+      var tdDate = document.createElement("td");
+      tdDate.textContent = rel.releaseDate;
+      tr.appendChild(tdDate);
+
+      var tdStatus = document.createElement("td");
+      var badge = releaseStatusBadge(rel);
+      var pill = document.createElement("span");
+      pill.className = "status-pill " + badge.cls;
+      pill.textContent = badge.text;
+      tdStatus.appendChild(pill);
+      tr.appendChild(tdStatus);
+
+      var tdActions = document.createElement("td");
+      var actions = document.createElement("div");
+      actions.className = "row-actions";
+      var editBtn = document.createElement("button");
+      editBtn.className = "btn btn-sm";
+      editBtn.type = "button";
+      editBtn.textContent = "Editar";
+      editBtn.addEventListener("click", function(){ openReleaseForm(rel); });
+      actions.appendChild(editBtn);
+
+      if (rel.status === "scheduled"){
+        var publishBtn = document.createElement("button");
+        publishBtn.className = "btn btn-sm";
+        publishBtn.type = "button";
+        publishBtn.textContent = "Publicar ahora";
+        publishBtn.addEventListener("click", function(){ patchReleaseStatus(rel, "published"); });
+        actions.appendChild(publishBtn);
+      } else {
+        var unpublishBtn = document.createElement("button");
+        unpublishBtn.className = "btn btn-sm";
+        unpublishBtn.type = "button";
+        unpublishBtn.textContent = "Pasar a programado";
+        unpublishBtn.addEventListener("click", function(){ patchReleaseStatus(rel, "scheduled"); });
+        actions.appendChild(unpublishBtn);
+      }
+
+      var delBtn = document.createElement("button");
+      delBtn.className = "btn btn-sm btn-danger";
+      delBtn.type = "button";
+      delBtn.textContent = "Eliminar";
+      delBtn.addEventListener("click", function(){ deleteRelease(rel); });
+      actions.appendChild(delBtn);
+
+      tdActions.appendChild(actions);
+      tr.appendChild(tdActions);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function patchReleaseStatus(rel, status){
+    api("/api/releases/" + rel.slug, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: status }),
+    }).then(function(r){ return r.json(); }).then(function(updated){
+      var idx = releases.findIndex(function(r){ return r.slug === rel.slug; });
+      if (idx !== -1) releases[idx] = updated;
+      renderReleasesList();
+      showToast(status === "published" ? "Publicado" : "Pasado a programado");
+    }).catch(function(){ showToast("Error al actualizar", true); });
+  }
+
+  function deleteRelease(rel){
+    if (!confirm('¿Eliminar "' + rel.title + '"? No se puede deshacer.')) return;
+    api("/api/releases/" + rel.slug, { method: "DELETE" }).then(function(){
+      releases = releases.filter(function(r){ return r.slug !== rel.slug; });
+      renderReleasesList();
+      showToast("Eliminado");
+    }).catch(function(){ showToast("Error al eliminar", true); });
+  }
+
+  function renderArtistDatalist(){
+    var dl = document.getElementById("knownArtists");
+    dl.innerHTML = "";
+    artists.forEach(function(a){
+      var opt = document.createElement("option");
+      opt.value = a.name;
+      dl.appendChild(opt);
+    });
+  }
+
+  var releaseForm = document.getElementById("releaseForm");
+  var releaseFormSection = document.getElementById("releaseFormSection");
+
+  document.getElementById("addTrackBtn").addEventListener("click", function(){
+    addSubrow(document.getElementById("tracksList"), "Nombre de la canción");
+  });
+
+  document.getElementById("releaseArtistInput").addEventListener("input", function(e){
+    var hint = document.getElementById("artistHint");
+    var name = e.target.value.trim();
+    if (!name){ hint.textContent = ""; return; }
+    var slug = slugifyGuess(name);
+    var exists = artists.some(function(a){ return a.slug === slug; });
+    hint.textContent = exists
+      ? ""
+      : "Artista nuevo — necesita ficha completa (bio + foto) en la pestaña Artistas antes de publicarse.";
+  });
+
+  function openReleaseForm(rel){
+    editingReleaseSlug = rel ? rel.slug : null;
+    pendingCoverFile = null;
+    document.getElementById("releaseFormTitle").textContent = rel ? "Editar lanzamiento" : "Nuevo lanzamiento";
+    releaseForm.reset();
+    document.getElementById("tracksList").innerHTML = "";
+    document.getElementById("coverInput").value = "";
+    document.getElementById("artistHint").textContent = "";
+    var preview = document.getElementById("coverPreview");
+    var statusHint = document.getElementById("releaseStatusHint");
+
+    if (rel){
+      releaseForm.artist.value = rel.artist || "";
+      releaseForm.title.value = rel.title || "";
+      releaseForm.suffix.value = rel.suffix || "single";
+      releaseForm.releaseDate.value = rel.releaseDate || "";
+      releaseForm.sfNumber.value = rel.sfNumber || "";
+      (rel.tracks || []).forEach(function(t){ addSubrow(document.getElementById("tracksList"), "Nombre de la canción", t); });
+      releaseForm.credits.value = rel.credits || "";
+      var s = rel.streaming || {};
+      releaseForm.streamingSpotify.value = s.spotify || "";
+      releaseForm.streamingYoutube.value = s.youtube || "";
+      releaseForm.streamingTidal.value = s.tidal || "";
+      releaseForm.streamingApple.value = s.apple || "";
+      releaseForm.streamingDeezer.value = s.deezer || "";
+      releaseForm.streamingBandcamp.value = s.bandcamp || "";
+      releaseForm.video.value = typeof rel.video === "string" ? rel.video : "";
+      if (rel.coverKey){
+        preview.src = "/api/covers/" + rel.coverKey;
+        preview.style.display = "";
+      } else {
+        preview.style.display = "none";
+      }
+      var badge = releaseStatusBadge(rel);
+      statusHint.textContent = rel.status === "published" ? "Ya publicado." : badge.text;
+      statusHint.className = "hint" + (badge.cls === "blocked" ? " warn" : "");
+    } else {
+      addSubrow(document.getElementById("tracksList"), "Nombre de la canción");
+      preview.style.display = "none";
+      statusHint.textContent = "Se crea como \"Programado\" y se publica solo en la fecha (o con \"Publicar ahora\").";
+      statusHint.className = "hint";
+    }
+    releaseFormSection.hidden = false;
+    releaseFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("newReleaseBtn").addEventListener("click", function(){ openReleaseForm(null); });
+  document.getElementById("cancelReleaseFormBtn").addEventListener("click", function(){ releaseFormSection.hidden = true; });
+
+  document.getElementById("coverInput").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    pendingCoverFile = file || null;
+    var preview = document.getElementById("coverPreview");
+    if (file){
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "";
+    }
+  });
+
+  function buildReleasePayload(){
+    var streaming = {};
+    ["Spotify", "Youtube", "Tidal", "Apple", "Deezer", "Bandcamp"].forEach(function(key){
+      var val = releaseForm["streaming" + key].value.trim();
+      if (val) streaming[key.toLowerCase()] = val;
+    });
+    return {
+      artist: releaseForm.artist.value.trim(),
+      title: releaseForm.title.value.trim(),
+      suffix: releaseForm.suffix.value,
+      sfNumber: releaseForm.sfNumber.value ? Number(releaseForm.sfNumber.value) : undefined,
+      releaseDate: releaseForm.releaseDate.value,
+      tracks: readSubrows(document.getElementById("tracksList")),
+      credits: releaseForm.credits.value.trim() || undefined,
+      streaming: streaming,
+      video: releaseForm.video.value.trim() || undefined,
+    };
+  }
+
+  function uploadCoverIfNeeded(slug){
+    if (!pendingCoverFile) return Promise.resolve();
+    return api("/api/releases/" + slug + "/cover", {
+      method: "POST",
+      headers: { "Content-Type": pendingCoverFile.type || "image/jpeg" },
+      body: pendingCoverFile,
+    });
+  }
+
+  releaseForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var payload = buildReleasePayload();
+    if (!payload.artist || !payload.title || !payload.releaseDate){
+      showToast("Falta artista, título o fecha", true);
+      return;
+    }
+    var req = editingReleaseSlug
+      ? api("/api/releases/" + editingReleaseSlug, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      : api("/api/releases", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+
+    req.then(function(r){ return r.json(); }).then(function(saved){
+      return uploadCoverIfNeeded(saved.slug).then(function(){ return saved; });
+    }).then(function(){
+      return loadAll();
+    }).then(function(){
+      renderReleasesList();
+      renderArtistDatalist();
+      releaseFormSection.hidden = true;
+      showToast("Guardado");
+    }).catch(function(){ showToast("Error al guardar", true); });
+  });
+
+  // ================== ARTISTS ==================
+  function renderArtistsList(){
+    var tbody = document.getElementById("artistsTbody");
+    tbody.innerHTML = "";
+    artists.slice().sort(function(a,b){ return a.name.localeCompare(b.name); }).forEach(function(a){
+      var tr = document.createElement("tr");
+
+      var tdName = document.createElement("td");
+      tdName.textContent = a.name;
+      tr.appendChild(tdName);
+
+      var tdIg = document.createElement("td");
+      tdIg.textContent = a.instagram ? "@" + a.instagram : "—";
+      tr.appendChild(tdIg);
+
+      var tdComplete = document.createElement("td");
+      var pill = document.createElement("span");
+      var complete = isArtistComplete(a);
+      pill.className = "status-pill " + (complete ? "complete" : "incomplete");
+      pill.textContent = complete ? "✓ Completa" : "⚠ Falta bio/foto";
+      tdComplete.appendChild(pill);
+      tr.appendChild(tdComplete);
+
+      var tdActions = document.createElement("td");
+      var actions = document.createElement("div");
+      actions.className = "row-actions";
+      var editBtn = document.createElement("button");
+      editBtn.className = "btn btn-sm";
+      editBtn.type = "button";
+      editBtn.textContent = "Editar";
+      editBtn.addEventListener("click", function(){ openArtistForm(a); });
+      var delBtn = document.createElement("button");
+      delBtn.className = "btn btn-sm btn-danger";
+      delBtn.type = "button";
+      delBtn.textContent = "Eliminar";
+      delBtn.addEventListener("click", function(){ deleteArtist(a); });
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      tdActions.appendChild(actions);
+      tr.appendChild(tdActions);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function deleteArtist(a){
+    var hasReleases = releases.some(function(r){ return r.artistSlug === a.slug; });
+    var msg = '¿Eliminar "' + a.name + '"? No se puede deshacer.';
+    if (hasReleases) msg += "\n\nOjo: tiene lanzamientos asociados — van a quedar bloqueados para siempre (el artista ya no va a existir).";
+    if (!confirm(msg)) return;
+    api("/api/artists/" + a.slug, { method: "DELETE" }).then(function(){
+      artists = artists.filter(function(x){ return x.slug !== a.slug; });
+      renderArtistsList();
+      renderArtistDatalist();
+      renderReleasesList();
+      showToast("Eliminado");
+    }).catch(function(){ showToast("Error al eliminar", true); });
+  }
+
+  var artistForm = document.getElementById("artistForm");
+  var artistFormSection = document.getElementById("artistFormSection");
+
+  document.getElementById("addMemberBtn").addEventListener("click", function(){
+    addSubrow(document.getElementById("membersList"), "Nombre del integrante");
+  });
+
+  function updateArtistCompleteHint(){
+    var hasBio = artistForm.bio.value.trim().length > 0;
+    var hasPhoto = !!pendingPhotoFile || !!(editingArtistSlug && findArtist(editingArtistSlug) && findArtist(editingArtistSlug).photoKey);
+    var hint = document.getElementById("artistCompleteHint");
+    if (hasBio && hasPhoto){ hint.textContent = ""; return; }
+    var missing = [];
+    if (!hasBio) missing.push("bio");
+    if (!hasPhoto) missing.push("foto");
+    hint.textContent = "Falta " + missing.join(" y ") + " — sus lanzamientos no se van a publicar hasta que la ficha esté completa.";
+  }
+  artistForm.bio.addEventListener("input", updateArtistCompleteHint);
+
+  function openArtistForm(a){
+    editingArtistSlug = a ? a.slug : null;
+    pendingPhotoFile = null;
+    document.getElementById("artistFormTitle").textContent = a ? "Editar artista" : "Nuevo artista";
+    artistForm.reset();
+    document.getElementById("membersList").innerHTML = "";
+    document.getElementById("artistPhotoInput").value = "";
+    var preview = document.getElementById("artistPhotoPreview");
+
+    if (a){
+      artistForm.name.value = a.name || "";
+      artistForm.instagram.value = a.instagram || "";
+      artistForm.spotify.value = a.spotify || "";
+      artistForm.bio.value = a.bio || "";
+      (a.members || []).forEach(function(m){ addSubrow(document.getElementById("membersList"), "Nombre del integrante", m); });
+      if (a.photoKey){
+        preview.src = "/api/artist-photos/" + a.photoKey;
+        preview.style.display = "";
+      } else {
+        preview.style.display = "none";
+      }
+    } else {
+      preview.style.display = "none";
+    }
+    updateArtistCompleteHint();
+    artistFormSection.hidden = false;
+    artistFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("newArtistBtn").addEventListener("click", function(){ openArtistForm(null); });
+  document.getElementById("cancelArtistFormBtn").addEventListener("click", function(){ artistFormSection.hidden = true; });
+
+  document.getElementById("artistPhotoInput").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    pendingPhotoFile = file || null;
+    var preview = document.getElementById("artistPhotoPreview");
+    if (file){
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "";
+    }
+    updateArtistCompleteHint();
+  });
+
+  function buildArtistPayload(){
+    return {
+      name: artistForm.name.value.trim(),
+      instagram: artistForm.instagram.value.trim().replace(/^@/, "") || null,
+      spotify: artistForm.spotify.value.trim() || undefined,
+      bio: artistForm.bio.value.trim() || undefined,
+      members: readSubrows(document.getElementById("membersList")),
+    };
+  }
+
+  function uploadPhotoIfNeeded(slug){
+    if (!pendingPhotoFile) return Promise.resolve();
+    return api("/api/artists/" + slug + "/photo", {
+      method: "POST",
+      headers: { "Content-Type": pendingPhotoFile.type || "image/jpeg" },
+      body: pendingPhotoFile,
+    });
+  }
+
+  artistForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var payload = buildArtistPayload();
+    if (!payload.name){
+      showToast("Falta el nombre", true);
+      return;
+    }
+    var req = editingArtistSlug
+      ? api("/api/artists/" + editingArtistSlug, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      : api("/api/artists", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+
+    req.then(function(r){ return r.json(); }).then(function(saved){
+      return uploadPhotoIfNeeded(saved.slug).then(function(){ return saved; });
+    }).then(function(){
+      return loadAll();
+    }).then(function(){
+      renderArtistsList();
+      renderArtistDatalist();
+      renderReleasesList(); // a newly-completed artist can unblock releases
+      artistFormSection.hidden = true;
+      showToast("Guardado");
+    }).catch(function(){ showToast("Error al guardar", true); });
+  });
+})();
+</script>
+
+</body>
+</html>
