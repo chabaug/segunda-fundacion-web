@@ -28,17 +28,17 @@ jobs:
         with:
           python-version: '3.x'
 
-      # releases-store.spec.js and events-store.mts's future counterpart
-      # import Netlify Functions modules straight from netlify/lib/*.mts at
-      # the repo root, which resolve their own deps (e.g. @netlify/blobs)
-      # from the root node_modules — the tests/ install below doesn't cover
-      # it, since tests/ is a sibling directory, not an ancestor.
-      # Deliberately bypasses the committed root package-lock.json (which
-      # carries stale "extraneous" per-platform Rollup entries from
-      # netlify-cli that make npm ci hard-fail with EBADPLATFORM on Linux,
-      # even with --omit=dev) and does a fresh, unlocked resolve of just the
-      # root "dependencies" instead — @netlify/blobs has none of its own, so
-      # there's nothing else this could pull in.
+      # releases-store.spec.js and youtube-store.spec.js both dynamically
+      # import a netlify/lib/*.mts module at the repo root, which resolves
+      # its @netlify/blobs import from the root node_modules — the tests/
+      # install below doesn't cover it, since tests/ is a sibling directory,
+      # not an ancestor. Deliberately bypasses the committed root
+      # package-lock.json (which carries stale "extraneous" per-platform
+      # Rollup entries from netlify-cli that make npm ci hard-fail with
+      # EBADPLATFORM on Linux, even with --omit=dev) and does a fresh,
+      # unlocked resolve of just the root "dependencies" instead —
+      # @netlify/blobs has none of its own, so there's nothing else this
+      # could pull in.
       - name: Install root dependencies
         working-directory: .
         run: npm install --no-save --package-lock=false --omit=dev
