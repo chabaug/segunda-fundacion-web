@@ -55,3 +55,25 @@ export function parseIsoDurationSeconds(iso: string): number {
   const [, h, m, s] = match;
   return (Number(h) || 0) * 3600 + (Number(m) || 0) * 60 + (Number(s) || 0);
 }
+
+export const SHORTS_MAX_SECONDS = 60; // YouTube's own Shorts cutoff
+
+export type VideoCandidate = { videoId: string; title: string; publishedAt: string; durationSeconds: number };
+
+// Pure decision logic for youtube-sweep.mts, pulled out so it's testable
+// without hitting the real YouTube API: filters out Shorts, picks the
+// newest remaining upload, and returns null if there's nothing eligible or
+// the eligible pick is already what's saved. Excludes updatedAt (a
+// wall-clock timestamp) so this stays a pure function of its inputs — the
+// caller stamps that on separately.
+export function pickHomepageVideo(
+  candidates: VideoCandidate[],
+  current: Pick<HomepageVideo, "videoId">
+): Omit<HomepageVideo, "updatedAt"> | null {
+  const longForm = candidates
+    .filter((v) => v.durationSeconds > SHORTS_MAX_SECONDS)
+    .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+  const newest = longForm[0];
+  if (!newest || newest.videoId === current.videoId) return null;
+  return { videoId: newest.videoId, title: newest.title, publishedAt: newest.publishedAt.slice(0, 10) };
+}

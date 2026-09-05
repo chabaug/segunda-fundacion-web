@@ -1,8 +1,13 @@
 import type { Config } from "@netlify/functions";
-import { loadHomepageVideo, saveHomepageVideo, nowISO, parseIsoDurationSeconds } from "../lib/youtube-store.mts";
+import {
+  loadHomepageVideo,
+  saveHomepageVideo,
+  nowISO,
+  parseIsoDurationSeconds,
+  pickHomepageVideo,
+} from "../lib/youtube-store.mts";
 
 const CHANNEL_HANDLE = "segundafundacion"; // youtube.com/@segundafundacion
-const SHORTS_MAX_SECONDS = 60; // YouTube's own Shorts cutoff
 const RECENT_UPLOADS_TO_SCAN = 15; // enough to skip past a run of Shorts
 
 // Runs every 6 hours: finds the channel's most recent upload that ISN'T a
@@ -27,26 +32,19 @@ export default async () => {
 
     const candidates = await getRecentUploads(apiKey, uploadsPlaylistId);
     const withDurations = await attachDurations(apiKey, candidates);
-    const longForm = withDurations
-      .filter((v) => v.durationSeconds > SHORTS_MAX_SECONDS)
-      .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
-
-    const newest = longForm[0];
-    if (!newest) {
-      console.log("youtube-sweep: no non-Short upload found in the last", RECENT_UPLOADS_TO_SCAN);
+    const current = await loadHomepageVideo();
+    const pick = pickHomepageVideo(withDurations, current);
+    if (!pick) {
+      console.log(
+        "youtube-sweep: no non-Short upload found in the last",
+        RECENT_UPLOADS_TO_SCAN,
+        "(or already up to date)"
+      );
       return;
     }
 
-    const current = await loadHomepageVideo();
-    if (newest.videoId === current.videoId) return; // already up to date
-
-    await saveHomepageVideo({
-      videoId: newest.videoId,
-      title: newest.title,
-      publishedAt: newest.publishedAt.slice(0, 10),
-      updatedAt: nowISO(),
-    });
-    console.log("youtube-sweep: swapped homepage video to", newest.videoId, "-", newest.title);
+    await saveHomepageVideo({ ...pick, updatedAt: nowISO() });
+    console.log("youtube-sweep: swapped homepage video to", pick.videoId, "-", pick.title);
   } catch (err) {
     console.log("youtube-sweep: failed:", err instanceof Error ? err.message : err);
   }
