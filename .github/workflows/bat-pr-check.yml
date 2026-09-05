@@ -33,12 +33,15 @@ jobs:
       # the repo root, which resolve their own deps (e.g. @netlify/blobs)
       # from the root node_modules — the tests/ install below doesn't cover
       # it, since tests/ is a sibling directory, not an ancestor.
-      # --omit=dev skips netlify-cli, which drags in per-platform Rollup
-      # binaries (Android arm/arm64) that error out under npm ci on Linux;
-      # the test only needs the root "dependencies", not the CLI.
+      # Deliberately bypasses the committed root package-lock.json (which
+      # carries stale "extraneous" per-platform Rollup entries from
+      # netlify-cli that make npm ci hard-fail with EBADPLATFORM on Linux,
+      # even with --omit=dev) and does a fresh, unlocked resolve of just the
+      # root "dependencies" instead — @netlify/blobs has none of its own, so
+      # there's nothing else this could pull in.
       - name: Install root dependencies
         working-directory: .
-        run: npm ci --omit=dev
+        run: npm install --no-save --package-lock=false --omit=dev
 
       - name: Install dependencies
         run: npm ci
