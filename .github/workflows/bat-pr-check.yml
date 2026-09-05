@@ -33,9 +33,12 @@ jobs:
       # the repo root, which resolve their own deps (e.g. @netlify/blobs)
       # from the root node_modules — the tests/ install below doesn't cover
       # it, since tests/ is a sibling directory, not an ancestor.
+      # --omit=dev skips netlify-cli, which drags in per-platform Rollup
+      # binaries (Android arm/arm64) that error out under npm ci on Linux;
+      # the test only needs the root "dependencies", not the CLI.
       - name: Install root dependencies
         working-directory: .
-        run: npm ci
+        run: npm ci --omit=dev
 
       - name: Install dependencies
         run: npm ci
