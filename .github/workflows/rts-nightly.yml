@@ -84,3 +84,26 @@ jobs:
         env:
           STATUS_REPO_TOKEN: ${{ secrets.STATUS_REPO_TOKEN }}
         run: bash scripts/push-status.sh rts-latest.json data/rts-latest.json
+
+      # Rolling history behind the admin portal's "ultimas 10 corridas"
+      # chart. Reads the current history from sf-status, appends this run,
+      # pushes it back.
+      - name: Append run to RTS history
+        if: always()
+        continue-on-error: true
+        env:
+          STATUS_REPO_TOKEN: ${{ secrets.STATUS_REPO_TOKEN }}
+        run: |
+          node scripts/append-status-history.js rts-latest.json data/rts-history.json rts-history.json
+          bash scripts/push-status.sh rts-history.json data/rts-history.json
+
+      # Per-page test coverage. Published from the nightly only: it describes
+      # the specs on main, not whatever a PR branch happens to carry.
+      - name: Publish test coverage summary
+        if: always()
+        continue-on-error: true
+        env:
+          STATUS_REPO_TOKEN: ${{ secrets.STATUS_REPO_TOKEN }}
+        run: |
+          node scripts/build-coverage-summary.js coverage-latest.json
+          bash scripts/push-status.sh coverage-latest.json data/coverage-latest.json
