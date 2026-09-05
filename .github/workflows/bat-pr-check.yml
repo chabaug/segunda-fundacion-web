@@ -20,11 +20,22 @@ jobs:
         with:
           node-version: '18'
           cache: npm
-          cache-dependency-path: tests/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            tests/package-lock.json
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
+      # releases-store.spec.js and events-store.mts's future counterpart
+      # import Netlify Functions modules straight from netlify/lib/*.mts at
+      # the repo root, which resolve their own deps (e.g. @netlify/blobs)
+      # from the root node_modules — the tests/ install below doesn't cover
+      # it, since tests/ is a sibling directory, not an ancestor.
+      - name: Install root dependencies
+        working-directory: .
+        run: npm ci
 
       - name: Install dependencies
         run: npm ci
