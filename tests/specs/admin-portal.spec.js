@@ -145,6 +145,93 @@ test.describe('Admin portal — Tests section', () => {
   });
 });
 
+test.describe('Admin portal — Tests section, failure/skip detail', () => {
+  const STATUS = {
+    fetchedAt: '2026-09-05T05:00:00.000Z',
+    bat: suiteSummary('BAT', {
+      counts: { passed: 100, failed: 0, skipped: 3, flaky: 0, total: 103 },
+      // Same test skipped on three projects — one row, three chips.
+      skips: ['desktop', 'firefox', 'webkit'].map((project) => ({
+        file: 'Catálogo — Cover Flow',
+        title: 'a real touch tap opens only the release modal',
+        project,
+        location: 'catalogo.spec.js:300',
+        reason: 'needs a touch-capable browser context',
+      })),
+    }),
+    rts: suiteSummary('RTS', {
+      counts: { passed: 200, failed: 1, skipped: 1, flaky: 0, total: 202 },
+      failures: [{
+        file: 'Eventos — event modal',
+        title: 'event modal flyer is complete/uncropped on desktop',
+        project: 'firefox',
+        location: 'eventos.spec.js:247',
+        error: 'Error: expect(received).toBeLessThan(expected) · Expected: < 1 · Received: 1.3333',
+      }],
+      // No reason in the report: the curated note in sf-status has to fill in.
+      skips: [{
+        file: 'Catálogo — grid & search',
+        title: 'mobile: search field is collapsed behind a magnifying-glass button',
+        project: 'desktop',
+        location: 'catalogo.spec.js:88',
+        reason: null,
+      }],
+    }),
+    batHistory: [],
+    rtsHistory: [],
+    testPendientes: {
+      generatedAt: '2026-09-03',
+      items: [{
+        category: 'skip',
+        suite: 'RTS',
+        title: '"mobile: search field is collapsed behind a magnifying-glass button..." (desktop project)',
+        reason: 'No aplica al viewport de escritorio, por diseño.',
+      }],
+    },
+    coverage: null,
+  };
+
+  test.beforeEach(async ({ page }) => {
+    await mockAdminApi(page, { status: STATUS });
+    await openPortal(page, 'tests');
+  });
+
+  test('a failing test shows its error and the projects it failed on @bat', async ({ page }) => {
+    const failure = page.locator('.detail-group.bad li').filter({ hasText: 'event modal flyer' });
+    await expect(failure).toHaveCount(1);
+    await expect(failure).toContainText('eventos.spec.js:247');
+    await expect(failure.locator('.detail-mono')).toContainText('toBeLessThan');
+    await expect(failure.locator('.status-pill')).toHaveText('firefox');
+  });
+
+  test('a skip repeated across projects is one row with a chip per project @bat', async ({ page }) => {
+    const skip = page.locator('#runDetail li').filter({ hasText: 'a real touch tap' });
+    await expect(skip).toHaveCount(1);
+    await expect(skip.locator('.status-pill')).toHaveCount(3);
+    await expect(skip).toContainText('needs a touch-capable browser context');
+  });
+
+  test('a skip with no reason in the report falls back to the curated note @bat', async ({ page }) => {
+    const skip = page.locator('#runDetail li').filter({ hasText: 'magnifying-glass' });
+    await expect(skip).toContainText('No aplica al viewport de escritorio');
+  });
+
+  test('the card is hidden when both suites ran clean', async ({ page }) => {
+    await page.route((url) => new URL(url.href).pathname === '/api/status', (route) =>
+      route.fulfill({
+        body: JSON.stringify({
+          ...STATUS,
+          bat: suiteSummary('BAT', { counts: { passed: 10, failed: 0, skipped: 0, flaky: 0, total: 10 } }),
+          rts: suiteSummary('RTS', { counts: { passed: 20, failed: 0, skipped: 0, flaky: 0, total: 20 } }),
+        }),
+        contentType: 'application/json',
+      })
+    );
+    await page.click('#testsReloadBtn');
+    await expect(page.locator('#runDetail')).toContainText('Sin fallas ni skips');
+  });
+});
+
 test.describe('Admin portal — Estado section', () => {
   const RELEASE_WITH_COVER = {
     slug: 'artist-a-song-1', artist: 'Artist A', artistSlug: 'artist-a', title: 'Song 1',
