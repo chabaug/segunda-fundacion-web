@@ -59,10 +59,11 @@
 
 <div id="gate">
   <h1 style="color:var(--heading);font-size:18px;">Admin Eventos</h1>
-  <p style="font-size:13px;color:var(--heading);">Ingresá el token de administración.</p>
-  <input type="password" id="gateToken" placeholder="Token" autocomplete="off">
+  <p style="font-size:13px;color:var(--heading);">Ingresá con tu usuario y contraseña.</p>
+  <input type="text" id="gateUser" placeholder="Usuario" autocomplete="username">
+  <input type="password" id="gatePassword" placeholder="Contraseña" autocomplete="current-password">
   <button class="btn btn-accent" id="gateSubmit" style="width:100%;">Entrar</button>
-  <p id="gateError" style="color:#B5502A;font-size:12px;display:none;">Token inválido.</p>
+  <p id="gateError" style="color:#B5502A;font-size:12px;display:none;">Usuario o contraseña inválidos.</p>
 </div>
 
 <div class="admin-wrap" id="app" hidden>
@@ -172,16 +173,29 @@
     renderList();
   }
 
-  document.getElementById("gateSubmit").addEventListener("click", function(){
-    token = document.getElementById("gateToken").value.trim();
-    checkToken().then(function(ok){
-      if (ok){
-        localStorage.setItem(TOKEN_KEY, token);
-        enterApp();
-      } else {
-        document.getElementById("gateError").style.display = "block";
-      }
+  function attemptLogin(){
+    document.getElementById("gateError").style.display = "none";
+    var username = document.getElementById("gateUser").value.trim();
+    var password = document.getElementById("gatePassword").value;
+    fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: username, password: password }),
+    }).then(function(r){
+      if (!r.ok) throw new Error("invalid");
+      return r.json();
+    }).then(function(data){
+      token = data.token;
+      localStorage.setItem(TOKEN_KEY, token);
+      enterApp();
+    }).catch(function(){
+      document.getElementById("gateError").style.display = "block";
     });
+  }
+
+  document.getElementById("gateSubmit").addEventListener("click", attemptLogin);
+  document.getElementById("gatePassword").addEventListener("keydown", function(e){
+    if (e.key === "Enter") attemptLogin();
   });
 
   if (token){
